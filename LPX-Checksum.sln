@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LPX-Checksum", "LPX-Checksum\LPX-Checksum.vcxproj", "{D5617FE0-8CCA-4B36-A63F-363EBE9D0867}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5617FE0-8CCA-4B36-A63F-363EBE9D0867}.Debug|x64.ActiveCfg = Debug|x64
+		{D5617FE0-8CCA-4B36-A63F-363EBE9D0867}.Debug|x64.Build.0 = Debug|x64
+		{D5617FE0-8CCA-4B36-A63F-363EBE9D0867}.Release|x64.ActiveCfg = Release|x64
+		{D5617FE0-8CCA-4B36-A63F-363EBE9D0867}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DCA534D4-9DC2-4E75-B307-E53594FA8B2A}
+	EndGlobalSection
+EndGlobal
