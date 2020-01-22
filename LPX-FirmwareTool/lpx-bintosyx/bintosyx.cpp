@@ -1,10 +1,70 @@
 #include "common.h"
 
+const std::vector<const char*> product_flags = {"/x", "/mini", "/pro"};
 byte lp_target;
 
-const char* lpx_flag = "/x";
-const char* lpminimk3_flag = "/mini";
-const char* lppromk3_flag = "/pro";
+void lp_target_error(const char* error) {
+	fprintf(stderr, "%s target Launchpad specified. Valid flags: %s", error, product_flags[0]);
+
+	for (int i = 1; i < product_flags.size(); i++)
+		fprintf(stderr, ", %s", product_flags[i]);
+
+	fprintf(stderr, "\n");
+
+	exit(1);
+}
+
+void parse_args(int argc, char** argv) {
+	if (argc <= 1) lp_target_error("No");
+
+	bool product_success = false;
+
+	for (int i = 0; i < product_flags.size(); i++)
+		if (product_success = !strcmp(argv[1], product_flags[i])) {
+			lp_target = product_types[i];
+			break;
+		}
+
+	if (!product_success) lp_target_error("Invalid");
+
+	if (argc <= 2) {
+		fprintf(stderr, "No version specified.\n");
+		exit(1);
+	}
+
+	int len = strlen(argv[2]);
+	if (len > 6) {
+		fprintf(stderr, "Specified version is too long.\n");
+		exit(1);
+	}
+
+	for (int i = 0; i < len; i++) {
+		if (0x30 <= argv[2][i] && argv[2][i] <= 0x39) argv[2][i] -= 0x30;
+		else {
+			argv[2][i] &= 0xDF;
+			if (0x41 <= argv[2][i] && argv[2][i] <= 0x46) argv[2][i] -= 0x37;
+			else {
+				fprintf(stderr, "Invalid target Launchpad specified.\n");
+				exit(1);
+			}
+		}
+	}
+
+	if (argc <= 3) {
+		fprintf(stderr, "No input file specified.\n");
+		exit(1);
+	}
+
+	input_file = argv[3];
+
+	if (argc <= 4) optional_output_file("syx");
+	else output_file = argv[4];
+
+	if (argc >= 6) {
+		fprintf(stderr, "Too many arguments specified.\n");
+		exit(1);
+	}
+}
 
 int ceil_div(int a, int b) {
 	return a / b + (a % b != 0);
@@ -55,59 +115,6 @@ void write_block(int* i, int j, byte update_type) {
 	*i += 0x25;
 
 	output.data[(*i)++] = SYSEX_END;
-}
-
-void parse_args(int argc, char** argv) {
-	if (argc <= 1) {
-		fprintf(stderr, "No target Launchpad specified. Use %s, %s, or %s.\n", lpx_flag, lpminimk3_flag, lppromk3_flag);
-		exit(1);
-	}
-
-	if (!strcmp(argv[1], lpx_flag)) lp_target = LPX_PRODUCT_ID;
-	else if (!strcmp(argv[1], lpminimk3_flag)) lp_target = LPMINIMK3_PRODUCT_ID;
-	else if(!strcmp(argv[1], lppromk3_flag)) lp_target = LPPROMK3_PRODUCT_ID;
-	else {
-		fprintf(stderr, "Invalid target Launchpad specified. Use %s, %s, or %s.\n", lpx_flag, lpminimk3_flag, lppromk3_flag);
-		exit(1);
-	}
-
-	if (argc <= 2) {
-		fprintf(stderr, "No version specified.\n");
-		exit(1);
-	}
-
-	int len = strlen(argv[2]);
-	if (len > 6) {
-		fprintf(stderr, "Specified version is too long.\n");
-		exit(1);
-	}
-
-	for (int i = 0; i < len; i++) {
-		if (0x30 <= argv[2][i] && argv[2][i] <= 0x39) argv[2][i] -= 0x30;
-		else {
-			argv[2][i] &= 0xDF;
-			if (0x41 <= argv[2][i] && argv[2][i] <= 0x46) argv[2][i] -= 0x37;
-			else {
-				fprintf(stderr, "Invalid target Launchpad specified.\n");
-				exit(1);
-			}
-		}
-	}
-
-	if (argc <= 3) {
-		fprintf(stderr, "No input file specified.\n");
-		exit(1);
-	}
-
-	input_file = argv[3];
-
-	if (argc <= 4) optional_output_file("syx");
-	else output_file = argv[4];
-
-	if (argc >= 6) {
-		fprintf(stderr, "Too many arguments specified.\n");
-		exit(1);
-	}
 }
 
 void convert(int argc, char** argv) {

@@ -33,7 +33,6 @@ const std::vector<byte> novation_header = {0x00, 0x20, 0x29, 0x00};
 const std::vector<byte> product_types = {LPX_PRODUCT_ID, LPMINIMK3_PRODUCT_ID, LPPROMK3_PRODUCT_ID};
 
 bin_t input, output;
-uint version, checksum, w;
 
 char* input_file;
 char* output_file;
@@ -78,53 +77,6 @@ uint crc32(bin_t* buffer) {
 	}
 
 	return crc;
-}
-
-void print_vector_error(int i, const char* error, std::vector<byte> v) {
-	if (v.size() == 0) fprintf(stderr, "Runtime error at position %08x: can't expect empty vector %s.", i, error);
-	else {
-		fprintf(stderr, "Parse error at position %08x: expected %s (%02x", i, error, v[0]);
-
-		for (int j = 1; j < v.size(); j++)
-			fprintf(stderr, ", %02x", v[j]);
-
-		fprintf(stderr, ").\n");
-	}
-
-	exit(1);
-}
-
-void verify_byte(int i, byte value, const char* error) {
-	if (input.data[i] != value) {
-		fprintf(stderr, "Parse error at position %08x: expected %s (%02x).\n", i, error, value);
-		exit(1);
-	}
-}
-
-void verify_byte(int i, const std::vector<byte> values, const char* error) {
-	for (int j = 0; j < values.size(); j++)
-		if (input.data[i] == values[j]) return;
-
-	print_vector_error(i, error, values);
-	exit(1);
-}
-
-int verify_byte_array(int i, const std::vector<byte> values, const char* error) {
-	for (int j = 0; j < values.size(); j++)
-		if (input.data[i + j] != values[j]) {
-			fprintf(stderr, "Parse error at position %08x: expected %s (", i, error);
-
-			exit(1);
-		}
-	
-	return values.size();
-}
-
-void verify_uints(int i, uint a, uint b, const char* error) {
-	if (a != b) {
-		fprintf(stderr, "Syntax error at position %08x: mismatching %s.\n", i, error);
-		exit(1);
-	}
 }
 
 void convert(int argc, char** argv);
