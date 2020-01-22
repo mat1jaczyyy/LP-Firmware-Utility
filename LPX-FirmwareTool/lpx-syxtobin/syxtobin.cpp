@@ -1,5 +1,3 @@
-#define SYXTOBIN
-
 #include "common.h"
 
 uint nibbles_to_uint(int* i, int length) {
@@ -13,7 +11,24 @@ uint nibbles_to_uint(int* i, int length) {
 	return result;
 }
 
-void convert() {
+void parse_args(int argc, char** argv) {
+	if (argc <= 1) {
+		fprintf(stderr, "No input file specified.\n");
+		exit(1);
+	}
+
+	input_file = argv[1];
+
+	if (argc <= 2) optional_output_file("bin");
+	else output_file = argv[2];
+
+	if (argc >= 4) {
+		fprintf(stderr, "Too many arguments specified.\n");
+		exit(1);
+	}
+}
+
+void convert(int argc, char** argv) {
 	std::vector<byte> expected_types = {UPDATE_INIT};
 
 	for (int i = 0; i < input.size;) {

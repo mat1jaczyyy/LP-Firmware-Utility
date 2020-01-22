@@ -35,20 +35,21 @@ const std::vector<byte> product_types = {LPX_PRODUCT_ID, LPMINIMK3_PRODUCT_ID, L
 bin_t input, output;
 uint version, checksum, w;
 
-char default_output[4] =
-#ifdef SYXTOBIN
-	"bin"
-#else
-	#ifdef BINTOSYX
-		"syx"
-	#else 
-		#error Repacker type not defined
-	#endif
-#endif
-;
+char* input_file;
+char* output_file;
 
-int argc;
-char** argv;
+void optional_output_file(const char* ext) {
+	int len = strlen(input_file);
+	output_file = (char*)malloc(len * sizeof(char));
+
+	if (output_file == NULL) {
+		fprintf(stderr, "Failed to allocate memory for output file name.\n");
+		exit(1);
+	}
+
+	strcpy(output_file, input_file);
+	strcpy(&output_file[len - 3], ext);
+}
 
 bool allocate_buffer(bin_t* buffer, int size, const char* error) {
 	buffer->size = size;
@@ -126,23 +127,13 @@ void verify_uints(int i, uint a, uint b, const char* error) {
 	}
 }
 
-void convert();
+void convert(int argc, char** argv);
+void parse_args(int argc, char** argv);
 
-int main(int c, char** v) {
-	if (c < 2) {
-		fprintf(stderr, "No input file specified.\n");
-		return false;
-	}
+int main(int argc, char** argv) {
+	parse_args(argc, argv);
 
-	if (c > 3) {
-		fprintf(stderr, "Too many arguments specified.\n");
-		return false;
-	}
-
-	argc = c;
-	argv = v;
-
-	FILE* handle = fopen(argv[1], "rb");
+	FILE* handle = fopen(input_file, "rb");
 	if (handle == NULL) {
 		fprintf(stderr, "Failed to open input file.\n");
 		exit(1);
@@ -159,17 +150,9 @@ int main(int c, char** v) {
 	(void)fread(input.data, input.size, 1, handle);
 	fclose(handle);
 
-	convert();
+	convert(argc, argv);
 
-	char** output_file;
-
-	if (argc == 3) output_file = &argv[2];
-	else {
-		strcpy(&argv[1][strlen(argv[1]) - 3], default_output);
-		output_file = &argv[1];
-	}
-
-	handle = fopen(*output_file, "wb");
+	handle = fopen(output_file, "wb");
 	if (handle == NULL) {
 		fprintf(stderr, "Failed to open output file.\n");
 		exit(1);
@@ -178,7 +161,7 @@ int main(int c, char** v) {
 	fwrite(output.data, sizeof(*output.data), output.size, handle);
 	fclose(handle);
 
-	printf("Success! Saved to %s\n", *output_file);
+	printf("Success! Saved to %s\n", output_file);
 
 	return 0;
 }
