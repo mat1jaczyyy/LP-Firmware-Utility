@@ -20,7 +20,7 @@ void parse_args(int argc, char** argv) {
 	bool product_success = false;
 
 	for (int i = 0; i < product_flags.size(); i++)
-		if (product_success = !strcmp(argv[1], product_flags[i])) {
+		if ((product_success = !strcmp(argv[1], product_flags[i]))) {
 			lp_target = product_types[i];
 			break;
 		}
@@ -148,7 +148,7 @@ void convert(int argc, char** argv) {
 		output.data[i++] = 0x30;
 
 	for (int j = 0; j < version_len; j++)
-		output.data[i++] = 0x30 | (argv[2][j]) & 0xF;
+		output.data[i++] = 0x30 | ((argv[2][j]) & 0xF);
 
 	write_byte_array(&i, uint_to_nibbles(input.size));
 	write_byte_array(&i, uint_to_nibbles(crc32(&input)));
