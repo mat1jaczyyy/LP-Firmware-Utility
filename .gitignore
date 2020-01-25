@@ -357,3 +357,6 @@ MigrationBackup/
 
 # Unix output folder
 out
+
+# WASM output folder
+out_wasm
