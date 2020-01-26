@@ -1,6 +1,5 @@
 CLI_OUT = cli/out
-WASM_OUT = web/src/wasm
-WEB_PUBLIC = web/public/js
+WASM_OUT = web/public/wasm
 
 BINTOSYX = bintosyx
 SYXTOBIN = syxtobin
@@ -19,7 +18,7 @@ cli:
 
 wasm:
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp web-$(FWGEN)/main.cpp --preload-file ../firmware
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp web-$(FWGEN)/main.cpp -s "EXPORTED_FUNCTIONS=['_test_function']"
 
 web:
 	cd web && yarn && yarn build

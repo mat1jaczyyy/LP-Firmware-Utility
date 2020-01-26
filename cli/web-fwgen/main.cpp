@@ -1,6 +1,7 @@
 #include "common.h"
 
-int main(int argc, char** argv) {
+#define NOMANGLE extern "C"
+
+NOMANGLE void test_function() {
     printf("Hello WASM!\n");
-    return 0;
 }
