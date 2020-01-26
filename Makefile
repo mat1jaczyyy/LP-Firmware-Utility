@@ -18,7 +18,7 @@ cli:
 
 wasm:
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp web-$(FWGEN)/main.cpp -s "EXPORTED_FUNCTIONS=['_test_function']"
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp web-$(FWGEN)/main.cpp
 
 web:
 	cd web && yarn && yarn build

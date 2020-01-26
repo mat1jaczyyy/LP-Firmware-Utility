@@ -1,7 +1,8 @@
 #include "common.h"
+#include "emscripten.h"
 
-#define NOMANGLE extern "C"
+#define wasm extern "C" EMSCRIPTEN_KEEPALIVE
 
-NOMANGLE void test_function() {
+wasm void test_function() {
     printf("Hello WASM!\n");
 }
