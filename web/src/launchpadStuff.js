@@ -3,6 +3,6 @@ module.exports = {
   options: ["Patch Programmer mode"],
   callback: e => {
     console.log(e);
-    
+    window.Module._test_function();
   },
 }
