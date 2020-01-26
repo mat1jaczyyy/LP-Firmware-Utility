@@ -1,5 +1,5 @@
 module.exports = {
-  launchpads: ["Launchpad Pro", "Launchpad xD"],
+  launchpads: ["Launchpad X", "Launchpad Mini MK3"],
   options: ["yes", "no"],
   callback: e => console.log(e),
 }
