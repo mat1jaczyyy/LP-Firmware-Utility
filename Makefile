@@ -17,7 +17,7 @@ cli:
 
 wasm:
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/lpx-$(BINTOSYX).wasm lpx-$(BINTOSYX)/$(BINTOSYX).cpp
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/fwgen.js common/common.cpp web-patcher/main.cpp
 
 web:
 	cd web && yarn && yarn build
