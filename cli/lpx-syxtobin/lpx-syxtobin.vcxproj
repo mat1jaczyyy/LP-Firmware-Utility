@@ -86,6 +86,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\cli.cpp" />
+    <ClCompile Include="..\common\common.cpp" />
+    <ClCompile Include="parse.cpp" />
     <ClCompile Include="syxtobin.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

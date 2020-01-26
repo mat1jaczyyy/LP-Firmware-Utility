@@ -1,22 +1,5 @@
 #include "common.h"
 
-void parse_args(int argc, char** argv) {
-	if (argc <= 1) {
-		fprintf(stderr, "No input file specified.\n");
-		exit(1);
-	}
-
-	input_file = argv[1];
-
-	if (argc <= 2) optional_output_file("bin");
-	else output_file = argv[2];
-
-	if (argc >= 4) {
-		fprintf(stderr, "Too many arguments specified.\n");
-		exit(1);
-	}
-}
-
 void print_vector_error(int i, const char* error, std::vector<byte> v) {
 	if (v.size() == 0) fprintf(stderr, "Runtime error at position %08x: can't expect empty vector %s.", i, error);
 	else {
@@ -75,7 +58,7 @@ void verify_uints(int i, uint a, uint b, const char* error) {
 	}
 }
 
-void convert(int argc, char** argv) {
+void convert() {
 	std::vector<byte> expected_types = {UPDATE_INIT};
 
 	uint version = 0;

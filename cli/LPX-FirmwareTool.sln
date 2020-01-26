@@ -7,6 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lpx-syxtobin", "lpx-syxtobi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{81F1E3B6-75A7-4D20-9FDD-70E8E28CDD06}"
 	ProjectSection(SolutionItems) = preProject
+		common\cli.cpp = common\cli.cpp
+		common\cli.h = common\cli.h
+		common\common.cpp = common\common.cpp
 		common\common.h = common\common.h
 	EndProjectSection
 EndProject

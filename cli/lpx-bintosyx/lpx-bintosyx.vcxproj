@@ -86,7 +86,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\cli.cpp" />
+    <ClCompile Include="..\common\common.cpp" />
     <ClCompile Include="bintosyx.cpp" />
+    <ClCompile Include="parse.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
