@@ -3,9 +3,9 @@
   .inner
     .launchpads
       select(v-model="selectedLp")
-        option(v-for="lp in launchpad.launchpads") {{ lp }}
+        option(v-for="(lp, k) in launchpad.launchpads" :value="k") {{ lp.name }}
     .options
-      .option(v-for="option in launchpad.options")
+      .option(v-for="option in launchpad.launchpads[selectedLp].options")
         input(type="checkbox" v-model="options[option]")
         span {{ option }}
     .finish
@@ -19,12 +19,24 @@ export default {
   name: "lpx-fwt",
   data: () => ({
     launchpad,
-    selectedLp: launchpad.launchpads[0],
+    selectedLp: 0,
     options: {},
   }),
   created() {
     const self = this
-    launchpad.options.forEach(o => (self.options[o] = false))
+    self.options = {}
+    launchpad.launchpads[self.selectedLp].options.forEach(op => {
+      self.options[op] = false
+    })
+  },
+  watch: {
+    selectedLp(n, o) {
+      const self = this
+      self.options = {}
+      launchpad.launchpads[self.selectedLp].options.forEach(op => {
+        self.options[op] = false
+      })
+    },
   },
   mounted() {
     // for debugging
@@ -68,11 +80,15 @@ body, html
     justify-content: center
     align-items: center
 
-  .launchpads
-    margin: 8px 0
+    select
+      background: #212121
+      color: #FFF
+      padding: 8px
+      border: none
 
   .options
     width: 100%
+    margin: 8px 0
 
     .option
       display: flex
@@ -82,4 +98,9 @@ body, html
   .finish
     button
       margin: 0 4px
+      background: #212121
+      border: none
+      color: #FFF
+      padding: 8px 16px
+      cursor: pointer
 </style>
