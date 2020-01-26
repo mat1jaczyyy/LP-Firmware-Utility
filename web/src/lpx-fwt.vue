@@ -96,6 +96,9 @@ body, html
       align-items: center
       margin: 4px 0
 
+      span
+        font-size: 0.8em
+
   .finish
     button
       margin: 0 4px
