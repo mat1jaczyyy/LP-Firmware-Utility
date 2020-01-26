@@ -62,6 +62,7 @@ body, html
   background: #191919
   color: #fff
   font-family: "Roboto Mono"
+  user-select: none
 
 @font-face
   font-family: "Roboto Mono"
