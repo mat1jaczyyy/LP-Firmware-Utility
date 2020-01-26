@@ -5,7 +5,7 @@ BINTOSYX = bintosyx
 SYXTOBIN = syxtobin
 
 define cli
-	g++ -std=c++11 -O2 -I common -o $(CLI_OUT)/lpx-$(1) lpx-$(1)/$(1).cpp
+	g++ -std=c++11 -O2 -I common -o $(CLI_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
 endef
 
 all: clean cli wasm
