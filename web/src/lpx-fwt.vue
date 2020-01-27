@@ -18,7 +18,6 @@
 import WebMidi from "webmidi"
 import { lpPorts, errorCodes, lpModels, lpOptions } from "./constants"
 import logic from "./logic"
-import axios from "axios";
 
 export default {
   name: "lpx-fwt",

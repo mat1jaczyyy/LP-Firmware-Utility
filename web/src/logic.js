@@ -1,13 +1,22 @@
 import WebMidi from "webmidi"
 import { lpModels, lpPorts, errorCodes } from "./constants"
 import { saveAs } from 'file-saver'
+import axios from "axios";
 
 var outputPort = null
 
+async function downloadCFW() {
+  var response = await axios.get("https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx");
+
+  return new Uint8Array(atob(response.data.content).split('').map(c => c.charCodeAt(0)));;
+}
+
 var wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
 
-function patchFirmware(args) {
+async function patchFirmware(args) {
   try {
+    if (args.selectedLp.includes("CFW")) return await downloadCFW();
+
     wasmPatch(
       lpModels.indexOf(args.selectedLp),
       Object.values(args.options)
@@ -16,7 +25,7 @@ function patchFirmware(args) {
     console.log(FS.readFile("firmware/output.syx"))
 
   } catch (e) {
-    console.log("Firmware patching failed with status code " + e.status + e.message)
+    console.log("Firmware deploy failed with status code " + e.status + " " + e.message)
     return null
   }
 
@@ -59,8 +68,10 @@ export default {
     if(!outputPort.name.includes(keys[i]) || lpPorts[keys[i]] !== type) 
       return errorCodes.SELECTION_NOT_FOUND
   },
-  flashFirmware: args => {
-    var fw = patchFirmware(args)
+  flashFirmware: async args => {
+    var fw = await patchFirmware(args)
+    
+    if (fw === null) return;
 
     console.log(outputPort);
 
@@ -79,11 +90,11 @@ export default {
       outputPort.sendSysex([], message);
     })
   },
-  downloadFirmware: args => {
-    var fw = patchFirmware(args)
+  downloadFirmware: async args => {
+    var fw = await patchFirmware(args)
     
-    if (fw !== null) {
-      saveAs(new Blob([fw.buffer]), "output.syx");
-    }
+    if (fw === null) return;
+    
+    saveAs(new Blob([fw.buffer]), "output.syx");
   }
 }
