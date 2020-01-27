@@ -9,9 +9,9 @@ define cli
 	cd cli && g++ -std=c++11 -O2 -I common -o ../$(CLI_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
 endef
 
-all: clean cli wasm web
+all: clean tools wasm web
 
-cli:
+tools:
 	mkdir -p $(CLI_OUT)
 	$(call cli,$(BINTOSYX))
 	$(call cli,$(SYXTOBIN))
