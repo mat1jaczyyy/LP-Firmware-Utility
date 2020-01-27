@@ -1,32 +1,39 @@
-CLI_OUT = cli/out
+TOOLS_OUT = cli/out
 WASM_OUT = web/public/wasm
 
 BINTOSYX = bintosyx
 SYXTOBIN = syxtobin
 FWGEN = fwgen
 
-define cli
-	cd cli && g++ -std=c++11 -O2 -I common -o ../$(CLI_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
+define tools
+	cd cli && g++ -std=c++11 -O2 -I common -o ../$(TOOLS_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
+endef
+
+define wasm
+	mkdir -p $(WASM_OUT)
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp --embed-file ../firmware/stock@firmware
 endef
 
 all: clean tools wasm web
 
-tools:
-	mkdir -p $(CLI_OUT)
-	$(call cli,$(BINTOSYX))
-	$(call cli,$(SYXTOBIN))
-
-wasm:
-	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp --embed-file ../firmware/stock@firmware
-
-web:
-	cd web && yarn && yarn build
-
-clean: clean_cli clean_wasm
-
-clean_cli:
-	rm -rf $(CLI_OUT)/*
+clean_tools:
+	rm -rf $(TOOLS_OUT)/*
 
 clean_wasm:
 	rm -rf $(WASM_OUT)/*
+
+clean: clean_tools clean_wasm
+
+tools: clean_tools
+	mkdir -p $(TOOLS_OUT)
+	$(call tools,$(BINTOSYX))
+	$(call tools,$(SYXTOBIN))
+
+wasm: clean_wasm
+	$(call wasm,)
+
+wasm-debug: clean_wasm
+	$(call wasm,-g4)
+
+web: wasm
+	cd web && yarn && yarn build
