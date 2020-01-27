@@ -1,7 +1,8 @@
 import WebMidi from "webmidi"
 import { lpPorts, errorCodes } from "./constants"
+import { saveAs } from 'file-saver'
 
-var outputPort = null;
+var outputPort = null
 
 export default {
   initializeMidi: callback => {
@@ -40,12 +41,24 @@ export default {
       return errorCodes.SELECTION_NOT_FOUND
   },
   flashFirmware: args => {
-    try{
-      window.Module._patch_firmware()
-      console.log(FS.readFile("firmware/output.syx"))
-    } catch (e){
-      console.log("Firmware patching failed with status code " + e.status)
+    var fw = patchFirmware(args)
+  },
+  downloadFirmware: args => {
+    var fw = patchFirmware(args)
+    
+    if (fw != null) {
+      saveAs(new Blob([fw.buffer]), "output.syx");
     }
   }
 }
 
+function patchFirmware(args) {
+  try {
+    window.Module._patch_firmware()
+    console.log(FS.readFile("firmware/output.syx"))
+  } catch (e) {
+    console.log("Firmware patching failed with status code " + e.status)
+    return null
+  }
+  return FS.readFile("firmware/output.syx")
+}
