@@ -11,7 +11,10 @@ endef
 
 define wasm
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp --embed-file ../firmware/stock@firmware
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common \
+		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp \
+		-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' \
+		--embed-file ../firmware/stock@firmware
 endef
 
 all: clean tools wasm web
@@ -33,7 +36,7 @@ wasm: clean_wasm
 	$(call wasm,)
 
 wasm-debug: clean_wasm
-	$(call wasm,-g4)
+	$(call wasm,-g4 -s ASSERTIONS=1)
 
 web: wasm
 	cd web && yarn && yarn build

@@ -5,7 +5,7 @@ const LPPRO = "Launchpad Pro"
 export const lpModels = [LPX, LPMINIMK3, LPPRO]
 
 export const lpOptions = {
-	"Launchpad X": ["Patch Programmer Mode", "Rename \"Programmer\" Mode to \"Cover\" Mode"],
+	"Launchpad X": ["Patch Programmer Mode", "Rename \"Live\" Mode to \"Gay\" Mode"],
 	"Launchpad Mini MK3": ["Patch Programmer Mode"],
 	"Launchpad Pro": ["Lol"]
 }

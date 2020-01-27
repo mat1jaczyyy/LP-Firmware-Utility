@@ -25,10 +25,8 @@ wasm void patch_firmware(int target, int argc, bool* argv) {
     lp_target = product_types[target];
     version = firmware_versions[target];
     input_file = firmware_files[target];
-
-    output_file = (char*)"firmware/output.syx";
     
-    remove(output_file);
+    remove(output_file = (char*)"firmware/output.syx");
 
     // TODO Patch Firmware
 
