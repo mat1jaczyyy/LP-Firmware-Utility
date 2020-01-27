@@ -31,6 +31,7 @@ const std::vector<byte> novation_header = {0x00, 0x20, 0x29, 0x00};
 #define LPMINIMK3_PRODUCT_ID 0x0D
 #define LPPROMK3_PRODUCT_ID 0x0E
 
+#define PRODUCT_COUNT 3
 const std::vector<byte> product_types = {LPX_PRODUCT_ID, LPMINIMK3_PRODUCT_ID, LPPROMK3_PRODUCT_ID};
 
 extern bin_t input, output;
@@ -55,6 +56,7 @@ void write_output();
  * 4: Failed to allocate output file
  * 5: Conversion error
  * 6: Invalid arguments
+ * 7: Patching error
 **/
 
 #endif

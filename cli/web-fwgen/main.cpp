@@ -1,7 +1,8 @@
-#include "common.h"
 #include "emscripten.h"
-
 #define wasm extern "C" EMSCRIPTEN_KEEPALIVE
+
+#include "common.h"
+#include "patches.h"
 
 const std::vector<char*> firmware_files = {
     (char*)"firmware/LPX-348.bin",
@@ -18,8 +19,8 @@ const std::vector<char*> firmware_versions = {
 extern byte lp_target;
 extern char* version;
 
-wasm void patch_firmware(int target, int argc, bool* argv) {
-    if (target >= product_types.size()) {
+wasm void patch_firmware(int target, bool* args) {
+    if (target >= PRODUCT_COUNT) {
 		fprintf(stderr, "Invalid target Launchpad specified.\n");
 		exit(6);
     }
@@ -30,9 +31,9 @@ wasm void patch_firmware(int target, int argc, bool* argv) {
     
     remove(output_file = (char*)"firmware/output.syx");
 
-    // TODO Patch Firmware
-
 	read_input();
+
+    (*patch[target])(args);
     
     convert();
 

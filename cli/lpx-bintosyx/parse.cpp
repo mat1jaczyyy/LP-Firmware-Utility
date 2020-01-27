@@ -1,6 +1,6 @@
 #include "cli.h"
 
-const std::vector<const char*> product_flags = { "/x", "/mini", "/pro" };
+const std::vector<const char*> product_flags = {"/x", "/mini", "/pro"};
 
 extern byte lp_target;
 extern char* version;
@@ -8,7 +8,7 @@ extern char* version;
 void lp_target_error(const char* error) {
 	fprintf(stderr, "%s target Launchpad specified. Valid flags: %s", error, product_flags[0]);
 
-	for (int i = 1; i < product_flags.size(); i++)
+	for (int i = 1; i < PRODUCT_COUNT; i++)
 		fprintf(stderr, ", %s", product_flags[i]);
 
 	fprintf(stderr, "\n");
@@ -21,7 +21,7 @@ void parse_args(int argc, char** argv) {
 
 	bool product_success = false;
 
-	for (int i = 0; i < product_flags.size(); i++)
+	for (int i = 0; i < PRODUCT_COUNT; i++)
 		if ((product_success = !strcmp(argv[1], product_flags[i]))) {
 			lp_target = product_types[i];
 			break;

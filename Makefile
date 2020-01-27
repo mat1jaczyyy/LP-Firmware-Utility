@@ -12,7 +12,7 @@ endef
 define wasm
 	mkdir -p $(WASM_OUT)
 	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common \
-		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp \
+		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/main.cpp \
 		-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' \
 		--embed-file ../firmware/stock@firmware
 endef

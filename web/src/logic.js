@@ -4,13 +4,14 @@ import { saveAs } from 'file-saver'
 
 var outputPort = null
 
-var wasmPatch = Module.cwrap("patch_firmware", null, ["number", "number", "array"])
+var wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
 
 function patchFirmware(args) {
   try {
-    var patches = Object.values(args.options)
-    
-    wasmPatch(lpModels.indexOf(args.selectedLp), patches.length, patches);
+    wasmPatch(
+      lpModels.indexOf(args.selectedLp),
+      Object.values(args.options)
+    );
 
     console.log(FS.readFile("firmware/output.syx"))
 

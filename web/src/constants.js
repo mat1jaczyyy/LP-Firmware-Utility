@@ -6,7 +6,7 @@ const LPPROCFW = "Launchpad Pro (CFW)";
 export const lpModels = [LPX, LPMINIMK3, LPPROMK3, LPPROCFW]
 
 export const lpOptions = {
-	"Launchpad X": ["Patch Programmer Mode"],
+	"Launchpad X": ["Patch Programmer Mode", "Rename Live mode to Gay mode"],
 	"Launchpad Mini MK3": [],
 	"Launchpad Pro MK3": [],
 	"Launchpad Pro (CFW)": []
