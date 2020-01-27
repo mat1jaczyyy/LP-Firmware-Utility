@@ -47,4 +47,14 @@ void convert();
 void read_input();
 void write_output();
 
+/**
+ * Error Codes
+ * 1: Failed to open input file
+ * 2: Failed to allocate input file
+ * 3: Failed to open output file
+ * 4: Failed to allocate output file
+ * 5: Conversion error
+ * 6: Invalid arguments
+**/
+
 #endif

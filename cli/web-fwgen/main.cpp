@@ -3,22 +3,30 @@
 
 #define wasm extern "C" EMSCRIPTEN_KEEPALIVE
 
-char* INPUT_FILE = (char*)"firmware/LPX-289.bin";
-char* OUTPUT_FILE = (char*)"firmware/output.syx";
+const std::vector<char*> firmware_files = {
+    (char*)"firmware/LPX-348.bin",
+    (char*)"firmware/LPMiniMK3-404.bin"
+};
 
-/**
- * Error Codes
- * 1: Failed to open input file
- * 2: Failed to allocate input file
- * 3: Failed to open output file
- * 4: Failed to allocate output file
- * 5: Conversion error
- * 6: Invalid arguments
-**/
+const std::vector<char*> firmware_versions = {
+    (char*)"348",
+    (char*)"404"
+};
 
-wasm void patch_firmware() {
-    input_file = INPUT_FILE;    // TODO Properly detect source firmware
-    output_file = OUTPUT_FILE;
+extern byte lp_target;
+extern char* version;
+
+wasm void patch_firmware(int target, int argc, bool* argv) {
+    if (target >= 2) {
+		fprintf(stderr, "Invalid target Launchpad specified.\n");
+		exit(6);
+    }
+
+    lp_target = product_types[target];
+    version = firmware_versions[target];
+    input_file = firmware_files[target];
+
+    output_file = (char*)"firmware/output.syx";
     
     remove(output_file);
 
