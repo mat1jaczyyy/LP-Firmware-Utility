@@ -5,11 +5,13 @@
 
 const std::vector<char*> firmware_files = {
     (char*)"firmware/LPX-348.bin",
+    (char*)"firmware/LPProMK3-385.bin",
     (char*)"firmware/LPMiniMK3-404.bin"
 };
 
 const std::vector<char*> firmware_versions = {
     (char*)"348",
+    (char*)"385",
     (char*)"404"
 };
 
@@ -17,7 +19,7 @@ extern byte lp_target;
 extern char* version;
 
 wasm void patch_firmware(int target, int argc, bool* argv) {
-    if (target >= 2) {
+    if (target >= product_types.size()) {
 		fprintf(stderr, "Invalid target Launchpad specified.\n");
 		exit(6);
     }

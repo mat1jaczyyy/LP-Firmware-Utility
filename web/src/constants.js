@@ -1,19 +1,22 @@
 const LPX = "Launchpad X";
 const LPMINIMK3 = "Launchpad Mini MK3";
-const LPPRO = "Launchpad Pro"
+const LPPROMK3 = "Launchpad Pro MK3";
+const LPPROCFW = "Launchpad Pro (CFW)";
 
-export const lpModels = [LPX, LPMINIMK3, LPPRO]
+export const lpModels = [LPX, LPMINIMK3, LPPROMK3, LPPROCFW]
 
 export const lpOptions = {
-	"Launchpad X": ["Patch Programmer Mode", "Rename \"Live\" Mode to \"Gay\" Mode"],
-	"Launchpad Mini MK3": ["Patch Programmer Mode"],
-	"Launchpad Pro": ["Lol"]
+	"Launchpad X": ["Patch Programmer Mode"],
+	"Launchpad Mini MK3": [],
+	"Launchpad Pro MK3": [],
+	"Launchpad Pro (CFW)": []
 }
 
 export const lpPorts = {
 	"Launchpad X Bootloader": LPX,
 	"Launchpad Mini Bootloader": LPMINIMK3,
-	"Launchpad Pro": LPPRO
+	"Launchpad Pro Bootloader": LPPROMK3,    // this is an assumption. don't have access to Pro MK3 yet
+	"Launchpad Pro": LPPROCFW
 }
 
 export const errorCodes = {
