@@ -14,6 +14,7 @@ export const lpOptions = {
 
 export const lpPorts = {
 	"Launchpad X Bootloader": LPX,
+	"LPX Bootloader": LPX,
 	"Launchpad Mini Bootloader": LPMINIMK3,
 	"Launchpad Pro Bootloader": LPPROMK3,    // this is an assumption. don't have access to Pro MK3 yet
 	"Launchpad Pro": LPPROCFW
