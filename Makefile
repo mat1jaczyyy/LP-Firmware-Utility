@@ -18,7 +18,7 @@ cli:
 
 wasm:
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp web-$(FWGEN)/main.cpp
+	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 -I common -o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/main.cpp --embed-file ../firmware/stock@firmware
 
 web:
 	cd web && yarn && yarn build
