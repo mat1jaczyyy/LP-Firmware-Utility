@@ -12,6 +12,7 @@ char* OUTPUT_FILE = (char*)"firmware/output.syx";
  * 2: Failed to allocate input file
  * 3: Failed to open output file
  * 4: Failed to allocate output file
+ * 5: Conversion error
 **/
 
 wasm void patch_firmware() {

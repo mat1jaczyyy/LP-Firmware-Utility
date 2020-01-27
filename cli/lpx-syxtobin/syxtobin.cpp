@@ -11,13 +11,13 @@ void print_vector_error(int i, const char* error, std::vector<byte> v) {
 		fprintf(stderr, ").\n");
 	}
 
-	exit(1);
+	exit(5);
 }
 
 void verify_byte(int i, byte value, const char* error) {
 	if (input.data[i] != value) {
 		fprintf(stderr, "Parse error at position %08x: expected %s (%02x).\n", i, error, value);
-		exit(1);
+		exit(5);
 	}
 }
 
@@ -26,7 +26,7 @@ void verify_byte(int i, const std::vector<byte> values, const char* error) {
 		if (input.data[i] == values[j]) return;
 
 	print_vector_error(i, error, values);
-	exit(1);
+	exit(5);
 }
 
 int verify_byte_array(int i, const std::vector<byte> values, const char* error) {
@@ -34,7 +34,7 @@ int verify_byte_array(int i, const std::vector<byte> values, const char* error) 
 		if (input.data[i + j] != values[j]) {
 			fprintf(stderr, "Parse error at position %08x: expected %s (", i, error);
 
-			exit(1);
+			exit(5);
 		}
 
 	return values.size();
@@ -54,7 +54,7 @@ uint nibbles_to_uint(int* i, int length) {
 void verify_uints(int i, uint a, uint b, const char* error) {
 	if (a != b) {
 		fprintf(stderr, "Syntax error at position %08x: mismatching %s.\n", i, error);
-		exit(1);
+		exit(5);
 	}
 }
 
@@ -87,7 +87,7 @@ void convert() {
 
 				verify_uints(i, version, nibbles_to_uint(&i, 6), "VERSION");
 
-				if (!allocate_buffer(&output, nibbles_to_uint(&i, 8), "OUTPUT")) exit(1);
+				if (!allocate_buffer(&output, nibbles_to_uint(&i, 8), "OUTPUT")) exit(4);
 
 				checksum = nibbles_to_uint(&i, 8);
 

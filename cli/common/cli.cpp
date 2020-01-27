@@ -6,7 +6,7 @@ void optional_output_file(const char* ext) {
 
 	if (output_file == NULL) {
 		fprintf(stderr, "Failed to allocate memory for output file name.\n");
-		exit(1);
+		exit(3);
 	}
 
 	strcpy(output_file, input_file);
