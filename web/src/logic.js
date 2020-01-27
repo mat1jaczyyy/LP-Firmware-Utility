@@ -47,7 +47,7 @@ export default {
         }
       })
       
-      if(outputPort = null) return errorCodes.NO_DEVICE
+      if(outputPort === null) return errorCodes.NO_DEVICE
       else return null;
     })
   },
@@ -60,11 +60,28 @@ export default {
   },
   flashFirmware: args => {
     var fw = patchFirmware(args)
+
+    console.log(outputPort);
+
+    var messages = []
+    var currentMessage = []
+    
+    fw.forEach(byte => {
+      if(byte === 0xF0){}
+      else if(byte === 0xF7){
+        messages.push(currentMessage)
+        currentMessage = []
+      } else currentMessage.push(byte)
+    })
+    
+    messages.forEach(message => {
+      outputPort.sendSysex([], message);
+    })
   },
   downloadFirmware: args => {
     var fw = patchFirmware(args)
     
-    if (fw != null) {
+    if (fw !== null) {
       saveAs(new Blob([fw.buffer]), "output.syx");
     }
   }
