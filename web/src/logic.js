@@ -65,15 +65,16 @@ export default {
     if(!outputPort) return errorCodes.NO_DEVICE;
     
     const keys = Object.keys(lpPorts);
-    if(!outputPort.name.includes(keys[i]) || lpPorts[keys[i]] !== type) 
-      return errorCodes.SELECTION_NOT_FOUND
+		for(var i = 0; i < keys.length; i++)
+	    if(outputPort.name.includes(keys[i]) && lpPorts[keys[i]] === type) 
+	      return
+		
+		return errorCodes.SELECTION_NOT_FOUND
   },
   flashFirmware: async args => {
     var fw = await patchFirmware(args)
     
     if (fw === null) return;
-
-    console.log(outputPort);
 
     var messages = []
     var currentMessage = []
