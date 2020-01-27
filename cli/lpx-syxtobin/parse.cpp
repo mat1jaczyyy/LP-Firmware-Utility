@@ -3,7 +3,7 @@
 void parse_args(int argc, char** argv) {
 	if (argc <= 1) {
 		fprintf(stderr, "No input file specified.\n");
-		exit(1);
+		exit(6);
 	}
 
 	input_file = argv[1];
@@ -13,6 +13,6 @@ void parse_args(int argc, char** argv) {
 
 	if (argc >= 4) {
 		fprintf(stderr, "Too many arguments specified.\n");
-		exit(1);
+		exit(6);
 	}
 }

@@ -13,7 +13,7 @@ void lp_target_error(const char* error) {
 
 	fprintf(stderr, "\n");
 
-	exit(1);
+	exit(6);
 }
 
 void parse_args(int argc, char** argv) {
@@ -31,13 +31,13 @@ void parse_args(int argc, char** argv) {
 
 	if (argc <= 2) {
 		fprintf(stderr, "No version specified.\n");
-		exit(1);
+		exit(6);
 	}
 
 	int len = strlen(argv[2]);
 	if (len > 6) {
 		fprintf(stderr, "Specified version is too long.\n");
-		exit(1);
+		exit(6);
 	}
 
 	for (int i = 0; i < len; i++) {
@@ -47,7 +47,7 @@ void parse_args(int argc, char** argv) {
 			if (0x41 <= argv[2][i] && argv[2][i] <= 0x46) argv[2][i] -= 0x37;
 			else {
 				fprintf(stderr, "Invalid version specified.\n");
-				exit(1);
+				exit(6);
 			}
 		}
 	}
@@ -56,7 +56,7 @@ void parse_args(int argc, char** argv) {
 
 	if (argc <= 3) {
 		fprintf(stderr, "No input file specified.\n");
-		exit(1);
+		exit(6);
 	}
 
 	input_file = argv[3];
@@ -66,6 +66,6 @@ void parse_args(int argc, char** argv) {
 
 	if (argc >= 6) {
 		fprintf(stderr, "Too many arguments specified.\n");
-		exit(1);
+		exit(6);
 	}
 }
