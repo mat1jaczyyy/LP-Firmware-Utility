@@ -45,7 +45,7 @@ void read_input() {
 
 	if (!allocate_buffer(&input, ftell(handle), "INPUT")) {
 		fclose(handle);
-		exit(1);
+		exit(2);
 	}
 
 	fseek(handle, 0, SEEK_SET);
@@ -57,7 +57,7 @@ void write_output() {
 	FILE* handle = fopen(output_file, "wb");
 	if (handle == NULL) {
 		fprintf(stderr, "Failed to open output file.\n");
-		exit(1);
+		exit(3);
 	}
 
 	fwrite(output.data, sizeof(*output.data), output.size, handle);

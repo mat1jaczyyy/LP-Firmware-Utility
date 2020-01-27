@@ -360,3 +360,4 @@ out
 
 # WASM output folder
 out_wasm
+.vscode/settings.json

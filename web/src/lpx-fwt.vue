@@ -1,11 +1,12 @@
+
 <template lang="pug">
 .lpxfwt
   .inner
     .launchpads
       select(v-model="selectedLp")
-        option(v-for="(lp, k) in launchpad.launchpads" :value="k") {{ lp.name }}
+        option(v-for="lp in lpModels" :value="lp") {{ lp }}
     .options
-      .option(v-for="option in launchpad.launchpads[selectedLp].options")
+      .option(v-for="option in lpOptions[selectedLp]")
         input(type="checkbox" v-model="options[option]")
         span {{ option }}
     .finish
@@ -14,28 +15,35 @@
 </template>
 
 <script>
-import launchpad from "./launchpadStuff"
+import logic from "./logic"
+import {lpOptions, lpModels} from "./constants"
+
 export default {
   name: "lpx-fwt",
   data: () => ({
-    launchpad,
-    selectedLp: 0,
+    lpModels,
+    lpOptions,
+    selectedLp: lpModels[0],
     options: {},
+    error: null
   }),
   created() {
     const self = this
     self.options = {}
-    launchpad.launchpads[self.selectedLp].options.forEach(op => {
+    lpOptions[self.selectedLp].forEach(op => {
       self.options[op] = false
     })
+    logic.initializeMidi(this.devicesChanged);
   },
   watch: {
     selectedLp(n, o) {
       const self = this
       self.options = {}
-      launchpad.launchpads[self.selectedLp].options.forEach(op => {
+      lpOptions[self.selectedLp].forEach(op => {
         self.options[op] = false
       })
+      
+      self.error = logic.typeChanged()
     },
   },
   mounted() {
@@ -46,13 +54,24 @@ export default {
     finish(type) {
       const { options, selectedLp } = this
 
-      launchpad.callback({
-        type,
-        selectedLp,
-        options,
-      })
+      if(type === "flash")
+        logic.flashFirmware({
+          type,
+          selectedLp,
+          options,
+        })
+      else if(type === "download")      
+        logic.downloadFirmware({
+          type, 
+          selectedLp, 
+          options
+        })
     },
-  },
+    devicesChanged() {
+      const ec = logic.updateDevices()
+      if(ec !== null) self.error = ec
+    }
+  }
 }
 </script>
 

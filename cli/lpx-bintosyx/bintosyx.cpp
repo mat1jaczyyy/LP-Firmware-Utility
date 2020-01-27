@@ -55,9 +55,11 @@ void write_block(int* i, int j, byte update_type) {
 }
 
 void convert() {
+	version = "999";
+	
 	int blocks = ceil_div(input.size, 0x20);
 
-	if (!allocate_buffer(&output, 0x2D + 0x2C * blocks, "OUTPUT")) exit(1);
+	if (!allocate_buffer(&output, 0x2D + 0x2C * blocks, "OUTPUT")) exit(4);
 
 	int i = 0;
 
@@ -72,7 +74,7 @@ void convert() {
 
 	for (int j = 0; j < 3; j++)
 		output.data[i++] = version[j] & 0xF;
-
+	
 	output.data[i++] = SYSEX_END;
 
 	create_sysex_start(&i, UPDATE_HEADER);

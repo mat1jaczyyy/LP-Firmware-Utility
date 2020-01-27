@@ -6722,6 +6722,11 @@ vue-loader@^15.7.2:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
+vue-midi@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/vue-midi/-/vue-midi-0.0.3.tgz#ab0d6013f8a90655688d9bae53cecb0f72592f75"
+  integrity sha512-LgOASH+DQxIGzZtSn4kgcYpImOUrO4zQVv8Onsj7Nz1qNImZ4pD0jajdzDQmSLndLvaNeycI7J8oFQEEZRRHog==
+
 vue-style-loader@^4.1.0:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/vue-style-loader/-/vue-style-loader-4.1.2.tgz#dedf349806f25ceb4e64f3ad7c0a44fba735fcf8"
@@ -6770,6 +6775,11 @@ wcwidth@^1.0.1:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
+
+webmidi@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/webmidi/-/webmidi-2.5.1.tgz#e98b0bb5356afb5112aaff7eaac23606cf0b71d0"
+  integrity sha512-rX9/vBBSnSZR04ZZcLWCe/ujOizH9f/Q9HX11+Zw+HHwOy7edUTbbC3Axc2RjoiDQ2W7RkK1tY4yv0nYSfUcJg==
 
 webpack-bundle-analyzer@^3.6.0:
   version "3.6.0"

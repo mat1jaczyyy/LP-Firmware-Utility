@@ -1,6 +1,6 @@
 import Vue from "vue"
 import App from "./lpx-fwt.vue"
-// import "./registerServiceWorker"
+// import "./registerServiceWorker"'
 
 Vue.config.productionTip = false
 
