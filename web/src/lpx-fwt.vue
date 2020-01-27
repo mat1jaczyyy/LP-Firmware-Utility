@@ -15,8 +15,9 @@
 </template>
 
 <script>
-import logic from "./logic"
-import {lpOptions, lpModels} from "./constants"
+import WebMidi from "webmidi"
+import { lpPorts, errorCodes, lpModels, lpOptions } from "./constants"
+import axios from "axios";
 
 export default {
   name: "lpx-fwt",
@@ -25,7 +26,8 @@ export default {
     lpOptions,
     selectedLp: lpModels[0],
     options: {},
-    error: null
+    error: null,
+    portIndex: null
   }),
   created() {
     const self = this
@@ -33,7 +35,7 @@ export default {
     lpOptions[self.selectedLp].forEach(op => {
       self.options[op] = false
     })
-    logic.initializeMidi(this.devicesChanged);
+    self.initializeMidi(() => self.updateDevices());
   },
   watch: {
     selectedLp(n, o) {
@@ -43,8 +45,8 @@ export default {
         self.options[op] = false
       })
       
-      self.error = logic.typeChanged()
-    },
+      self.error = self.typeChanged(self.selectedLp)
+    }
   },
   mounted() {
     // for debugging
@@ -55,21 +57,103 @@ export default {
       const { options, selectedLp } = this
 
       if(type === "flash")
-        logic.flashFirmware({
+        this.flashFirmware({
           type,
           selectedLp,
           options,
         })
       else if(type === "download")      
-        logic.downloadFirmware({
+        this.downloadFirmware({
           type, 
           selectedLp, 
           options
         })
     },
-    devicesChanged() {
-      const ec = logic.updateDevices()
-      if(ec !== null) self.error = ec
+    initializeMidi: (callback) => WebMidi.enable(err => {
+        if(err){ 
+          return errorCodes.MIDI_UNSUPPORTED
+        } else {
+          WebMidi.addListener("connected", callback)
+          WebMidi.addListener("disconnected", callback)
+        }
+      }, true),
+    updateDevices: () => {
+      var outputIndex = null;
+      WebMidi.outputs.forEach((output, index) => {
+        var didFindPort = false;
+        Object.keys(lpPorts).forEach(portName => {
+          if(output.name.includes(portName)){
+            didFindPort = true;
+            
+            if(didFindPort && !!outputIndex){
+              return errorCodes.MULTIPLE_DEVICES
+            }
+            else {
+              outputIndex = index
+            }
+          }
+        })
+        
+        if(outputIndex === null) return errorCodes.NO_DEVICE
+        else self.portIndex = outputIndex
+      })
+    },
+    typeChanged: (type) => {
+      if(!self.portIndex) return errorCodes.NO_DEVICE;
+      
+      const keys = Object.keys(lpPorts);
+      for(var i = 0; i < keys.length; i++){
+        if(!WebMidi.outputs[portIndex].name.includes(keys[i]) || lpPorts[keys[i]] !== type) 
+          return errorCodes.SELECTION_NOT_FOUND
+      }
+    },
+    flashFirmware: args => {
+      // try{
+      //   window.Module._patch_firmware()
+      // } catch (e){
+      //   console.log("Firmware patching failed with status code " + e.status)
+      //   return;
+      // }
+      
+      // var fwBuffer;
+      // try {
+      //   fwBuffer = FS.readFile("firmware/output.syx")
+      // } catch (e){
+      //   console.log("Firmware file not found!")
+      //   return;
+      // }
+      
+      switch(args.selectedLp){
+        case "Launchpad Pro":
+          axios.get(
+            "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx"
+          ).then(response => {
+            const str = atob(response.data.content)
+            var len = str.length;
+            
+            var fwBuffer = new Uint8Array(len)
+            
+            for(var i = 0; i < len; i++){
+              fwBuffer[i] = str.charCodeAt(i);
+            }
+        
+            var messages = []
+            var currentMessage = []
+            
+            fwBuffer.forEach(byte => {
+              if(byte === 0xF0){}
+              else if(byte === 0xF7){
+                messages.push(currentMessage)
+                currentMessage = []
+              } else currentMessage.push(byte)
+            })
+            
+            messages.forEach(message => {
+              WebMidi.outputs[portIndex].sendSysex([], message);
+            })
+          }
+        )
+      }
     }
   }
 }
