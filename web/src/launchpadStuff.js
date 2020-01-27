@@ -5,6 +5,8 @@ module.exports = {
   ],
   callback: e => {
     console.log(e)
-    window.Module._test_function()
+    window.Module._patch_firmware() // how to detect if this errored out? a) no firmware/output.syx file, b) something will print to stderr
+    console.log(FS.readFile("firmware/output.syx"))
+    alert("open console nerd")
   },
 }

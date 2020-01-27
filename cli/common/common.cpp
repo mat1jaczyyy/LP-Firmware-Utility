@@ -2,6 +2,9 @@
 
 bin_t input, output;
 
+char* input_file;
+char* output_file;
+
 bool allocate_buffer(bin_t* buffer, int size, const char* error) {
 	buffer->size = size;
 	buffer->data = (byte*)malloc(buffer->size * sizeof(*buffer->data));
@@ -29,4 +32,34 @@ uint crc32(bin_t* buffer) {
 	}
 
 	return crc;
+}
+
+void read_input() {
+	FILE* handle = fopen(input_file, "rb");
+	if (handle == NULL) {
+		fprintf(stderr, "Failed to open input file.\n");
+		exit(1);
+	}
+
+	fseek(handle, 0, SEEK_END);
+
+	if (!allocate_buffer(&input, ftell(handle), "INPUT")) {
+		fclose(handle);
+		exit(1);
+	}
+
+	fseek(handle, 0, SEEK_SET);
+	(void)fread(input.data, input.size, 1, handle);
+	fclose(handle);
+}
+
+void write_output() {
+	FILE* handle = fopen(output_file, "wb");
+	if (handle == NULL) {
+		fprintf(stderr, "Failed to open output file.\n");
+		exit(1);
+	}
+
+	fwrite(output.data, sizeof(*output.data), output.size, handle);
+	fclose(handle);
 }

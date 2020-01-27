@@ -35,8 +35,16 @@ const std::vector<byte> product_types = {LPX_PRODUCT_ID, LPMINIMK3_PRODUCT_ID, L
 
 extern bin_t input, output;
 
+extern char* input_file;
+extern char* output_file;
+
 bool allocate_buffer(bin_t* buffer, int size, const char* error);
 
 uint crc32(bin_t* buffer);
+
+void convert();
+
+void read_input();
+void write_output();
 
 #endif
