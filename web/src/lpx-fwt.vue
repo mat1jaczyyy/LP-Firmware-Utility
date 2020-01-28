@@ -35,7 +35,7 @@ export default {
     lpOptions[self.selectedLp].forEach(op => {
       self.options[op] = false
     })
-    logic.initializeMidi(() => logic.updateDevices());
+    logic.initializeMidi(() => logic.updateDevices(self.setError));
   },
   watch: {
     selectedLp(n, o) {
@@ -68,7 +68,8 @@ export default {
           selectedLp, 
           options
         })
-    }
+    },
+    setError(val){ self.error = val }
   }
 }
 </script>

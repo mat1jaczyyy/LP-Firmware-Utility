@@ -5,7 +5,9 @@ import axios from "axios";
 
 var outputPort = null
 
-async function downloadCFW() {
+const deviceInquiry = [0x7E, 0x7F, 0x06, 0x01]
+
+const downloadCFW = async() => {
   var response = await axios.get("https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx");
 
   return new Uint8Array(atob(response.data.content).split('').map(c => c.charCodeAt(0)));;
@@ -13,7 +15,7 @@ async function downloadCFW() {
 
 var wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
 
-async function patchFirmware(args) {
+const patchFirmware = async(args) => {
   try {
     if (args.selectedLp.includes("CFW")) return await downloadCFW();
 
@@ -32,6 +34,39 @@ async function patchFirmware(args) {
   return FS.readFile("firmware/output.syx")
 }
 
+const waitForIdentification = (e, setError) => {
+  if(e.data.length != 17) return;
+  
+  var msg = e.data.slice(1, e.data.length - 1);
+  
+  if(msg[4] == 0x00 && msg[5] == 0x20 && msg[6] == 0x29){
+    const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
+    
+    switch(msg[7]){
+      case 0x51:
+        if(versionStr === "000") // LP Pro Bootlaoder
+          setError(setOutput(e.target.name))
+        break;
+      case 0x03:
+        if(msg[8] === 17) // LPX Bootloader
+          setError(setOutput(e.target.name))
+        break;
+      case 0x13:
+        if(msg[8] === 17) // LP Mini Bootloader
+          setError(setOutput(e.target.name))
+        break;
+    }
+  }
+}
+
+const setOutput = (name) => {
+  if(!outputPort){
+    outputPort = WebMidi.outputs.find((output) => output.name === name)
+    return null
+  }
+  else return errorCodes.MULTIPLE_DEVICES
+}
+
 export default {
   initializeMidi: callback => {
     WebMidi.enable(err => {
@@ -43,23 +78,19 @@ export default {
       }
     }, true)
   },
-  updateDevices: () => {
-    WebMidi.outputs.forEach(output => {
-      var didFindPort = false;
-      Object.keys(lpPorts).forEach(portName => {
-        if(output.name.includes(portName)){
-          didFindPort = true;
-          
-          if(didFindPort && !!outputPort){
-            return errorCodes.MULTIPLE_DEVICES
+  updateDevices: setError => {
+    for(var iI = 0; iI < WebMidi.inputs.length; iI++){
+      for(var oI = 0; oI < WebMidi.outputs.length; oI++){
+        try {
+          if(WebMidi.inputs[iI].name === WebMidi.outputs[oI].name){
+            WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
+            WebMidi.outputs[oI].sendSysex([], deviceInquiry);
           }
-          else outputPort = output
+        } catch (e){
+          console.log(e)
         }
-      })
-      
-      if(outputPort === null) return errorCodes.NO_DEVICE
-      else return null;
-    })
+      }
+    }
   },
   typeChanged: type => {
     if(!outputPort) return errorCodes.NO_DEVICE;
