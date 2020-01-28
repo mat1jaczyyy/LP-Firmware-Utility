@@ -113,6 +113,9 @@ export default {
       }
     }
 
+    console.log(WebMidi.inputs);
+    console.log(WebMidi.outputs);
+
     const scan = () => {
       MIDIresponded = 0;
       MIDIfound = 0;
