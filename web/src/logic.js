@@ -69,10 +69,12 @@ export default {
         if(msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
           const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
       
-          if (msg[7] === 0x03 && msg[8] === 17 || // LPX Bootloader
-              msg[7] === 0x13 && msg[8] === 17 || // LPMiniMK3 Bootloader
-              msg[7] === 0x23 && msg[8] === 17 || // LPProMK3 Bootloader
-              msg[7] === 0x51 && versionStr === "000" // LPPro Bootloader
+          var selectedIndex = lpModels.indexOf(args.selectedLp);
+
+          if (selectedIndex == 0 && msg[7] === 0x03 && msg[8] === 17 || // LPX Bootloader
+              selectedIndex == 1 && msg[7] === 0x13 && msg[8] === 17 || // LPMiniMK3 Bootloader
+              selectedIndex == 2 && msg[7] === 0x23 && msg[8] === 17 || // LPProMK3 Bootloader
+              selectedIndex == 3 && msg[7] === 0x51 && versionStr === "000" // LPPro Bootloader
           ) {
             flash(output);
           }
