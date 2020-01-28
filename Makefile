@@ -1,4 +1,4 @@
-TOOLS_OUT = cli/out
+TOOLS_OUT = tools/out
 WASM_OUT = web/public/wasm
 
 BINTOSYX = bintosyx
@@ -6,12 +6,12 @@ SYXTOBIN = syxtobin
 FWGEN = fwgen
 
 define tools
-	cd cli && g++ -std=c++11 -O2 -I common -o ../$(TOOLS_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
+	cd tools && g++ -std=c++11 -O2 -I common -o ../$(TOOLS_OUT)/lpx-$(1) common/common.cpp common/cli.cpp lpx-$(1)/parse.cpp lpx-$(1)/$(1).cpp
 endef
 
 define wasm
 	mkdir -p $(WASM_OUT)
-	cd cli && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common \
+	cd tools && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common \
 		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp lpx-$(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/main.cpp \
 		-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' \
 		--embed-file ../firmware/stock@firmware
