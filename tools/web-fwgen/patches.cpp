@@ -49,3 +49,11 @@ void lpminimk3_patch(bool* args) {
 void lppromk3_patch(bool* args) {
 
 }
+
+void lpmk2_patch(bool* args) {
+
+}
+
+void lppro_patch(bool* args) {
+
+}
