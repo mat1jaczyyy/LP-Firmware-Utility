@@ -48,20 +48,25 @@ const waitForIdentification = (e, setError) => {
     const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
     
     switch(msg[7]){
-      case 0x51:
-        if(versionStr === "000") // LP Pro Bootlaoder
-          setError(setOutput(e.target.name))
-          outputType = lpModels[3]
-        break;
       case 0x03:
         if(msg[8] === 17) // LPX Bootloader
           setError(setOutput(e.target.name))
           outputType = lpModels[0]
         break;
       case 0x13:
-        if(msg[8] === 17) // LP Mini Bootloader
+        if(msg[8] === 17) // LPMiniMK3 Bootloader
           setError(setOutput(e.target.name))
           outputType = lpModels[1]
+        break;
+      case 0x23:
+        if(msg[8] === 17) // LPProMK3 Bootloader
+          setError(setOutput(e.target.name))
+          outputType = lpModels[2]
+        break;
+      case 0x51:
+        if(versionStr === "000") // LPPro Bootloader
+          setError(setOutput(e.target.name))
+          outputType = lpModels[3]
         break;
     }
   }
@@ -107,6 +112,9 @@ export default {
     var fw = await patchFirmware(args)
     
     if (fw === null) return;
+	
+	console.log(outputPort);
+	
     if (outputPort === null) return;
 
     var messages = []
