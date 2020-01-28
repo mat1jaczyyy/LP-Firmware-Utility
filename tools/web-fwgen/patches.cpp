@@ -1,15 +1,5 @@
 #include "common.h"
 
-void reallocate_buffer(bin_t* buffer, uint increment) {
-	buffer->data = (byte*)realloc(buffer->data, buffer->size += increment);
-
-	if (buffer->data == NULL) {
-		fprintf(stderr, "Failed to reallocate memory for firmware patches.\n");
-
-		exit(7);
-	}
-}
-
 #define LPX_PROGRAMMER_PATCH_SIZE 0x142
 const byte lpx_programmer_patch[LPX_PROGRAMMER_PATCH_SIZE] = {
   0x06, 0xb4, 0xf5, 0xf7, 0xd9, 0xfa, 0x06, 0xbc, 0x7f, 0x28, 0x07, 0xd1, 0xdf, 0xf8, 0x16, 0x00,
@@ -37,7 +27,7 @@ const byte lpx_programmer_patch[LPX_PROGRAMMER_PATCH_SIZE] = {
 
 void lpx_patch(bool* args) {
     if (args[0]) {
-        reallocate_buffer(&input, LPX_PROGRAMMER_PATCH_SIZE);
+        if (!reallocate_buffer(&input, LPX_PROGRAMMER_PATCH_SIZE, "firmware patches")) exit(7);
         
         for (int i = 0; i < LPX_PROGRAMMER_PATCH_SIZE; i++)
             input.data[input.size - LPX_PROGRAMMER_PATCH_SIZE + i] = lpx_programmer_patch[i];

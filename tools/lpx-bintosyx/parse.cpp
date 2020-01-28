@@ -1,14 +1,14 @@
 #include "cli.h"
 
-const std::vector<const char*> product_flags = {"/x", "/mini", "/pro"};
+const std::vector<const char*> product_flags = {"/x", "/minimk3", "/promk3", "/mk2", "/pro"};
 
-extern byte lp_target;
+extern byte lp_target_family, lp_target;
 extern char* version;
 
 void lp_target_error(const char* error) {
 	fprintf(stderr, "%s target Launchpad specified. Valid flags: %s", error, product_flags[0]);
 
-	for (int i = 1; i < PRODUCT_COUNT; i++)
+	for (int i = 1; i < products_all.size(); i++)
 		fprintf(stderr, ", %s", product_flags[i]);
 
 	fprintf(stderr, "\n");
@@ -21,9 +21,10 @@ void parse_args(int argc, char** argv) {
 
 	bool product_success = false;
 
-	for (int i = 0; i < PRODUCT_COUNT; i++)
+	for (int i = 0; i < products_all.size(); i++)
 		if ((product_success = !strcmp(argv[1], product_flags[i]))) {
-			lp_target = product_types[i];
+			lp_target_family = families[i >= products_lpx.size()];
+			lp_target = products_all[i];
 			break;
 		}
 
@@ -35,12 +36,12 @@ void parse_args(int argc, char** argv) {
 	}
 
 	int len = strlen(argv[2]);
-	if (len > 6) {
-		fprintf(stderr, "Specified version is too long.\n");
+	if (len != 3) {
+		fprintf(stderr, "Version should be 3 characters long.\n");
 		exit(6);
 	}
 
-	for (int i = 0; i < len; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (0x30 <= argv[2][i] && argv[2][i] <= 0x39) argv[2][i] -= 0x30;
 		else {
 			argv[2][i] &= 0xDF;

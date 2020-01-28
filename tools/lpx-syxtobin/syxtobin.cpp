@@ -61,6 +61,7 @@ void verify_uints(int i, uint a, uint b, const char* error) {
 void convert() {
 	std::vector<byte> expected_types = {UPDATE_INIT};
 
+	byte family = LPX_FAMILY_ID;
 	uint version = 0;
 	uint checksum = 0;
 	uint block = 0;
@@ -74,12 +75,21 @@ void convert() {
 
 		switch (input.data[i++]) {
 			case UPDATE_INIT:
-				verify_byte(i++, LPX_FAMILY_ID, "LPX_FAMILY_ID");
-				verify_byte(i++, product_types, "PRODUCT_TYPES");
+				verify_byte(i, families, "LP_FAMILY_ID");
+				family = input.data[i++];
+
+				verify_byte(i++, *get_products(family), "LP_PRODUCT_ID");
 
 				version = nibbles_to_uint(&i, 6);
 
-				expected_types = {UPDATE_HEADER};
+				if (family == LPX_FAMILY_ID) expected_types = {UPDATE_HEADER};
+				else if (family == LPRGB_FAMILY_ID) {
+					if (!allocate_buffer(&output, BLOCK_SIZE_BYTES, "OUTPUT")) exit(4);
+
+					block = 1;
+					expected_types = {UPDATE_WRITE, UPDATE_FINISH};
+				}
+
 				break;
 
 			case UPDATE_HEADER:
@@ -97,14 +107,20 @@ void convert() {
 
 			case UPDATE_FINISH:
 				block = 0;
-				expected_types = {};
+
+				if (family == LPX_FAMILY_ID) expected_types = {};
+				else if (family == LPRGB_FAMILY_ID)	expected_types = {UPDATE_FOOTER};
 
 			case UPDATE_WRITE:
-				for (int j = 0; j < 256; j++) {
-					int shift = 6 - j % 7;
-					int target = block * 0x20 + j / 8;
+				if (family == LPRGB_FAMILY_ID && block > 0) {
+					if (!reallocate_buffer(&output, BLOCK_SIZE_BYTES, "firmware conversion")) exit(5);
+				}
 
-					if (target >= output.size) {
+				for (int j = 0; j < BLOCK_SIZE_BITS; j++) {
+					int shift = 6 - j % 7;
+					int target = block * BLOCK_SIZE_BYTES + j / 8;
+
+					if (family == LPX_FAMILY_ID && target >= output.size) {
 						expected_types = {UPDATE_FINISH};
 						break;
 					}
@@ -115,12 +131,20 @@ void convert() {
 				}
 
 				block++;
-				i += 0x25;
+				i += BLOCK_SIZE_7BITS;
+				break;
+
+			case UPDATE_FOOTER:
+				i += 1;
+				i += verify_byte_array(i, rgb_firmware_footer, "RGB_FIRMWARE_FOOTER");
+				i += 8;
+
+				expected_types = {};
 				break;
 		}
 
 		verify_byte(i++, SYSEX_END, "SYSEX_END");
 	}
 
-	verify_uints(input.size, checksum, crc32(&output), "CHECKSUM");
+	if (family == LPX_FAMILY_ID) verify_uints(input.size, checksum, crc32(&output), "CHECKSUM");
 }

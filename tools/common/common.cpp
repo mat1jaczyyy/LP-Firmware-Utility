@@ -1,5 +1,17 @@
 #include "common.h"
 
+int ceil_div(int a, int b) {
+ return a / b + (a % b != 0);
+}
+
+const std::vector<byte>* get_products(byte family_id) {
+	if (family_id == LPX_FAMILY_ID) return &products_lpx;
+	if (family_id == LPRGB_FAMILY_ID) return &products_lprgb;
+	
+	fprintf(stderr, "Attempted to get products for invalid family id.\n");
+	exit(5);
+}
+
 bin_t input, output;
 
 char* input_file;
@@ -11,7 +23,17 @@ bool allocate_buffer(bin_t* buffer, int size, const char* error) {
 
 	if (buffer->data == NULL) {
 		fprintf(stderr, "Failed to allocate memory for %s file.\n", error);
+		return false;
+	}
 
+	return true;
+}
+
+bool reallocate_buffer(bin_t* buffer, uint increment, const char* error) {
+	buffer->data = (byte*)realloc(buffer->data, buffer->size += increment);
+
+	if (buffer->data == NULL) {
+		fprintf(stderr, "Failed to reallocate memory for %s.\n", error);
 		return false;
 	}
 
