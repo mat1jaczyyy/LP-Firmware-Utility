@@ -77,14 +77,13 @@ export default {
         if(e.data.length != 17) return;
         
         var msg = e.data.slice(1, e.data.length - 1);
+
+        console.log(msg);
         
         if(msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
           const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
       
           var selectedIndex = lpModels.indexOf(args.selectedLp);
-
-          console.log(versionStr < 171);
-          console.log(versionStr);
 
           if (selectedIndex == 0 && msg[7] === 0x03 && msg[8] === 17 || // LPX Bootloader
               selectedIndex == 1 && msg[7] === 0x13 && msg[8] === 17 || // LPMiniMK3 Bootloader
@@ -122,6 +121,8 @@ export default {
       for (var iI = 0; iI < WebMidi.inputs.length; iI++)
         for (var oI = 0; oI < WebMidi.outputs.length; oI++)
           if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
+            console.log(WebMidi.inputs[iI]);
+            console.log(WebMidi.outputs[oI]);
             MIDItotal++;
             identify(WebMidi.inputs[iI], WebMidi.outputs[oI]);
           }
