@@ -16,7 +16,7 @@
 
 <script>
 import WebMidi from "webmidi"
-import { lpPorts, errorCodes, lpModels, lpOptions } from "./constants"
+import { errorCodes, lpModels, lpOptions } from "./constants"
 import logic from "./logic"
 
 export default {
