@@ -111,6 +111,10 @@ export default {
     }
 
     const scan = () => {
+      MIDIresponded = 0;
+      MIDIfound = 0;
+      MIDItotal = 0;
+
       for (var iI = 0; iI < WebMidi.inputs.length; iI++)
         for (var oI = 0; oI < WebMidi.outputs.length; oI++)
           if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
