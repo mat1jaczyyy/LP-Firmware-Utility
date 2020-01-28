@@ -81,13 +81,9 @@ export default {
   updateDevices: setError => {
     for(var iI = 0; iI < WebMidi.inputs.length; iI++){
       for(var oI = 0; oI < WebMidi.outputs.length; oI++){
-        try {
-          if(WebMidi.inputs[iI].name === WebMidi.outputs[oI].name){
-            WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
-            WebMidi.outputs[oI].sendSysex([], deviceInquiry);
-          }
-        } catch (e){
-          console.log(e)
+        if(WebMidi.inputs[iI].name === WebMidi.outputs[iI].name){
+          WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
+          WebMidi.outputs[oI].sendSysex([], deviceInquiry);
         }
       }
     }
@@ -106,6 +102,7 @@ export default {
     var fw = await patchFirmware(args)
     
     if (fw === null) return;
+    if (outputPort === null) return;
 
     var messages = []
     var currentMessage = []
