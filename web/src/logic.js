@@ -66,7 +66,7 @@ export default {
       const listenerTimer = setTimeout(() => {
         console.log("No response from device")
         input.removeListener("sysex", "all")
-        return;
+        responded();
       }, 1000)
       
       input.addListener("sysex", "all", e => {
@@ -93,12 +93,20 @@ export default {
           }
         }
 
-        if (++MIDIresponded == MIDItotal && MIDIfound == 0) {
-          console.log("no appropriate midi devices found");
-        }
+        responded();
       });
 
       output.sendSysex([], [0x7E, 0x7F, 0x06, 0x01])
+    }
+
+    const responded = () => {
+      if (++MIDIresponded == MIDItotal && MIDIfound == 0) {
+        console.log("no appropriate midi devices found");
+
+        // TODO popup should appear saying no midi devices were found. if user closes popup, cancel flashing operation (by removing connected/disconnected on webmidi)
+
+        
+      }
     }
 
     for (var iI = 0; iI < WebMidi.inputs.length; iI++)
