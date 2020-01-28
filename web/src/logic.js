@@ -35,9 +35,7 @@ const patchFirmware = async(args) => {
   return FS.readFile("firmware/output.syx")
 }
 
-const portsMatch = (input, output)
-            => input.ToUpperCase().Replace("IN", "").Replace("OUT", "") === output.ToUpperCase().Replace("IN", "").Replace("OUT", "");
-
+const portsMatch = (input, output) => input.ToUpperCase().Replace("IN", "").Replace("OUT", "") === output.ToUpperCase().Replace("IN", "").Replace("OUT", "");
 
 const waitForIdentification = (e, setError) => {
   if(e.data.length != 17) return;
