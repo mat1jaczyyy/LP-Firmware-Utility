@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver'
 import axios from "axios";
 
 var outputPort = null
+var outputType = null;
 
 const deviceInquiry = [0x7E, 0x7F, 0x06, 0x01]
 
@@ -46,14 +47,17 @@ const waitForIdentification = (e, setError) => {
       case 0x51:
         if(versionStr === "000") // LP Pro Bootlaoder
           setError(setOutput(e.target.name))
+          outputType = lpModels[3]
         break;
       case 0x03:
         if(msg[8] === 17) // LPX Bootloader
           setError(setOutput(e.target.name))
+          outputType = lpModels[0]
         break;
       case 0x13:
         if(msg[8] === 17) // LP Mini Bootloader
           setError(setOutput(e.target.name))
+          outputType = lpModels[1]
         break;
     }
   }
@@ -91,10 +95,7 @@ export default {
   typeChanged: type => {
     if(!outputPort) return errorCodes.NO_DEVICE;
     
-    const keys = Object.keys(lpPorts);
-		for(var i = 0; i < keys.length; i++)
-	    if(outputPort.name.includes(keys[i]) && lpPorts[keys[i]] === type) 
-	      return
+    if(outputType === type) return;
 		
 		return errorCodes.SELECTION_NOT_FOUND
   },
