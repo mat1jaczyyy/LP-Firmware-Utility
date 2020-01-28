@@ -63,7 +63,15 @@ export default {
     var MIDItotal = 0;
 
     const identify = (input, output) => {
+      const listenerTimer = setTimeout(() => {
+        console.log("No response from device")
+        input.removeListener("sysex", "all")
+        return;
+      }, 1000)
+      
       input.addListener("sysex", "all", e => {
+        clearTimeout(listenerTimer)
+        
         input.removeListener("sysex", "all");
 
         if(e.data.length != 17) return;
