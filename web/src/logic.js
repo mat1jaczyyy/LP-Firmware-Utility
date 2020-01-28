@@ -105,21 +105,25 @@ export default {
 
         // TODO popup should appear saying no midi devices were found. if user closes popup, cancel flashing operation (by removing connected/disconnected on webmidi)
 
-        
+        WebMidi.addListener("connected", scan)
+        WebMidi.addListener("disconnected", scan)
       }
     }
 
-    for (var iI = 0; iI < WebMidi.inputs.length; iI++)
-      for (var oI = 0; oI < WebMidi.outputs.length; oI++)
-        if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
-          MIDItotal++;
-          identify(WebMidi.inputs[iI], WebMidi.outputs[oI]);
-        }
+    const scan = () => {
+      for (var iI = 0; iI < WebMidi.inputs.length; iI++)
+        for (var oI = 0; oI < WebMidi.outputs.length; oI++)
+          if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
+            MIDItotal++;
+            identify(WebMidi.inputs[iI], WebMidi.outputs[oI]);
+          }
+    }
+
+    scan();
   },
   
   downloadFirmware: async args => {
     var fw = await patchFirmware(args)
-    
     if (fw === null) return;
     
     saveAs(new Blob([fw.buffer]), "output.syx");
