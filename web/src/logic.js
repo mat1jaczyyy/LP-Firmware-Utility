@@ -35,6 +35,10 @@ const patchFirmware = async(args) => {
   return FS.readFile("firmware/output.syx")
 }
 
+const portsMatch = (input, output)
+            => input.ToUpperCase().Replace("IN", "").Replace("OUT", "") === output.ToUpperCase().Replace("IN", "").Replace("OUT", "");
+
+
 const waitForIdentification = (e, setError) => {
   if(e.data.length != 17) return;
   
@@ -85,7 +89,7 @@ export default {
   updateDevices: setError => {
     for(var iI = 0; iI < WebMidi.inputs.length; iI++){
       for(var oI = 0; oI < WebMidi.outputs.length; oI++){
-        if(WebMidi.inputs[iI].name === WebMidi.outputs[oI].name){
+        if(portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)){
           WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
           WebMidi.outputs[oI].sendSysex([], deviceInquiry);
         }
