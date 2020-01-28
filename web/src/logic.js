@@ -1,5 +1,5 @@
 import WebMidi from "webmidi"
-import { lpModels, lpPorts, errorCodes } from "./constants"
+import { lpModels, errorCodes } from "./constants"
 import { saveAs } from 'file-saver'
 import axios from "axios";
 
@@ -44,7 +44,7 @@ const waitForIdentification = (e, setError) => {
   
   var msg = e.data.slice(1, e.data.length - 1);
   
-  if(msg[4] == 0x00 && msg[5] == 0x20 && msg[6] == 0x29){
+  if(msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29){
     const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
     
     switch(msg[7]){
