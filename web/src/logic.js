@@ -3,18 +3,13 @@ import { lpModels, errorCodes } from "./constants"
 import { saveAs } from 'file-saver'
 import axios from "axios";
 
-var outputPort = null
-var outputType = null;
-
-const deviceInquiry = [0x7E, 0x7F, 0x06, 0x01]
-
 const downloadCFW = async() => {
   var response = await axios.get("https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx");
 
   return new Uint8Array(atob(response.data.content).split('').map(c => c.charCodeAt(0)));;
 }
 
-var wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
+const wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
 
 const patchFirmware = async(args) => {
   try {
@@ -24,8 +19,6 @@ const patchFirmware = async(args) => {
       lpModels.indexOf(args.selectedLp),
       Object.values(args.options)
     );
-
-    console.log(FS.readFile("firmware/output.syx"))
 
   } catch (e) {
     console.log("Firmware deploy failed with status code " + e.status + " " + e.message)
@@ -37,83 +30,16 @@ const patchFirmware = async(args) => {
 
 const portsMatch = (input, output) => input.toUpperCase().replace("IN", "").replace("OUT", "") === output.toUpperCase().replace("IN", "").replace("OUT", "");
 
-const waitForIdentification = (e, setError) => {
-  if(e.data.length != 17) return;
-  
-  var msg = e.data.slice(1, e.data.length - 1);
-  
-  if(msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29){
-    const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
-    
-    switch(msg[7]){
-      case 0x03:
-        if(msg[8] === 17) // LPX Bootloader
-          setError(setOutput(e.target.name))
-          outputType = lpModels[0]
-        break;
-      case 0x13:
-        if(msg[8] === 17) // LPMiniMK3 Bootloader
-          setError(setOutput(e.target.name))
-          outputType = lpModels[1]
-        break;
-      case 0x23:
-        if(msg[8] === 17) // LPProMK3 Bootloader
-          setError(setOutput(e.target.name))
-          outputType = lpModels[2]
-        break;
-      case 0x51:
-        if(versionStr === "000") // LPPro Bootloader
-          setError(setOutput(e.target.name))
-          outputType = lpModels[3]
-        break;
-    }
-  }
-}
-
-const setOutput = (name) => {
-  if(!outputPort){
-    outputPort = WebMidi.outputs.find((output) => output.name === name)
-    return null
-  }
-  else return errorCodes.MULTIPLE_DEVICES
-}
-
 export default {
-  initializeMidi: callback => {
+  initializeMidi: () => {
     WebMidi.enable(err => {
-      if(err){ 
-        return errorCodes.MIDI_UNSUPPORTED
-      } else {
-        WebMidi.addListener("connected", callback)
-        WebMidi.addListener("disconnected", callback)
-      }
+      if(err) return errorCodes.MIDI_UNSUPPORTED
     }, true)
   },
-  updateDevices: setError => {
-    for(var iI = 0; iI < WebMidi.inputs.length; iI++){
-      for(var oI = 0; oI < WebMidi.outputs.length; oI++){
-        if(portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)){
-          WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
-          WebMidi.outputs[oI].sendSysex([], deviceInquiry);
-        }
-      }
-    }
-  },
-  typeChanged: type => {
-    if(!outputPort) return errorCodes.NO_DEVICE;
-    
-    if(outputType === type) return;
-		
-		return errorCodes.SELECTION_NOT_FOUND
-  },
+
   flashFirmware: async args => {
     var fw = await patchFirmware(args)
-    
     if (fw === null) return;
-	
-	console.log(outputPort);
-	
-    if (outputPort === null) return;
 
     var messages = []
     var currentMessage = []
@@ -125,11 +51,43 @@ export default {
         currentMessage = []
       } else currentMessage.push(byte)
     })
-    
-    messages.forEach(message => {
-      outputPort.sendSysex([], message);
-    })
+
+    const flash = outputPort => {
+      messages.forEach(message => {
+        outputPort.sendSysex([], message);
+      })
+    }
+
+    const identify = (input, output) => {
+      input.addListener("sysex", "all", e => {
+        input.removeListener("sysex", "all");
+
+        if(e.data.length != 17) return;
+        
+        var msg = e.data.slice(1, e.data.length - 1);
+        
+        if(msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
+          const versionStr = msg.slice(msg.length - 3).reduce((prev, current) => ("" + prev) + current)
+      
+          if (msg[7] === 0x03 && msg[8] === 17 || // LPX Bootloader
+              msg[7] === 0x13 && msg[8] === 17 || // LPMiniMK3 Bootloader
+              msg[7] === 0x23 && msg[8] === 17 || // LPProMK3 Bootloader
+              msg[7] === 0x51 && versionStr === "000" // LPPro Bootloader
+          ) {
+            flash(output);
+          }
+        }
+      });
+
+      output.sendSysex([], [0x7E, 0x7F, 0x06, 0x01])
+    }
+
+    for (var iI = 0; iI < WebMidi.inputs.length; iI++)
+      for (var oI = 0; oI < WebMidi.outputs.length; oI++)
+        if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name))
+          identify(WebMidi.inputs[iI], WebMidi.outputs[oI]);
   },
+  
   downloadFirmware: async args => {
     var fw = await patchFirmware(args)
     

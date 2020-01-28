@@ -35,7 +35,7 @@ export default {
     lpOptions[self.selectedLp].forEach(op => {
       self.options[op] = false
     })
-    logic.initializeMidi(() => logic.updateDevices(self.setError));
+    logic.initializeMidi();
   },
   watch: {
     selectedLp(n, o) {
@@ -44,8 +44,6 @@ export default {
       lpOptions[self.selectedLp].forEach(op => {
         self.options[op] = false
       })
-      
-      self.error = logic.typeChanged(self.selectedLp)
     }
   },
   mounted() {
