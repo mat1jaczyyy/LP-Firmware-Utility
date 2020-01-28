@@ -58,6 +58,10 @@ export default {
       })
     }
 
+    var MIDIresponded = 0;
+    var MIDIfound = 0;
+    var MIDItotal = 0;
+
     const identify = (input, output) => {
       input.addListener("sysex", "all", e => {
         input.removeListener("sysex", "all");
@@ -76,8 +80,13 @@ export default {
               selectedIndex == 2 && msg[7] === 0x23 && msg[8] === 17 || // LPProMK3 Bootloader
               selectedIndex == 3 && msg[7] === 0x51 && versionStr === "000" // LPPro Bootloader
           ) {
+            MIDIfound++;
             flash(output);
           }
+        }
+
+        if (++MIDIresponded == MIDItotal && MIDIfound == 0) {
+          console.log("no appropriate midi devices found");
         }
       });
 
@@ -86,8 +95,10 @@ export default {
 
     for (var iI = 0; iI < WebMidi.inputs.length; iI++)
       for (var oI = 0; oI < WebMidi.outputs.length; oI++)
-        if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name))
+        if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
+          MIDItotal++;
           identify(WebMidi.inputs[iI], WebMidi.outputs[oI]);
+        }
   },
   
   downloadFirmware: async args => {
