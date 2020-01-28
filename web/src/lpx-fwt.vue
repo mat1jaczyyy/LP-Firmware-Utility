@@ -15,9 +15,11 @@
     .finish
       button(:disabled="!launchpadConnected" @click="finish('flash')") flash
       button(@click="finish('download')") download
+
   .notice(:class="{ hidden: !displayNotice }")
     span {{ noticeText }}
     i.material-icons.close(@click="displayNotice = false" v-show="noticeDismissable") close
+    progress(v-if="progress")
   .feet
     span &copy; mat & vaaski & more people ok
     a(href="https://github.com/mat1jaczyyy/LPX-FirmwareTool" target="_blank") github
@@ -41,6 +43,7 @@ export default {
     noticeText: "Download Chrome you dumb bitch",
     error: null,
     portIndex: null,
+    progress: false,
   }),
   created() {
     const self = this
