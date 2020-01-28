@@ -81,7 +81,7 @@ export default {
   updateDevices: setError => {
     for(var iI = 0; iI < WebMidi.inputs.length; iI++){
       for(var oI = 0; oI < WebMidi.outputs.length; oI++){
-        if(WebMidi.inputs[iI].name === WebMidi.outputs[iI].name){
+        if(WebMidi.inputs[iI].name === WebMidi.outputs[oI].name){
           WebMidi.inputs[iI].addListener("sysex", "all", (e) => waitForIdentification(e, setError))
           WebMidi.outputs[oI].sendSysex([], deviceInquiry);
         }
