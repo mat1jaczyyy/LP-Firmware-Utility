@@ -126,7 +126,9 @@ export default {
 
     const response = () => {
       if(++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
-        args.showNotice("Please connect a " + args.selectedLp + " in bootloader mode to continue flashing.", true, removeScan)
+        let lp = lpModels.indexOf(args.selectedLp) === lpModels.length - 1? lpModels[lpModels.length - 2] : args.selectedLp;
+
+        args.showNotice("Please connect a " + lp + " in bootloader mode to continue flashing.", true, removeScan)
 
         WebMidi.addListener("connected", scan)
         WebMidi.addListener("disconnected", scan)
