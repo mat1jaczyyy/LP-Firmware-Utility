@@ -75,7 +75,15 @@ export default {
       self.showNotice("Please use a browser with WebAssembly support.", false)
       
     WebMidi.enable(err => {
-      self.midiAvailable = !!!err
+      if (self.midiAvailable = !!!err)
+        for (const i of document.styleSheets)
+          try {
+            for (const j of i.rules)
+              if (j.selectorText === ".tooltip") {
+                i.insertRule(".tooltip { visibility: hidden !important; }")
+                return;
+              }
+          } catch {}
     }, true)
   },
   watch: {
