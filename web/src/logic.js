@@ -72,10 +72,8 @@ export default {
     }
 
     let MIDIresponded = 0
-    let MIDIfound = 0
+    let MIDIfound = []
     let MIDItotal = 0
-    
-    let awaitingFlash = false;
 
     const identify = (input, output) => {
       const listenerTimer = setTimeout(() => {
@@ -88,60 +86,56 @@ export default {
 
         input.removeListener("sysex", "all")
 
-        if (e.data.length != 17) return
-          
-        const msg = e.data.slice(1, e.data.length - 1)
+        if (e.data.length === 17) {
+          const msg = e.data.slice(1, e.data.length - 1)
 
-        if (msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
-          const versionStr = msg
-            .slice(msg.length - 3)
-            .reduce((prev, current) => "" + prev + current)
+          if (msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
+            const versionStr = msg
+              .slice(msg.length - 3)
+              .reduce((prev, current) => "" + prev + current)
 
-          const selectedIndex = lpModels.indexOf(args.selectedLp)
+            const selectedIndex = lpModels.indexOf(args.selectedLp)
 
-          if (
-            (selectedIndex == 0 && msg[7] === 0x03 && msg[8] === 17) || // LPX Bootloader
-            (selectedIndex == 1 && msg[7] === 0x13 && msg[8] === 17) || // LPMiniMK3 Bootloader
-            (selectedIndex == 2 && msg[7] === 0x23 && msg[8] === 17) || // LPProMK3 Bootloader
-            (selectedIndex == 3 && msg[7] === 0x69 && versionStr < 171) || // LPMK2 Bootloader
-            ((selectedIndex == 4 || selectedIndex == 5) &&
-              msg[7] === 0x51 &&
-              versionStr === "000") // LPPro Bootloader
-          ) {
-            MIDIfound++
-            if(awaitingFlash){
-              args.showNotice("Flashing...", null)
-              setTimeout(args.clearNotice, 3000)
+            if (!MIDIfound.includes(output) && (
+              (selectedIndex == 0 && msg[7] === 0x03 && msg[8] === 17) || // LPX Bootloader
+              (selectedIndex == 1 && msg[7] === 0x13 && msg[8] === 17) || // LPMiniMK3 Bootloader
+              (selectedIndex == 2 && msg[7] === 0x23 && msg[8] === 17) || // LPProMK3 Bootloader
+              (selectedIndex == 3 && msg[7] === 0x69 && versionStr < 171) || // LPMK2 Bootloader
+              ((selectedIndex == 4 || selectedIndex == 5) && msg[7] === 0x51 && versionStr === "000") // LPPro Bootloader
+            )) {
+              MIDIfound.push(output)
+
+              if (MIDIfound.length === 1)
+                WebMidi.addListener("disconnected", removeFlashing);
+
+              args.showNotice("Flashing...")
+
+              console.log("flashing");
+              console.log(output);
+
+              flash(output)
             }
-            flash(output)
-          } else {
-            response()
           }
         }
-      })
+
+        response()
+      });
 
       output.sendSysex([], [0x7e, 0x7f, 0x06, 0x01])
     }
 
     const response = () => {
-      if(++MIDIresponded === MIDItotal && MIDIfound === 0){
-        args.showNotice("No Launchpads could be found. Please connect a Launchpad to continue flashing.", removeScan)
+      if(++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
+        args.showNotice("Please connect a " + args.selectedLp + " in bootloader mode to continue flashing.", true, removeScan)
 
         WebMidi.addListener("connected", scan)
         WebMidi.addListener("disconnected", scan)
-        awaitingFlash = true;
-      } else if(MIDIresponded === MIDItotal && MIDIfound !== 0){
-        args.showNotice("Chosen Launchpad model not found. Please connect a Launchpad to continue flashing.", removeScan)
-
-        WebMidi.addListener("connected", scan)
-        WebMidi.addListener("disconnected", scan)
-        awaitingFlash = true;
       }
     }
 
     const scan = () => {
       MIDIresponded = 0
-      MIDIfound = 0
+      MIDIfound = []
       MIDItotal = 0
 
       for (let iI = 0; iI < WebMidi.inputs.length; iI++)
@@ -161,6 +155,17 @@ export default {
     const removeScan = () => {
       WebMidi.removeListener("connected", scan);
       WebMidi.removeListener("disconnected", scan);
+    }
+
+    const removeFlashing = e => {
+      for (let i = 0; i < MIDIfound.length; i++)
+        if (MIDIfound[i].id === e.port.id) {
+          MIDIfound.splice(i, 1);
+          
+          if (MIDIfound.length === 0) args.clearNotice();
+
+          return;
+        }
     }
 
     scan()

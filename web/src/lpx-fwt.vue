@@ -19,11 +19,11 @@
   .notice(:class="{ hidden: !displayNotice }")
     div
       span {{ noticeText }}
-      i.material-icons.close(@click="displayNotice = false; noticeClosed()" v-show="noticeDismissable") close
+      i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable") close
     .progressDiv
       progress
   .feet
-    span &copy; mat & vaaski & brendonovich
+    span built by Brendonovich, mat1jaczyyy, vaaski &copy;
     a(href="https://github.com/mat1jaczyyy/LPX-FirmwareTool" target="_blank") github
 </template>
 
@@ -108,18 +108,19 @@ export default {
           options,
         })
     },
-    showNotice(notice, callback) {
-      this.noticeText = notice
-      this.displayNotice = true;
-      this.noticeCallback = callback;
-    },
     clearNotice(){
       this.displayNotice = false;
       this.noticeText = null;
-    },
-    noticeClosed() {
-      this.noticeCallback !== null && this.noticeCallback()
+      
+      if (this.noticeCallback !== null) this.noticeCallback()
       this.noticeCallback = null;
+    },
+    showNotice(notice, dismissable = false, callback = null) {
+      if (this.displayNotice) this.clearNotice();
+      this.noticeText = notice;
+      this.noticeDismissable = dismissable;
+      this.displayNotice = true;
+      this.noticeCallback = callback;
     }
   },
 }
