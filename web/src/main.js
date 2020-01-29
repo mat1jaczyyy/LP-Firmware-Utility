@@ -1,4 +1,8 @@
 import Vue from "vue"
+import VTooltip from 'v-tooltip'
+
+Vue.use(VTooltip);
+
 import App from "./lpx-fwt.vue"
 // import "./registerServiceWorker"'
 

@@ -13,7 +13,7 @@
         span {{ option }}
 
     .finish
-      button(:disabled="!midiAvaliable" @click="finish('flash')") flash
+      button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
       button(@click="finish('download')") download
 
   .notice(:class="{ hidden: !displayNotice }")
@@ -39,10 +39,10 @@ export default {
     lpOptions,
     selectedLp: lpModels[0],
     options: {},
-    midiAvaliable: false,
+    midiAvailable: false,
     displayNotice: false,
     noticeDismissable: true,
-    noticeText: "Download Chrome you dumb bitch",
+    noticeText: "",
     noticeCallback: null
   }),
   created() {
@@ -72,9 +72,11 @@ export default {
       return false
     })()
     if (!webAss)
-      self.notice("Please use a browser with WebAssembly support.", false)
+      self.showNotice("Please use a browser with WebAssembly support.", false)
       
-    WebMidi.enable(err => !!err ? self.midiAvaliable = false : self.midiAvaliable = true, true)
+    WebMidi.enable(err => {
+      self.midiAvailable = !!!err
+    }, true)
   },
   watch: {
     selectedLp(n, o) {
@@ -217,7 +219,6 @@ body, html
       
   .progressDiv
     margin-top: 10px    
-      
 
   .feet
     position: absolute
@@ -230,4 +231,46 @@ body, html
       margin-left: 8px
       color: #FFF
       opacity: 0.4865126587
+  
+.tooltip
+  display: block !important;
+  z-index: 10000;
+
+  .tooltip-inner
+    background: #0E0E0E;
+    color: white;
+    border-radius: 16px;
+    padding: 5px 10px 4px;
+
+  .tooltip-arrow
+    width: 0;
+    height: 0;
+    border-style: solid;
+    position: absolute;
+    margin: 5px;
+    border-color: #0E0E0E;
+    z-index: 1;
+
+.tooltip[x-placement^="bottom"]
+  margin-top: 5px;
+
+  .tooltip-arrow
+    border-width: 0 5px 5px 5px;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+    border-top-color: transparent !important;
+    top: -5px;
+    left: calc(50% - 5px);
+    margin-top: 0;
+    margin-bottom: 0;
+
+.tooltip[aria-hidden='true']
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .15s, visibility .15s;
+
+.tooltip[aria-hidden='false']
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .15s;
 </style>
