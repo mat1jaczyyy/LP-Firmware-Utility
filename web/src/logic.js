@@ -74,12 +74,13 @@ export default {
     let MIDIresponded = 0
     let MIDIfound = 0
     let MIDItotal = 0
+    
+    let awaitingFlash = false;
 
     const identify = (input, output) => {
       const listenerTimer = setTimeout(() => {
-        console.log("No response from device")
         input.removeListener("sysex", "all")
-        responded()
+        response()
       }, 1000)
 
       input.addListener("sysex", "all", e => {
@@ -88,10 +89,8 @@ export default {
         input.removeListener("sysex", "all")
 
         if (e.data.length != 17) return
-
+          
         const msg = e.data.slice(1, e.data.length - 1)
-
-        console.log(msg)
 
         if (msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
           const versionStr = msg
@@ -110,29 +109,35 @@ export default {
               versionStr === "000") // LPPro Bootloader
           ) {
             MIDIfound++
+            if(awaitingFlash){
+              args.showNotice("Flashing...", null)
+              setTimeout(args.clearNotice, 3000)
+            }
             flash(output)
+          } else {
+            response()
           }
         }
-
-        responded()
       })
 
       output.sendSysex([], [0x7e, 0x7f, 0x06, 0x01])
     }
 
-    const responded = () => {
-      if (++MIDIresponded == MIDItotal && MIDIfound == 0) {
-        console.log("no appropriate midi devices found")
-
-        // TODO popup should appear saying no midi devices were found. if user closes popup, cancel flashing operation (by removing connected/disconnected on webmidi)
+    const response = () => {
+      if(++MIDIresponded === MIDItotal && MIDIfound === 0){
+        args.showNotice("No Launchpads could be found. Please connect a Launchpad to continue flashing.", removeScan)
 
         WebMidi.addListener("connected", scan)
         WebMidi.addListener("disconnected", scan)
+        awaitingFlash = true;
+      } else if(MIDIresponded === MIDItotal && MIDIfound !== 0){
+        args.showNotice("Chosen Launchpad model not found. Please connect a Launchpad to continue flashing.", removeScan)
+
+        WebMidi.addListener("connected", scan)
+        WebMidi.addListener("disconnected", scan)
+        awaitingFlash = true;
       }
     }
-
-    console.log(WebMidi.inputs)
-    console.log(WebMidi.outputs)
 
     const scan = () => {
       MIDIresponded = 0
@@ -142,11 +147,20 @@ export default {
       for (let iI = 0; iI < WebMidi.inputs.length; iI++)
         for (let oI = 0; oI < WebMidi.outputs.length; oI++)
           if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
-            console.log(WebMidi.inputs[iI])
-            console.log(WebMidi.outputs[oI])
             MIDItotal++
+            console.log(WebMidi.inputs[iI].name)
             identify(WebMidi.inputs[iI], WebMidi.outputs[oI])
           }
+          
+      if (MIDItotal === 0) {
+        MIDIresponded = -1;
+        response();
+      }
+    }
+    
+    const removeScan = () => {
+      WebMidi.removeListener("connected", scan);
+      WebMidi.removeListener("disconnected", scan);
     }
 
     scan()

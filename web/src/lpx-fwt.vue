@@ -13,15 +13,17 @@
         span {{ option }}
 
     .finish
-      button(:disabled="!launchpadConnected" @click="finish('flash')") flash
+      button(:disabled="!midiAvaliable" @click="finish('flash')") flash
       button(@click="finish('download')") download
 
   .notice(:class="{ hidden: !displayNotice }")
-    span {{ noticeText }}
-    i.material-icons.close(@click="displayNotice = false" v-show="noticeDismissable") close
-    progress
+    div
+      span {{ noticeText }}
+      i.material-icons.close(@click="displayNotice = false; noticeClosed()" v-show="noticeDismissable") close
+    .progressDiv
+      progress
   .feet
-    span &copy; mat & vaaski & more people ok
+    span &copy; mat & vaaski & brendonovich
     a(href="https://github.com/mat1jaczyyy/LPX-FirmwareTool" target="_blank") github
 </template>
 
@@ -37,12 +39,11 @@ export default {
     lpOptions,
     selectedLp: lpModels[0],
     options: {},
-    launchpadConnected: false,
+    midiAvaliable: false,
     displayNotice: false,
     noticeDismissable: true,
     noticeText: "Download Chrome you dumb bitch",
-    error: null,
-    portIndex: null,
+    noticeCallback: null
   }),
   created() {
     const self = this
@@ -72,6 +73,8 @@ export default {
     })()
     if (!webAss)
       self.notice("Please use a browser with WebAssembly support.", false)
+      
+    WebMidi.enable(err => !!err ? self.midiAvaliable = false : self.midiAvaliable = true, true)
   },
   watch: {
     selectedLp(n, o) {
@@ -87,14 +90,7 @@ export default {
     window.vue = this
   },
   methods: {
-    notice(t = "mat stinky", dismissable = true) {
-      this.noticeText = t
-      this.displayNotice = true
-      this.noticeDismissable = dismissable
-      return b => (this.displayNotice = b)
-    },
     finish(type) {
-      console.log("stinky")
       const { options, selectedLp } = this
 
       if (type === "flash")
@@ -102,6 +98,8 @@ export default {
           type,
           selectedLp,
           options,
+          showNotice: this.showNotice,
+          clearNotice: this.clearNotice
         })
       else if (type === "download")
         logic.downloadFirmware({
@@ -110,9 +108,19 @@ export default {
           options,
         })
     },
-    setError(val) {
-      this.error = val
+    showNotice(notice, callback) {
+      this.noticeText = notice
+      this.displayNotice = true;
+      this.noticeCallback = callback;
     },
+    clearNotice(){
+      this.displayNotice = false;
+      this.noticeText = null;
+    },
+    noticeClosed() {
+      this.noticeCallback !== null && this.noticeCallback()
+      this.noticeCallback = null;
+    }
   },
 }
 </script>
@@ -144,7 +152,7 @@ body, html
     align-items: center
     height: 200px
     opacity: 1
-    transition: 1s cubic-bezier(0.77, 0, 0.175, 1)
+    transition: 0.8s cubic-bezier(0.77, 0, 0.175, 1)
     overflow: hidden
 
     &.hidden
@@ -183,9 +191,10 @@ body, html
       opacity: 0.5
 
   .notice
-    margin: 16px 0
+    padding: 16px 0
     height: 32px
     display: flex
+    flex-direction: column
     justify-content: center
     align-items: center
     transition: 1s cubic-bezier(0.77, 0, 0.175, 1)
@@ -204,6 +213,10 @@ body, html
       height: 0
       margin: 0
       opacity: 0
+      
+  .progressDiv
+    margin-top: 10px    
+      
 
   .feet
     position: absolute
