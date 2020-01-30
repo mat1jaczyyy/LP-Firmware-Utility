@@ -52,7 +52,7 @@ export default {
     noticeText: "",
     noticeCallback: null,
     isWindows: false,
-    konamiInputs: [],
+    konamiCounter: 0,
     konamiSuccess: false
   }),
   created() {
@@ -65,23 +65,13 @@ export default {
     window.notice = this.notice
     
     const konamiHandler = e => {
-      
       if(self.konamiSuccess) return;
-      if(e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40){
-        self.konamiInputs.push(e.keyCode);
-        
-        let isKonami = true;
-        for(var i = 0; i < 8; i++){          
-          if(self.konamiInputs[i] !== konamiSequence[i]){
-            isKonami = false;
-            break;
-          }
-        }
-        
-        self.konamiSuccess = isKonami;
-      } else {
-        self.konamiInputs = []
+      
+      if(e.keyCode === konamiSequence[self.konamiCounter]){
+        self.konamiCounter++
+        if(self.konamiCounter === konamiSequence.length) self.konamiSuccess = true;
       }
+      else self.konamiCounter = 0
     }
     
     window.addEventListener("keydown", konamiHandler);
