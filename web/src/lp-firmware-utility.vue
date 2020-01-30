@@ -1,7 +1,7 @@
 <template lang="pug">
-.lpxfwt
+.lp-firmware-utility
   .header
-    h1 LPX FWT
+    h1 Launchpad Firmware Utility
   .inner(:class="{ hidden: displayNotice }")
     .launchpads
       select(v-model="selectedLp")
@@ -30,7 +30,7 @@
 
   .feet
     span built by Brendonovich, mat1jaczyyy, vaaski &copy;
-    a(href="https://github.com/mat1jaczyyy/LPX-FirmwareTool" target="_blank") github
+    a(href="https://github.com/mat1jaczyyy/LP-Firmware-Utility" target="_blank") github
 </template>
 
 <script>
@@ -39,7 +39,7 @@ import { errorCodes, lpModels, lpOptions } from "./constants"
 import logic from "./logic"
 
 export default {
-  name: "lpx-fwt",
+  name: "lp-firmware-utility",
   data: () => ({
     lpModels,
     lpOptions,
@@ -157,7 +157,7 @@ body, html
   font-family: "Roboto Mono"
   src: url("./assets/RobotoMono-Regular.ttf")
 
-.lpxfwt
+.lp-firmware-utility
   height: 100vh
   width: 100vw
   display: flex

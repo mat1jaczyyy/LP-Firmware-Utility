@@ -3,7 +3,7 @@ import VTooltip from 'v-tooltip'
 
 Vue.use(VTooltip);
 
-import App from "./lpx-fwt.vue"
+import App from "./lp-firmware-utility.vue"
 // import "./registerServiceWorker"'
 
 Vue.config.productionTip = false
