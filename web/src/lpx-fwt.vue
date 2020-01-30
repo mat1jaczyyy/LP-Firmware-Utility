@@ -24,9 +24,9 @@
   .notice(:class="{ hidden: !displayNotice }")
     div
       span {{ noticeText }}
-      i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable") close
+      i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable" :style="{ visibility: (displayNotice? 'visible' : 'hidden') }") close
     .progressDiv
-      progress
+      progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
 
   .feet
     span built by Brendonovich, mat1jaczyyy, vaaski &copy;
