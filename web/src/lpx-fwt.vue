@@ -93,7 +93,7 @@ export default {
           } catch {}
     }, true)
 
-    self.isWindows = window.navigator.appVersion.indexOf('Win') !== -1;
+    self.isWindows = window.navigator.platform.indexOf('Win') !== -1;
   },
   watch: {
     selectedLp(n, o) {
