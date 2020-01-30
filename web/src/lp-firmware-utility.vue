@@ -1,8 +1,9 @@
 <template lang="pug">
 .lp-firmware-utility
-  .header
-    h1 Launchpad Firmware Utility
   .inner(:class="{ hidden: displayNotice }")
+    .header
+      p Launchpad Firmware Utility
+
     .launchpads
       select(v-model="selectedLp")
         option(v-for="lp in lpModels" :value="lp") {{ lp }}
@@ -165,12 +166,15 @@ body, html
   align-items: center
   flex-direction: column
 
+  .header
+    font-weight: bold;
+    font-size: 1.4em;
+
   .inner
     flex-direction: column
     display: flex
     justify-content: center
     align-items: center
-    height: 220px
     opacity: 1
     transition: 0.8s cubic-bezier(0.77, 0, 0.175, 1)
     overflow: hidden
