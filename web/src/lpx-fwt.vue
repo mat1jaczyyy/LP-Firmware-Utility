@@ -16,12 +16,18 @@
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
       button(@click="finish('download')") download
 
+    .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden') }")
+      span Don't forget to install
+      a(href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/nvnusbaudio-2.15.5.exe" target="_blank") Novation's USB driver
+      span !
+
   .notice(:class="{ hidden: !displayNotice }")
     div
       span {{ noticeText }}
       i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable") close
     .progressDiv
       progress
+
   .feet
     span built by Brendonovich, mat1jaczyyy, vaaski &copy;
     a(href="https://github.com/mat1jaczyyy/LPX-FirmwareTool" target="_blank") github
@@ -43,7 +49,8 @@ export default {
     displayNotice: false,
     noticeDismissable: true,
     noticeText: "",
-    noticeCallback: null
+    noticeCallback: null,
+    isWindows: false
   }),
   created() {
     const self = this
@@ -85,6 +92,8 @@ export default {
               }
           } catch {}
     }, true)
+
+    self.isWindows = window.navigator.appVersion.indexOf('Win') !== -1;
   },
   watch: {
     selectedLp(n, o) {
@@ -161,7 +170,7 @@ body, html
     display: flex
     justify-content: center
     align-items: center
-    height: 200px
+    height: 220px
     opacity: 1
     transition: 0.8s cubic-bezier(0.77, 0, 0.175, 1)
     overflow: hidden
@@ -176,7 +185,7 @@ body, html
       color: #FFF
       padding: 8px
       border: none
-      font-size: 1.2em
+      font-size: 1.3em
 
   .options
     width: 100%
@@ -194,7 +203,7 @@ body, html
     color: #FFF
     padding: 8px 16px
     cursor: pointer
-    font-size: 1.2em
+    font-size: 1.3em
     text-transform: uppercase
     font-weight: bold
 
@@ -213,7 +222,7 @@ body, html
     overflow: hidden
 
     span
-      font-size: 1.5em
+      font-size: 1.6em
 
     i.close
       margin-left: 0.5em
@@ -227,6 +236,18 @@ body, html
       
   .progressDiv
     margin-top: 10px    
+
+  .smol
+    margin-top: 15px
+    font-size: 0.6em
+
+    span
+      opacity: 0.25
+
+    a
+      margin-left: 8px
+      color: #FFF
+      opacity: 0.4865126587
 
   .feet
     position: absolute
