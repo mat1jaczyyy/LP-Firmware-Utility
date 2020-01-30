@@ -9,7 +9,7 @@
         option(v-for="lp in lpModels" :value="lp") {{ lp }}
 
     .options
-      .option(v-for="option in lpOptions[selectedLp]")
+      .option(v-for="option in (selectedLp === 'Launchpad X' && konamiSuccess === false) ? lpOptions[selectedLp].slice(0, lpOptions[selectedLp].length - 1) : lpOptions[selectedLp]")
         input(type="checkbox" v-model="options[option]")
         span {{ option }}
 
@@ -36,7 +36,7 @@
 
 <script>
 import WebMidi from "webmidi"
-import { errorCodes, lpModels, lpOptions } from "./constants"
+import { errorCodes, lpModels, lpOptions, konamiSequence } from "./constants"
 import logic from "./logic"
 
 export default {
@@ -51,7 +51,9 @@ export default {
     noticeDismissable: true,
     noticeText: "",
     noticeCallback: null,
-    isWindows: false
+    isWindows: false,
+    konamiInputs: [],
+    konamiSuccess: false
   }),
   created() {
     const self = this
@@ -61,6 +63,28 @@ export default {
     })
     logic.initializeMidi()
     window.notice = this.notice
+    
+    const konamiHandler = e => {
+      
+      if(self.konamiSuccess) return;
+      if(e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40){
+        self.konamiInputs.push(e.keyCode);
+        
+        let isKonami = true;
+        for(var i = 0; i < 8; i++){          
+          if(self.konamiInputs[i] !== konamiSequence[i]){
+            isKonami = false;
+            break;
+          }
+        }
+        
+        self.konamiSuccess = isKonami;
+      } else {
+        self.konamiInputs = []
+      }
+    }
+    
+    window.addEventListener("keydown", konamiHandler);
 
     const webAss = (() => {
       try {
@@ -192,7 +216,7 @@ body, html
       font-size: 1.3em
 
   .options
-    width: 100%
+    width: auto
     margin: 16px 0
 
     .option

@@ -23,4 +23,6 @@ export const errorCodes = {
   SELECTION_NOT_FOUND: 3,
 }
 
+export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39]
+
 export default { lpOptions, errorCodes, lpModels }
