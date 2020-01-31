@@ -5,30 +5,56 @@ BINTOSYX = bintosyx
 SYXTOBIN = syxtobin
 FWGEN = fwgen
 
+ifeq ($(OS),Windows_NT)
+
+EMSDK_ENV = %USERPROFILE%/emsdk/emsdk_env.bat
+	
+define rmdir
+	if exist "$(1)" rd /s /q "$(1)"
+endef
+
+MKDIR = md
+
+define tools
+	echo Building CLI tools via make is not supported on Windows. Use Visual Studio.
+endef
+
+else
+
+EMSDK_ENV = . ~/emsdk/emsdk_env.sh
+
+define rmdir
+	rm -rf "$(1)"
+endef
+	
+MKDIR = mkdir -p
+
 define tools
 	cd tools && g++ -std=c++11 -O2 -I common -o ../$(TOOLS_OUT)/$(1) common/common.cpp common/cli.cpp $(1)/parse.cpp $(1)/$(1).cpp
 endef
 
+endif
+
 define wasm
-	mkdir -p $(WASM_OUT)
-	cd tools && . ~/emsdk/emsdk_env.sh --build=Release && emcc -std=c++11 -O2 $(1) -I common \
+	$(MKDIR) "$(WASM_OUT)"
+	cd tools && "$(EMSDK_ENV)" --build=Release && emcc -std=c++11 -O2 $(1) -I common \
 		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp $(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/main.cpp \
-		-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' \
+		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 		--embed-file ../firmware/stock@firmware
 endef
 
 all: clean tools wasm web
 
 clean_tools:
-	rm -rf $(TOOLS_OUT)/*
+	$(call rmdir,$(TOOLS_OUT))
 
 clean_wasm:
-	rm -rf $(WASM_OUT)/*
+	$(call rmdir,$(WASM_OUT))
 
 clean: clean_tools clean_wasm
 
 tools: clean_tools
-	mkdir -p $(TOOLS_OUT)
+	$(MKDIR) "$(TOOLS_OUT)"
 	$(call tools,$(BINTOSYX))
 	$(call tools,$(SYXTOBIN))
 
