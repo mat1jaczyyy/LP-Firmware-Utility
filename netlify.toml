@@ -2,3 +2,9 @@
   base = "web/"
   publish = "dist/"
   command = "yarn build"
+
+[[redirects]]
+  from = "http://*"
+  to = "https://lp-firmware-utility.mat1jaczyyy.com"
+  status = 301
+  force = true
