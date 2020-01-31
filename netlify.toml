@@ -4,19 +4,7 @@
   command = "yarn build"
 
 [[redirects]]
-  from = "https://lp-firmware-utility.netlify.com/*"
-  to = "https://lp-firmware-utility-staging.mat1jaczyyy.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://lp-firmware-utility.netlify.com/*"
-  to = "http://lp-firmware-utility-staging.mat1jaczyyy.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://lp-firmware-utility-staging.mat1jaczyyy.com/*"
-  to = "https://lp-firmware-utility-staging.mat1jaczyyy.com/:splat"
+  from = "http://*"
+  to = "https://lp-firmware-utility.mat1jaczyyy.com"
   status = 301
   force = true
