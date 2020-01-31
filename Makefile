@@ -5,6 +5,8 @@ BINTOSYX = bintosyx
 SYXTOBIN = syxtobin
 FWGEN = fwgen
 
+GPP_FLAGS = -std=c++11 -O2 -I common
+
 ifeq ($(OS),Windows_NT)
 
 EMSDK_ENV = %USERPROFILE%/emsdk/emsdk_env.bat
@@ -30,14 +32,14 @@ endef
 MKDIR = mkdir -p
 
 define tools
-	cd tools && g++ -std=c++11 -O2 -I common -o ../$(TOOLS_OUT)/$(1) common/common.cpp common/cli.cpp $(1)/parse.cpp $(1)/$(1).cpp
+	cd tools && g++ $(GPP_FLAGS) -o ../$(TOOLS_OUT)/$(1) common/common.cpp common/cli.cpp $(1)/parse.cpp $(1)/$(1).cpp
 endef
 
 endif
 
 define wasm
 	$(MKDIR) "$(WASM_OUT)"
-	cd tools && "$(EMSDK_ENV)" --build=Release && emcc -std=c++11 -O2 $(1) -I common \
+	cd tools && "$(EMSDK_ENV)" --build=Release && emcc $(GPP_FLAGS) $(1) \
 		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp $(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/main.cpp \
 		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 		--embed-file ../firmware/stock@firmware
