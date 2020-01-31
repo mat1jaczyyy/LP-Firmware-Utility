@@ -37,6 +37,8 @@ void lpx_patch(bool* args) {
         memcpy(&input.data[0x7698], "Cover\0mat1", 11);
         *(uint*)&input.data[0xD10E] = 0xBC98F003;
         memcpy(&input.data[input.size - LPX_PROGRAMMER_PATCH_SIZE], lpx_programmer_patch, LPX_PROGRAMMER_PATCH_SIZE);
+        input.data[0x749B] = 0x69;
+        *(ushort*)&input.data[0x1045C] = 0x0507;
     }
 
     if (args[1]) memcpy(&input.data[0x7690], "Gay", 4);

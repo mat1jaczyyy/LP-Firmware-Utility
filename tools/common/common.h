@@ -9,6 +9,7 @@
 #include <vector>
 
 typedef unsigned char byte;
+typedef unsigned short ushort;
 typedef unsigned int uint;
 
 int ceil_div(int a, int b);
