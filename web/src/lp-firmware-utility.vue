@@ -97,7 +97,6 @@ export default {
       self.showNotice("Please use a browser with WebAssembly support.", false)
       
     WebMidi.enable(err => {
-      console.log(err)
       if (self.midiAvailable = !!!err)
         for (const i of document.styleSheets)
           try {
