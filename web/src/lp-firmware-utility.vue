@@ -128,8 +128,8 @@ export default {
     finish(type) {
       const { options, selectedLp } = this
 
-      if (type === "flash")
-        if(!logic.flashFirmware({
+      if (type === "flash") {
+        if (!logic.flashFirmware({
           type,
           selectedLp,
           options,
@@ -137,15 +137,16 @@ export default {
           clearNotice: this.clearNotice
         }))
           this.showNotice("Firmware flashing failed. Please try again.", true, false)
-      else if (type === "download")
+      } else if (type === "download") {
         if(!logic.downloadFirmware({
           type,
           selectedLp,
-          options,
+          options
         }))
           this.showNotice("Firmware download failed. Please try again.", true, false)
+      }
     },
-    clearNotice(){
+    clearNotice() {
       this.displayNotice = false;
       this.noticeText = null;
       

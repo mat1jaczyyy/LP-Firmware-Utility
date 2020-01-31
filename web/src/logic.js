@@ -167,6 +167,8 @@ export default {
     }
 
     scan()
+
+    return true;
   },
 
   downloadFirmware: async args => {
@@ -174,5 +176,7 @@ export default {
     if (fw === null) return false
 
     saveAs(new Blob([fw.buffer]), "output.syx")
+
+    return true;
   },
 }
