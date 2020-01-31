@@ -25,7 +25,7 @@ const patchFirmware = async args => {
     wasmPatch(lpModels.indexOf(args.selectedLp), Object.values(args.options))
   } catch (e) {
     console.log(
-      "Firmware deploy failed with status code " + e.status + " " + e.message
+      "Firmware patching failed with status code " + e.status + " " + e.message
     )
     return null
   }
@@ -52,7 +52,7 @@ export default {
 
   flashFirmware: async args => {
     const fw = await patchFirmware(args)
-    if (fw === null) return
+    if (fw === null) return false;
 
     const messages = []
     let currentMessage = []
@@ -110,9 +110,6 @@ export default {
 
               args.showNotice("Flashing...")
 
-              console.log("flashing");
-              console.log(output);
-
               flash(output)
             }
           }
@@ -144,7 +141,6 @@ export default {
         for (let oI = 0; oI < WebMidi.outputs.length; oI++)
           if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
             MIDItotal++
-            console.log(WebMidi.inputs[iI].name)
             identify(WebMidi.inputs[iI], WebMidi.outputs[oI])
           }
           
@@ -175,7 +171,7 @@ export default {
 
   downloadFirmware: async args => {
     const fw = await patchFirmware(args)
-    if (fw === null) return
+    if (fw === null) return false
 
     saveAs(new Blob([fw.buffer]), "output.syx")
   },

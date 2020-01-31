@@ -26,7 +26,7 @@
     div
       span {{ noticeText }}
       i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable" :style="{ visibility: (displayNotice? 'visible' : 'hidden') }") close
-    .progressDiv
+    .progressDiv(:style="{visibility: (showNoticeProgress? 'visible' : 'hidden')}")
       progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
 
   .feet
@@ -51,6 +51,7 @@ export default {
     noticeDismissable: true,
     noticeText: "",
     noticeCallback: null,
+    showNoticeProgress: true,
     isWindows: false,
     konamiCounter: 0,
     konamiSuccess: false
@@ -128,19 +129,21 @@ export default {
       const { options, selectedLp } = this
 
       if (type === "flash")
-        logic.flashFirmware({
+        if(!logic.flashFirmware({
           type,
           selectedLp,
           options,
           showNotice: this.showNotice,
           clearNotice: this.clearNotice
-        })
+        }))
+          this.showNotice("Firmware flashing failed. Please try again.", true, false)
       else if (type === "download")
-        logic.downloadFirmware({
+        if(!logic.downloadFirmware({
           type,
           selectedLp,
           options,
-        })
+        }))
+          this.showNotice("Firmware download failed. Please try again.", true, false)
     },
     clearNotice(){
       this.displayNotice = false;
@@ -149,12 +152,13 @@ export default {
       if (this.noticeCallback !== null) this.noticeCallback()
       this.noticeCallback = null;
     },
-    showNotice(notice, dismissable = false, callback = null) {
+    showNotice(notice, dismissable = false, callback = null, showProgress = true) {
       if (this.displayNotice) this.clearNotice();
       this.noticeText = notice;
       this.noticeDismissable = dismissable;
       this.displayNotice = true;
       this.noticeCallback = callback;
+      this.showNoticeProgress = showProgress;
     }
   },
 }
