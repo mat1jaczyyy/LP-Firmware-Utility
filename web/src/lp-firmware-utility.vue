@@ -30,7 +30,7 @@
       progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
 
   .feet
-    span built by Brendonovich, mat1jaczyyy & vaaski &copy;
+    span built by Brendonovich, mat1jaczyyy, vaaski &copy;
     a(href="https://github.com/mat1jaczyyy/LP-Firmware-Utility" target="_blank") github
 </template>
 
