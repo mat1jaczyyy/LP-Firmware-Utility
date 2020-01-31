@@ -1,11 +1,20 @@
 #include "common.h"
 
 void write_buffer(bin_t* buffer, const uint start, const byte* data, const uint size) {
+    if (start + size > buffer->size) {
+		fprintf(stderr, "Attempted to write to unallocated memory.\n");
+		exit(7);
+    }
+
     memcpy(&buffer->data[start], data, size);
 }
 
-void write_buffer(bin_t* buffer, const byte* data, const uint size) {
-    write_buffer(buffer, buffer->size - size, data, size);
+void append_buffer(bin_t* buffer, const byte* data, const uint size) {
+    uint start = buffer->size;
+
+    if (!reallocate_buffer(&input, size, "firmware patches")) exit(7);
+
+    write_buffer(buffer, start, data, size);
 }
 
 #define LPX_PROGRAMMER_PATCH_SIZE 0x142
@@ -34,13 +43,12 @@ const byte lpx_programmer_patch[LPX_PROGRAMMER_PATCH_SIZE] = {
 };
 
 void lpx_patch(bool* args) {
-    if (args[0]) { // Patch Programmer mode
-        if (!reallocate_buffer(&input, LPX_PROGRAMMER_PATCH_SIZE, "firmware patches")) exit(7);
-        
-        // Write LPX_PROGRAMMER_PATCH (custom code)
-        write_buffer(&input, lpx_programmer_patch, LPX_PROGRAMMER_PATCH_SIZE);
+    // Patch Programmer mode
+    if (args[0]) {
+        // Append LPX_PROGRAMMER_PATCH (custom code)
+        append_buffer(&input, lpx_programmer_patch, LPX_PROGRAMMER_PATCH_SIZE);
 
-        // Branch to LPX_PROGRAMMER_PATCH
+        // Branches to LPX_PROGRAMMER_PATCH
         *(uint*)&input.data[0x64C6] = 0xBA76F00A;
         *(uint*)&input.data[0x6506] = 0xBAEAF00A;
         *(uint*)&input.data[0xD10E] = 0xBC98F003;
@@ -51,9 +59,19 @@ void lpx_patch(bool* args) {
 
         // Setup text
         write_buffer(&input, 0x7698, (byte*)"Cover\0mat1", 11);
+
+        // Use Pro-like top row mapping
+        if (args[1])
+            // Patch DR and XY tables from LPX_PROGRAMMER_PATCH
+            for (int i = 0; i < 9; i++) {
+                input.data[0x109DF + i] = (i != 8)? 0x1C + i : 0x1B;
+                input.data[0x10A79 + i] = (i != 0)? 0x5B + i : 0x63;
+                input.data[0x10ACA + i] = 0x00;
+            }
     }
 
-    if (args[1]) // Setup rename Live mode to Gay mode
+    // Setup rename Live mode to Gay mode
+    if (args[2])
         memcpy(&input.data[0x7690], "Gay", 4);
 }
 
