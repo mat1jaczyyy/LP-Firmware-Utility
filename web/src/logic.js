@@ -89,8 +89,6 @@ export default {
 
             const selectedIndex = lpModels.indexOf(args.selectedLp)
 
-            console.log(selectedIndex, msg[7], msg[8])
-
             if (!MIDIfound.includes(output) && (
               (selectedIndex === 0 && msg[7] === 0x03 && msg[8] === 17) || // LPX Bootloader
               (selectedIndex === 1 && msg[7] === 0x13 && msg[8] === 17) || // LPMiniMK3 Bootloader
