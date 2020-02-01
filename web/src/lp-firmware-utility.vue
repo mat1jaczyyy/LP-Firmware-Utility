@@ -27,7 +27,7 @@
       span {{ noticeText }}
       i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable" :style="{ visibility: (displayNotice? 'visible' : 'hidden') }") close
 
-    img(:src="noticeSvg" :style="{margin: '10px 0', visibility: (noticeSvg !== null? 'visible' : 'hidden')}")
+    img(:src="noticeSvg" :style="{margin: (noticeSvg !== null? '50px 0' : '0'), visibility: (noticeSvg !== null? 'visible' : 'hidden')}")
     
     span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL1 }}
     span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL2 }}
