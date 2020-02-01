@@ -16,6 +16,9 @@
     .finish
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
       button(@click="finish('download')") download
+    input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")    
+    button(:style="{ visibility: (konamiSuccess? 'visible' : 'hidden') }" @click="$refs.file.click()") upload
+    
 
     .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden') }")
       span Don't forget to install
@@ -181,6 +184,11 @@ export default {
       this.noticeDismissable = dismissable;
       this.displayNotice = true;
       this.noticeCallback = callback;
+    },
+    uploadFirmware(file) {
+      file.arrayBuffer().then(ret => {
+        logic.flashRaw(new Uint8Array(ret))
+      }).catch(e => console.log(e))
     }
   },
 }
@@ -239,8 +247,20 @@ body, html
       display: flex
       align-items: center
       margin: 4px 0
+      flex-direction: column
+    
+    .mainOption
+      width: auto 
+      
+      &.hidden
+        height: 0
+        margin: 0
+        opacity: 0
+        
+  .finish
+    padding-bottom: 10px
 
-  .finish button
+  button
     margin: 0 4px
     background: #212121
     border: none

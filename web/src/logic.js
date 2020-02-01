@@ -163,7 +163,6 @@ export default {
 
     return true;
   },
-
   downloadFirmware: async args => {
     const fw = await patchFirmware(args)
     if (fw === null) return false
@@ -172,4 +171,24 @@ export default {
 
     return true;
   },
+  flashRaw: fw => {
+    let messages = []
+    let currentMessage = []
+    
+    fw.forEach(byte => {
+      if (byte === 0xf0) {
+      } else if (byte === 0xf7) {
+        messages.push(currentMessage)
+        currentMessage = []
+      } else currentMessage.push(byte)
+    })
+
+    const flash = outputPort => {
+      messages.forEach(message => {
+        outputPort.sendSysex([], message)
+      })
+    }
+    
+    WebMidi.outputs.forEach(ouput => flash(ouput))
+  }
 }
