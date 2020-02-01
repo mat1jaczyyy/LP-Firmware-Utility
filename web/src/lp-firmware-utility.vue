@@ -9,9 +9,13 @@
         option(v-for="lp in lpModels" :value="lp") {{ lp }}
 
     .options
-      .option(v-for="option in ((selectedLp === 'Launchpad X' || selectedLp === 'Launchpad Mini MK3') && konamiSuccess === false)? lpOptions[selectedLp].slice(0, lpOptions[selectedLp].length - 1) : lpOptions[selectedLp]")
-        input(type="checkbox" v-model="options[option]")
-        span {{ option }}
+      .option(v-for="(subOptions, option, optionIndex) in lpOptions[selectedLp]")
+        .mainOption(:class="{ hidden: selectedLp === 'Launchpad X' && konamiSuccess === false && option === 'Rename Live mode to Gay mode'}")
+          input(type="checkbox" v-model="options[option]")
+          span {{ option }}
+        .subOption(v-for="(subOption, subIndex) in subOptions" :style="{paddingLeft: '20px'}")
+          input(type="checkbox" v-model="options[subOption]" :disabled="(options[option] === false)")
+          span {{ subOption }}
 
     .finish
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
@@ -50,7 +54,7 @@ export default {
   data: () => ({
     lpModels,
     lpOptions,
-    selectedLp: lpModels[0],
+    selectedLp: null,
     options: {},
     midiAvailable: false,
     displayNotice: false,
@@ -66,22 +70,18 @@ export default {
     konamiSuccess: false
   }),
   created() {
-    const self = this
-    self.options = {}
-    lpOptions[self.selectedLp].forEach(op => {
-      self.options[op] = false
-    })
+    this.selectedLp = lpModels[0]
     logic.initializeMidi()
     window.notice = this.notice
     
     const konamiHandler = e => {
-      if(self.konamiSuccess) return;
+      if(this.konamiSuccess) return;
       
-      if(e.keyCode === konamiSequence[self.konamiCounter]){
-        self.konamiCounter++
-        if(self.konamiCounter === konamiSequence.length) self.konamiSuccess = true;
+      if(e.keyCode === konamiSequence[this.konamiCounter]){
+        this.konamiCounter++
+        if(this.konamiCounter === konamiSequence.length) this.konamiSuccess = true;
       }
-      else self.konamiCounter = 0
+      else this.konamiCounter = 0
     }
     
     window.addEventListener("keydown", konamiHandler);
@@ -104,10 +104,10 @@ export default {
       return false
     })()
     if (!webAss)
-      self.showNotice("Please use a browser with WebAssembly support.", false)
+      this.showNotice("Please use a browser with WebAssembly support.", false)
       
     WebMidi.enable(err => {
-      if (self.midiAvailable = !!!err)
+      if (this.midiAvailable = !!!err)
         for (const i of document.styleSheets)
           try {
             for (const j of i.rules)
@@ -118,16 +118,18 @@ export default {
           } catch {}
     }, true)
 
-    self.isWindows = window.navigator.platform.indexOf('Win') !== -1;
+    this.isWindows = window.navigator.platform.indexOf('Win') !== -1;
   },
   watch: {
     selectedLp(n, o) {
-      const self = this
-      self.options = {}
-      lpOptions[self.selectedLp].forEach(op => {
-        self.options[op] = false
+      this.options = {}
+      Object.keys(lpOptions[this.selectedLp]).forEach(op => {
+        this.options[op] = false;
+        lpOptions[this.selectedLp][op].forEach(subOp =>{
+          this.options[subOp] = false;
+        })
       })
-    },
+    }
   },
   mounted() {
     // for debugging
@@ -237,8 +239,17 @@ body, html
 
     .option
       display: flex
-      align-items: center
+      align-items: left
       margin: 4px 0
+      flex-direction: column
+    
+    .mainOption
+      width: auto 
+      
+      &.hidden
+        height: 0
+        margin: 0
+        opacity: 0
 
   .finish button
     margin: 0 4px
