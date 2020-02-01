@@ -9,7 +9,7 @@
         option(v-for="lp in lpModels" :value="lp") {{ lp }}
 
     .options
-      .option(v-for="option in (selectedLp === 'Launchpad X' && konamiSuccess === false) ? lpOptions[selectedLp].slice(0, lpOptions[selectedLp].length - 1) : lpOptions[selectedLp]")
+      .option(v-for="option in ((selectedLp === 'Launchpad X' || selectedLp === 'Launchpad Mini MK3') && konamiSuccess === false)? lpOptions[selectedLp].slice(0, lpOptions[selectedLp].length - 1) : lpOptions[selectedLp]")
         input(type="checkbox" v-model="options[option]")
         span {{ option }}
 
