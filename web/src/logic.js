@@ -132,17 +132,12 @@ export default {
       MIDIfound = []
       MIDItotal = 0
 
-      for (let iI = 0; iI < WebMidi.inputs.length; iI++) {
-        console.log(">considering input ", WebMidi.inputs[iI].name)
-        for (let oI = 0; oI < WebMidi.outputs.length; oI++) {
-        console.log(">>considering output ", WebMidi.outputs[oI].name)
+      for (let iI = 0; iI < WebMidi.inputs.length; iI++)
+        for (let oI = 0; oI < WebMidi.outputs.length; oI++)
           if (portsMatch(WebMidi.inputs[iI].name, WebMidi.outputs[oI].name)) {
-            console.log(">>>matched ports")
             MIDItotal++
             identify(WebMidi.inputs[iI], WebMidi.outputs[oI])
           }
-        }
-      }
           
       if (MIDItotal === 0) {
         MIDIresponded = -1;
