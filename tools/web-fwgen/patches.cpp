@@ -65,7 +65,7 @@ void lpx_patch(bool* args) {
             // Patch DR and XY tables from LPX_PROGRAMMER_PATCH
             for (int i = 0; i < 9; i++) {
                 input.data[0x109DF + i] = (i != 8)? 0x1C + i : 0x1B;
-                input.data[0x10A79 + i] = (i != 0)? 0x5B + i : 0x63;
+                input.data[0x10A79 + i] = (i != 0)? 0x5A + i : 0x63;
                 input.data[0x10ACA + i] = 0x00;
             }
     }
