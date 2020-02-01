@@ -26,6 +26,12 @@
     div
       span {{ noticeText }}
       i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable" :style="{ visibility: (displayNotice? 'visible' : 'hidden') }") close
+
+    img(:src="noticeSvg" :style="{margin: '10px 0', visibility: (noticeSvg !== null? 'visible' : 'hidden')}")
+    
+    span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL1 }}
+    span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL2 }}
+
     .progressDiv(:style="{visibility: (showNoticeProgress? 'visible' : 'hidden')}")
       progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
 
@@ -50,6 +56,9 @@ export default {
     displayNotice: false,
     noticeDismissable: true,
     noticeText: "",
+    noticeSvg: null,
+    noticeBL1: "",
+    noticeBL2: "",
     noticeCallback: null,
     showNoticeProgress: true,
     isWindows: false,
@@ -149,17 +158,29 @@ export default {
     clearNotice() {
       this.displayNotice = false;
       this.noticeText = null;
+      this.noticeSvg = null;
       
       if (this.noticeCallback !== null) this.noticeCallback()
       this.noticeCallback = null;
     },
-    showNotice(notice, dismissable = false, callback = null, showProgress = true) {
+    showNotice(notice, dismissable = false, callback = null, svg = null, bl = null) {
+      const halve = s => {
+        let middle = Math.floor(s.length / 2)
+        let before = s.lastIndexOf(' ', middle)
+        let after = s.indexOf(' ', middle + 1)
+
+        middle = (middle - before < after - middle)? before : after
+        
+        return [s.substr(0, middle), s.substr(middle + 1)]
+      }
+
       if (this.displayNotice) this.clearNotice();
       this.noticeText = notice;
+      this.noticeSvg = svg === null? null : "./svg/" + svg + ".svg";
+      [this.noticeBL1, this.noticeBL2] = bl === null? ["", ""] : halve("You can enter the bootloader by holding " + bl + " while turning your Launchpad on.");
       this.noticeDismissable = dismissable;
       this.displayNotice = true;
       this.noticeCallback = callback;
-      this.showNoticeProgress = showProgress;
     }
   },
 }
@@ -235,7 +256,6 @@ body, html
 
   .notice
     padding: 16px 0
-    height: 32px
     display: flex
     flex-direction: column
     justify-content: center

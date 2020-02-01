@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="540px" height="270px">
+<defs>
+<linearGradient id="fadeGrad" y2="1" x2="0">
+<stop offset="0" stop-color="white" stop-opacity="0"/>
+<stop offset=".3" stop-color="white" stop-opacity=".3"/>
+<stop offset="1" stop-color="white" stop-opacity="1"/>
+</linearGradient>
+
+<mask id="fade" maskContentUnits="userSpaceOnUse">
+<rect width="540" height="270" fill="url(#fadeGrad)"/>
+</mask>
+</defs>
+<g mask="url(#fade)">
+<rect x="5px" y="-125px" width="530px" height="390px" rx="2px" ry="2px" fill="#202020" stroke="#ffffff" stroke-width="5" stroke-opacity="1" />
+</g>
+<g mask="url(#fade)">
+
+<rect x="36px" y="216px" width="18px" height="18px" fill="#ffffff" fill-opacity="1" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="24px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="24px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="24px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="24px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="474px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="474px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="474px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="474px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="74px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="74px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="124px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="124px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="174px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="174px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="224px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="224px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="274px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="274px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="324px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="324px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="374px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="374px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="424px" y="204px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="424px" y="228px" width="42px" height="18px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="1" stroke-opacity="1" />
+<rect x="74px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="124px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="174px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="274px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="224px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="324px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="374px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="424px" y="54px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="74px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="124px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="174px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="274px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="224px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="324px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="374px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="424px" y="104px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="74px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="124px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="174px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="274px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="224px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="324px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="374px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="424px" y="154px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="74px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="124px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="174px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="274px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="224px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="324px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="374px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+<rect x="424px" y="4px" width="42px" height="42px" fill="#000000" fill-opacity="0" stroke="#ffffff" stroke-width="2" stroke-opacity="1" />
+</g>
+</svg>

@@ -16,6 +16,24 @@ export const lpOptions = {
   "Launchpad Pro (CFW)": [],
 }
 
+export const svgs = {
+  "Launchpad X": "x",
+  "Launchpad Mini MK3": "x",
+  "Launchpad Pro MK3": "promk3",
+  "Launchpad MK2": "mk2",
+  "Launchpad Pro": "pro",
+  "Launchpad Pro (CFW)": "pro",
+}
+
+export const bltext = {
+  "Launchpad X": "the Capture MIDI button",
+  "Launchpad Mini MK3": "the Capture MIDI button",
+  "Launchpad Pro MK3": "the Setup button",
+  "Launchpad MK2": "Session, User 1, User 2 and Mixer",
+  "Launchpad Pro": "the Setup button",
+  "Launchpad Pro (CFW)": "the Setup button",
+}
+
 export const errorCodes = {
   MIDI_UNSUPPORTED: 0,
   NO_DEVICE: 1,

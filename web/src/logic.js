@@ -1,6 +1,6 @@
 /* eslint-disable no-inline-comments */
 import WebMidi from "webmidi"
-import { lpModels, errorCodes } from "./constants"
+import { lpModels, errorCodes, svgs, bltext } from "./constants"
 import { saveAs } from "file-saver"
 import axios from "axios"
 
@@ -118,7 +118,7 @@ export default {
       if(++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
         let lp = lpModels.indexOf(args.selectedLp) === lpModels.length - 1? lpModels[lpModels.length - 2] : args.selectedLp;
 
-        args.showNotice("Please connect a " + lp + " in bootloader mode to continue flashing.", true, removeScan)
+        args.showNotice("Please connect a " + lp + " in bootloader mode to continue flashing.", true, removeScan, svgs[lp], bltext[lp])
 
         WebMidi.addListener("connected", scan)
         WebMidi.addListener("disconnected", scan)
