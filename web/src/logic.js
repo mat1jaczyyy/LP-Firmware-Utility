@@ -33,15 +33,8 @@ const patchFirmware = async args => {
   return FS.readFile("firmware/output.syx")
 }
 
-const portsMatch = (input, output) =>
-  input
-    .toUpperCase()
-    .replace("IN", "")
-    .replace("OUT", "") ===
-  output
-    .toUpperCase()
-    .replace("IN", "")
-    .replace("OUT", "")
+const portNeutralize = x => x.toUpperCase().split("IN").join("").split("OUT").join("")
+const portsMatch = (input, output) => portNeutralize(input) === portNeutralize(output)
 
 export default {
   initializeMidi: () => {
