@@ -127,9 +127,10 @@ export default {
       Object.keys(lpOptions[self.selectedLp]).forEach(op => {
         self.$set(self.options, op, false)
         lpOptions[self.selectedLp][op].forEach(subOp => {
-          self.$set(self.options, op, false)
+          self.$set(self.options, subOp, false)
         })
       })
+      // console.log(self.options)
     },
   },
   mounted() {
