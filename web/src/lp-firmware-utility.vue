@@ -82,8 +82,10 @@ export default {
 
       if (e.keyCode === konamiSequence[this.konamiCounter]) {
         this.konamiCounter++
-        if (this.konamiCounter === konamiSequence.length)
+        if (this.konamiCounter === konamiSequence.length) {
           this.konamiSuccess = true
+          lpModels.push("Custom SysEx file");
+        }
       } else this.konamiCounter = 0
     }
 
