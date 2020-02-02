@@ -32,7 +32,7 @@
       i.material-icons.close(@click="clearNotice()" v-show="noticeDismissable" :style="{ visibility: (displayNotice? 'visible' : 'hidden') }") close
 
     img(:src="noticeSvg" :style="{margin: (noticeSvg !== null? '50px 0' : '0'), visibility: (noticeSvg !== null? 'visible' : 'hidden')}")
-    
+
     span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL1 }}
     span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL2 }}
 
@@ -40,7 +40,7 @@
       progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
 
   .feet
-    span built by Brendonovich, mat1jaczyyy, vaaski &copy;
+    span built by Brendonovich & mat1jaczyyy & vaaski
     a(href="https://github.com/mat1jaczyyy/LP-Firmware-Utility" target="_blank") github
 </template>
 
@@ -67,24 +67,24 @@ export default {
     showNoticeProgress: true,
     isWindows: false,
     konamiCounter: 0,
-    konamiSuccess: false
+    konamiSuccess: false,
   }),
   created() {
     this.selectedLp = lpModels[0]
     logic.initializeMidi()
     window.notice = this.notice
-    
+
     const konamiHandler = e => {
-      if(this.konamiSuccess) return;
-      
-      if(e.keyCode === konamiSequence[this.konamiCounter]){
+      if (this.konamiSuccess) return
+
+      if (e.keyCode === konamiSequence[this.konamiCounter]) {
         this.konamiCounter++
-        if(this.konamiCounter === konamiSequence.length) this.konamiSuccess = true;
-      }
-      else this.konamiCounter = 0
+        if (this.konamiCounter === konamiSequence.length)
+          this.konamiSuccess = true
+      } else this.konamiCounter = 0
     }
-    
-    window.addEventListener("keydown", konamiHandler);
+
+    window.addEventListener("keydown", konamiHandler)
 
     const webAss = (() => {
       try {
@@ -105,31 +105,32 @@ export default {
     })()
     if (!webAss)
       this.showNotice("Please use a browser with WebAssembly support.", false)
-      
+
     WebMidi.enable(err => {
-      if (this.midiAvailable = !!!err)
+      if ((this.midiAvailable = !!!err))
         for (const i of document.styleSheets)
           try {
             for (const j of i.rules)
               if (j.selectorText === ".tooltip") {
                 i.insertRule(".tooltip { visibility: hidden !important; }")
-                return;
+                return
               }
           } catch {}
     }, true)
 
-    this.isWindows = window.navigator.platform.indexOf('Win') !== -1;
+    this.isWindows = window.navigator.platform.indexOf("Win") !== -1
   },
   watch: {
     selectedLp(n, o) {
-      this.options = {}
-      Object.keys(lpOptions[this.selectedLp]).forEach(op => {
-        this.options[op] = false;
-        lpOptions[this.selectedLp][op].forEach(subOp =>{
-          this.options[subOp] = false;
+      const self = this
+      self.options = {}
+      Object.keys(lpOptions[self.selectedLp]).forEach(op => {
+        self.$set(self.options, op, false)
+        lpOptions[self.selectedLp][op].forEach(subOp => {
+          self.$set(self.options, op, false)
         })
       })
-    }
+    },
   },
   mounted() {
     // for debugging
@@ -140,50 +141,75 @@ export default {
       const { options, selectedLp } = this
 
       if (type === "flash") {
-        if (!logic.flashFirmware({
-          type,
-          selectedLp,
-          options,
-          showNotice: this.showNotice,
-          clearNotice: this.clearNotice
-        }))
-          this.showNotice("Firmware flashing failed. Please try again.", true, false)
+        if (
+          !logic.flashFirmware({
+            type,
+            selectedLp,
+            options,
+            showNotice: this.showNotice,
+            clearNotice: this.clearNotice,
+          })
+        )
+          this.showNotice(
+            "Firmware flashing failed. Please try again.",
+            true,
+            false
+          )
       } else if (type === "download") {
-        if(!logic.downloadFirmware({
-          type,
-          selectedLp,
-          options
-        }))
-          this.showNotice("Firmware download failed. Please try again.", true, false)
+        if (
+          !logic.downloadFirmware({
+            type,
+            selectedLp,
+            options,
+          })
+        )
+          this.showNotice(
+            "Firmware download failed. Please try again.",
+            true,
+            false
+          )
       }
     },
     clearNotice() {
-      this.displayNotice = false;
-      this.noticeText = null;
-      this.noticeSvg = null;
-      
+      this.displayNotice = false
+      this.noticeText = null
+      this.noticeSvg = null
+
       if (this.noticeCallback !== null) this.noticeCallback()
-      this.noticeCallback = null;
+      this.noticeCallback = null
     },
-    showNotice(notice, dismissable = false, callback = null, svg = null, bl = null) {
+    showNotice(
+      notice,
+      dismissable = false,
+      callback = null,
+      svg = null,
+      bl = null
+    ) {
       const halve = s => {
         let middle = Math.floor(s.length / 2)
-        let before = s.lastIndexOf(' ', middle)
-        let after = s.indexOf(' ', middle + 1)
+        let before = s.lastIndexOf(" ", middle)
+        let after = s.indexOf(" ", middle + 1)
 
-        middle = (middle - before < after - middle)? before : after
-        
+        middle = middle - before < after - middle ? before : after
+
         return [s.substr(0, middle), s.substr(middle + 1)]
       }
 
-      if (this.displayNotice) this.clearNotice();
-      this.noticeText = notice;
-      this.noticeSvg = svg === null? null : "./svg/" + svg + ".svg";
-      [this.noticeBL1, this.noticeBL2] = bl === null? ["", ""] : halve("You can enter the bootloader by holding " + bl + " while turning your Launchpad on.");
-      this.noticeDismissable = dismissable;
-      this.displayNotice = true;
-      this.noticeCallback = callback;
-    }
+      if (this.displayNotice) this.clearNotice()
+      this.noticeText = notice
+      this.noticeSvg = svg === null ? null : "./svg/" + svg + ".svg"
+      ;[this.noticeBL1, this.noticeBL2] =
+        bl === null
+          ? ["", ""]
+          : halve(
+              "You can enter the bootloader by holding " +
+                bl +
+                " while turning your Launchpad on."
+            )
+      this.noticeDismissable = dismissable
+      this.displayNotice = true
+      this.noticeCallback = callback
+    },
   },
 }
 </script>
@@ -209,8 +235,8 @@ body, html
   flex-direction: column
 
   .header
-    font-weight: bold;
-    font-size: 1.4em;
+    font-weight: bold
+    font-size: 1.4em
 
   .inner
     flex-direction: column
@@ -242,10 +268,10 @@ body, html
       align-items: left
       margin: 4px 0
       flex-direction: column
-    
+
     .mainOption
-      width: auto 
-      
+      width: auto
+
       &.hidden
         height: 0
         margin: 0
@@ -287,9 +313,9 @@ body, html
       height: 0
       margin: 0
       opacity: 0
-      
+
   .progressDiv
-    margin-top: 10px    
+    margin-top: 10px
 
   .smol
     margin-top: 15px
@@ -314,46 +340,46 @@ body, html
       margin-left: 8px
       color: #FFF
       opacity: 0.4865126587
-  
+
 .tooltip
-  display: block !important;
-  z-index: 10000;
+  display: block !important
+  z-index: 10000
 
   .tooltip-inner
-    background: #0E0E0E;
-    color: white;
-    border-radius: 16px;
-    padding: 5px 10px 4px;
+    background: #0E0E0E
+    color: white
+    border-radius: 16px
+    padding: 5px 10px 4px
 
   .tooltip-arrow
-    width: 0;
-    height: 0;
-    border-style: solid;
-    position: absolute;
-    margin: 5px;
-    border-color: #0E0E0E;
-    z-index: 1;
+    width: 0
+    height: 0
+    border-style: solid
+    position: absolute
+    margin: 5px
+    border-color: #0E0E0E
+    z-index: 1
 
 .tooltip[x-placement^="bottom"]
-  margin-top: 5px;
+  margin-top: 5px
 
   .tooltip-arrow
-    border-width: 0 5px 5px 5px;
-    border-left-color: transparent !important;
-    border-right-color: transparent !important;
-    border-top-color: transparent !important;
-    top: -5px;
-    left: calc(50% - 5px);
-    margin-top: 0;
-    margin-bottom: 0;
+    border-width: 0 5px 5px 5px
+    border-left-color: transparent !important
+    border-right-color: transparent !important
+    border-top-color: transparent !important
+    top: -5px
+    left: calc(50% - 5px)
+    margin-top: 0
+    margin-bottom: 0
 
-.tooltip[aria-hidden='true']
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity .15s, visibility .15s;
+.tooltip[aria-hidden="true"]
+  visibility: hidden
+  opacity: 0
+  transition: opacity 0.15s, visibility 0.15s
 
-.tooltip[aria-hidden='false']
-  visibility: visible;
-  opacity: 1;
-  transition: opacity .15s;
+.tooltip[aria-hidden="false"]
+  visibility: visible
+  opacity: 1
+  transition: opacity 0.15s
 </style>
