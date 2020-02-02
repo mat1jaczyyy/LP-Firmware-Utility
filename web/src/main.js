@@ -1,7 +1,7 @@
 import Vue from "vue"
-import VTooltip from 'v-tooltip'
+import VTooltip from "v-tooltip"
 
-Vue.use(VTooltip);
+Vue.use(VTooltip)
 
 import App from "./lp-firmware-utility.vue"
 // import "./registerServiceWorker"'

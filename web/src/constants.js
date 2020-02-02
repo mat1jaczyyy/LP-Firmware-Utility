@@ -8,12 +8,18 @@ const LPPROCFW = "Launchpad Pro (CFW)"
 export const lpModels = [LPX, LPMINIMK3, LPPROMK3, LPMK2, LPPRO, LPPROCFW]
 
 export const lpOptions = {
-  "Launchpad X": ["Patch Programmer Mode", "Use Pro-like top row mapping", "Rename Live mode to Gay mode"],
-  "Launchpad Mini MK3": ["Patch Programmer Mode", "Use Pro-like top row mapping", "Rename Live mode to Gay mode"],
-  "Launchpad Pro MK3": [],
-  "Launchpad MK2": [],
-  "Launchpad Pro": [],
-  "Launchpad Pro (CFW)": [],
+  "Launchpad X": {
+    "Patch Programmer Mode": ["Use Pro-like top row mapping"],
+    "Rename Live mode to Gay mode": [],
+  },
+  "Launchpad Mini MK3": {
+    "Patch Programmer Mode": ["Use Pro-like top row mapping"],
+    "Rename Live mode to Gay mode": [],
+  },
+  "Launchpad Pro MK3": {},
+  "Launchpad MK2": {},
+  "Launchpad Pro": {},
+  "Launchpad Pro (CFW)": {},
 }
 
 export const svgs = {

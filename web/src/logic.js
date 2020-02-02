@@ -33,8 +33,15 @@ const patchFirmware = async args => {
   return FS.readFile("firmware/output.syx")
 }
 
-const portNeutralize = x => x.toUpperCase().split("IN").join("").split("OUT").join("")
-const portsMatch = (input, output) => portNeutralize(input) === portNeutralize(output)
+const portNeutralize = x =>
+  x
+    .toUpperCase()
+    .split("IN")
+    .join("")
+    .split("OUT")
+    .join("")
+const portsMatch = (input, output) =>
+  portNeutralize(input) === portNeutralize(output)
 
 export default {
   initializeMidi: () => {
@@ -45,7 +52,7 @@ export default {
 
   flashFirmware: async args => {
     const fw = await patchFirmware(args)
-    if (fw === null) return false;
+    if (fw === null) return false
 
     const messages = []
     let currentMessage = []
@@ -89,17 +96,20 @@ export default {
 
             const selectedIndex = lpModels.indexOf(args.selectedLp)
 
-            if (!MIDIfound.includes(output) && (
-              (selectedIndex === 0 && msg[7] === 0x03 && msg[8] === 17) || // LPX Bootloader
+            if (
+              !MIDIfound.includes(output) &&
+              ((selectedIndex === 0 && msg[7] === 0x03 && msg[8] === 17) || // LPX Bootloader
               (selectedIndex === 1 && msg[7] === 0x13 && msg[8] === 17) || // LPMiniMK3 Bootloader
               (selectedIndex === 2 && msg[7] === 0x23 && msg[8] === 17) || // LPProMK3 Bootloader
               (selectedIndex === 3 && msg[7] === 0x69 && versionStr < 171) || // LPMK2 Bootloader
-              ((selectedIndex === 4 || selectedIndex === 5) && msg[7] === 0x51 && versionStr === "000") // LPPro Bootloader
-            )) {
+                ((selectedIndex === 4 || selectedIndex === 5) &&
+                  msg[7] === 0x51 &&
+                  versionStr === "000")) // LPPro Bootloader
+            ) {
               MIDIfound.push(output)
 
               if (MIDIfound.length === 1)
-                WebMidi.addListener("disconnected", removeFlashing);
+                WebMidi.addListener("disconnected", removeFlashing)
 
               args.showNotice("Flashing...")
 
@@ -109,16 +119,27 @@ export default {
         }
 
         response()
-      });
+      })
 
       output.sendSysex([], [0x7e, 0x7f, 0x06, 0x01])
     }
 
     const response = () => {
-      if(++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
-        let lp = lpModels.indexOf(args.selectedLp) === lpModels.length - 1? lpModels[lpModels.length - 2] : args.selectedLp;
+      if (++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
+        let lp =
+          lpModels.indexOf(args.selectedLp) === lpModels.length - 1
+            ? lpModels[lpModels.length - 2]
+            : args.selectedLp
 
-        args.showNotice("Please connect a " + lp + " in bootloader mode to continue flashing.", true, removeScan, svgs[lp], bltext[lp])
+        args.showNotice(
+          "Please connect a " +
+            lp +
+            " in bootloader mode to continue flashing.",
+          true,
+          removeScan,
+          svgs[lp],
+          bltext[lp]
+        )
 
         WebMidi.addListener("connected", scan)
         WebMidi.addListener("disconnected", scan)
@@ -136,32 +157,32 @@ export default {
             MIDItotal++
             identify(WebMidi.inputs[iI], WebMidi.outputs[oI])
           }
-          
+
       if (MIDItotal === 0) {
-        MIDIresponded = -1;
-        response();
+        MIDIresponded = -1
+        response()
       }
     }
-    
+
     const removeScan = () => {
-      WebMidi.removeListener("connected", scan);
-      WebMidi.removeListener("disconnected", scan);
+      WebMidi.removeListener("connected", scan)
+      WebMidi.removeListener("disconnected", scan)
     }
 
     const removeFlashing = e => {
       for (let i = 0; i < MIDIfound.length; i++)
         if (MIDIfound[i].id === e.port.id) {
-          MIDIfound.splice(i, 1);
-          
-          if (MIDIfound.length === 0) args.clearNotice();
+          MIDIfound.splice(i, 1)
 
-          return;
+          if (MIDIfound.length === 0) args.clearNotice()
+
+          return
         }
     }
 
     scan()
 
-    return true;
+    return true
   },
   downloadFirmware: async args => {
     const fw = await patchFirmware(args)
@@ -169,7 +190,7 @@ export default {
 
     saveAs(new Blob([fw.buffer]), "output.syx")
 
-    return true;
+    return true
   },
   flashRaw: fw => {
     let messages = []
