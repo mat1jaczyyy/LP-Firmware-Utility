@@ -51,8 +51,16 @@ export default {
   },
 
   flashFirmware: async args => {
-    const fw = await patchFirmware(args)
-    if (fw === null) return false
+    let fw;
+    let selectedLp;
+    if(args.rawFW){
+      fw = args.rawFW
+      selectedLp = "Launchpad Pro"
+    } else {
+      fw = await patchFirmware(args)
+      if (fw === null) return false
+      selectedLp = args.selectedLp
+    }
 
     const messages = []
     let currentMessage = []
@@ -94,7 +102,7 @@ export default {
               .slice(msg.length - 3)
               .reduce((prev, current) => "" + prev + current)
 
-            const selectedIndex = lpModels.indexOf(args.selectedLp)
+            const selectedIndex = lpModels.indexOf(selectedLp)
 
             if (
               !MIDIfound.includes(output) &&
@@ -127,9 +135,9 @@ export default {
     const response = () => {
       if (++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
         let lp =
-          lpModels.indexOf(args.selectedLp) === lpModels.length - 1
+          lpModels.indexOf(selectedLp) === lpModels.length - 1
             ? lpModels[lpModels.length - 2]
-            : args.selectedLp
+            : selectedLp
 
         args.showNotice(
           "Please connect a " +
@@ -191,25 +199,5 @@ export default {
     saveAs(new Blob([fw.buffer]), "output.syx")
 
     return true
-  },
-  flashRaw: fw => {
-    let messages = []
-    let currentMessage = []
-    
-    fw.forEach(byte => {
-      if (byte === 0xf0) {
-      } else if (byte === 0xf7) {
-        messages.push(currentMessage)
-        currentMessage = []
-      } else currentMessage.push(byte)
-    })
-
-    const flash = outputPort => {
-      messages.forEach(message => {
-        outputPort.sendSysex([], message)
-      })
-    }
-    
-    WebMidi.outputs.forEach(ouput => flash(ouput))
   }
 }

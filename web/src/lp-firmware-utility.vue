@@ -21,8 +21,6 @@
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
       button(@click="finish('download')") download
     input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")    
-    button(:style="{ visibility: (konamiSuccess? 'visible' : 'hidden') }" @click="$refs.file.click()") upload
-    
 
     .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden') }")
       span Don't forget to install
@@ -84,7 +82,7 @@ export default {
         this.konamiCounter++
         if (this.konamiCounter === konamiSequence.length) {
           this.konamiSuccess = true
-          lpModels.push("Custom SysEx file");
+          lpModels.push("Custom SysEx File");
         }
       } else this.konamiCounter = 0
     }
@@ -129,13 +127,16 @@ export default {
     selectedLp(n, o) {
       const self = this
       self.options = {}
-      Object.keys(lpOptions[self.selectedLp]).forEach(op => {
-        self.$set(self.options, op, false)
-        lpOptions[self.selectedLp][op].forEach(subOp => {
-          self.$set(self.options, subOp, false)
+      if(self.selectedLp === "Custom SysEx File"){
+        self.$refs.file.click()
+      } else {
+        Object.keys(lpOptions[self.selectedLp]).forEach(op => {
+          self.$set(self.options, op, false)
+          lpOptions[self.selectedLp][op].forEach(subOp => {
+            self.$set(self.options, subOp, false)
+          })
         })
-      })
-      // console.log(self.options)
+      }
     },
   },
   mounted() {
@@ -149,7 +150,6 @@ export default {
       if (type === "flash") {
         if (
           !logic.flashFirmware({
-            type,
             selectedLp,
             options,
             showNotice: this.showNotice,
@@ -164,7 +164,6 @@ export default {
       } else if (type === "download") {
         if (
           !logic.downloadFirmware({
-            type,
             selectedLp,
             options,
           })
@@ -217,9 +216,17 @@ export default {
       this.noticeCallback = callback
     },
     uploadFirmware(file) {
+      const {options, selectedLp} = this
       file.arrayBuffer().then(ret => {
-        logic.flashRaw(new Uint8Array(ret))
+        logic.flashFirmware({
+          selectedLp,
+          options,
+          showNotice: this.showNotice,
+          clearNotice: this.clearNotice,
+          rawFW: new Uint8Array(ret)
+        })
       }).catch(e => console.log(e))
+      .finally(() => this.selectedLp = "Launchpad X")
     }
   },
 }
