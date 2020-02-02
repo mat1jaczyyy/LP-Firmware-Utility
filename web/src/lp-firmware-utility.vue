@@ -128,6 +128,7 @@ export default {
       const self = this
       self.options = {}
       if(self.selectedLp === "Custom SysEx File"){
+        self.selectedLp = o
         self.$refs.file.click()
       } else {
         Object.keys(lpOptions[self.selectedLp]).forEach(op => {
@@ -226,7 +227,6 @@ export default {
           rawFW: new Uint8Array(ret)
         })
       }).catch(e => console.log(e))
-      .finally(() => this.selectedLp = "Launchpad X")
     }
   },
 }
