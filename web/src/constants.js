@@ -33,7 +33,7 @@ export const svgs = {
 
 export const bltext = {
   "Launchpad X": "the Capture MIDI button",
-  "Launchpad Mini MK3": "the Capture MIDI button",
+  "Launchpad Mini MK3": "the User button",
   "Launchpad Pro MK3": "the Setup button",
   "Launchpad MK2": "Session, User 1, User 2 and Mixer",
   "Launchpad Pro": "the Setup button",
