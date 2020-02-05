@@ -38,7 +38,7 @@
     span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL2 }}
 
     .progressDiv(:style="{visibility: (showNoticeProgress? 'visible' : 'hidden')}")
-      progress(:style="{ visibility: (displayNotice? 'visible' : 'hidden') }")
+      progress(:style="{ visibility: ((displayNotice && showNoticeProgress)? 'visible' : 'hidden') }")
 
   .feet
     span built by Brendonovich, mat1jaczyyy, vaaski &copy;
@@ -189,7 +189,8 @@ export default {
       dismissable = false,
       callback = null,
       svg = null,
-      bl = null
+      bl = null,
+      progres = true
     ) {
       const halve = s => {
         let middle = Math.floor(s.length / 2)
@@ -215,6 +216,7 @@ export default {
       this.noticeDismissable = dismissable
       this.displayNotice = true
       this.noticeCallback = callback
+      this.showNoticeProgress = progres
     },
     uploadFirmware(file) {
       const {options, selectedLp} = this

@@ -28,22 +28,24 @@ const patchFirmware = async args => {
     console.log(
       "Firmware patching failed with status code " + e.status + " " + e.message
     )
+    args.showNotice("Something went wrong while patching the firmware file.", true, undefined, undefined, undefined, false)
     return null
   }
 
   return FS.readFile("firmware/output.syx")
 }
 
-const verifyFirmware = fw => {
+const verifyFirmware = args => {
   let selected = null;
 
   try {
-    FS.writeFile("firmware/input.syx", fw);
+    FS.writeFile("firmware/input.syx", args.rawFW);
     selected = wasmVerify();
   } catch (e) {
     console.log(
       "Firmware verification failed with status code " + e.status + " " + e.message
     )
+    args.showNotice("The firmware file is invalid.", true, undefined, undefined, undefined, false)
     return null
   }
 
@@ -72,7 +74,7 @@ export default {
     let selectedLp;
 
     if (args.rawFW) {
-      let result = verifyFirmware(args.rawFW);
+      let result = verifyFirmware(args);
       if (result === null) return false;
 
       fw = args.rawFW;
