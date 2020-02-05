@@ -34,8 +34,7 @@
 
     img(:src="noticeSvg" :style="{margin: (noticeSvg !== null? '50px 0' : '0'), visibility: (noticeSvg !== null? 'visible' : 'hidden')}")
 
-    span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL1 }}
-    span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL2 }}
+    span(:style="{visibility: (noticeSvg !== null? 'visible' : 'hidden')}") {{ noticeBL }}
 
     .progressDiv(:style="{visibility: (showNoticeProgress? 'visible' : 'hidden')}")
       progress(:style="{ visibility: ((displayNotice && showNoticeProgress)? 'visible' : 'hidden') }")
@@ -62,8 +61,7 @@ export default {
     noticeDismissable: true,
     noticeText: "",
     noticeSvg: null,
-    noticeBL1: "",
-    noticeBL2: "",
+    noticeBL: "",
     noticeCallback: null,
     showNoticeProgress: true,
     isWindows: false,
@@ -192,27 +190,14 @@ export default {
       bl = null,
       progres = true
     ) {
-      const halve = s => {
-        let middle = Math.floor(s.length / 2)
-        let before = s.lastIndexOf(" ", middle)
-        let after = s.indexOf(" ", middle + 1)
-
-        middle = middle - before < after - middle ? before : after
-
-        return [s.substr(0, middle), s.substr(middle + 1)]
-      }
-
       if (this.displayNotice) this.clearNotice()
       this.noticeText = notice
       this.noticeSvg = svg === null ? null : "./svg/" + svg + ".svg";
-      [this.noticeBL1, this.noticeBL2] =
-        bl === null
-          ? ["", ""]
-          : halve(
-              "You can enter the bootloader by holding " +
-                bl +
-                " while turning your Launchpad on."
-            )
+      this.noticeBL = bl === null
+          ? ""
+          : "You can enter the bootloader by holding " +
+              bl +
+              " while turning your Launchpad on."
       this.noticeDismissable = dismissable
       this.displayNotice = true
       this.noticeCallback = callback
@@ -323,6 +308,8 @@ body, html
     flex-direction: column
     justify-content: center
     align-items: center
+    text-align: center
+    max-width: 900px
     transition: 1s cubic-bezier(0.77, 0, 0.175, 1)
     opacity: 1
     overflow: hidden
