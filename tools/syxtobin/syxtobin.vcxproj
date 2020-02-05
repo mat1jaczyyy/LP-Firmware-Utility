@@ -91,6 +91,9 @@
     <ClCompile Include="parse.cpp" />
     <ClCompile Include="syxtobin.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="syxtobin.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

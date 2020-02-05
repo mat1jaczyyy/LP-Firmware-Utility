@@ -1,5 +1,7 @@
 #include "cli.h"
 
+#include "bintosyx.h"
+
 const std::vector<const char*> product_flags = {"/x", "/minimk3", "/promk3", "/mk2", "/pro"};
 
 extern byte lp_target_family, lp_target;
@@ -69,4 +71,8 @@ void parse_args(int argc, char** argv) {
 		fprintf(stderr, "Too many arguments specified.\n");
 		exit(6);
 	}
+}
+
+void convert() {
+	convert_bintosyx();
 }

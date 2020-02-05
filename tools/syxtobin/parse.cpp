@@ -1,5 +1,7 @@
 #include "cli.h"
 
+#include "syxtobin.h"
+
 void parse_args(int argc, char** argv) {
 	if (argc <= 1) {
 		fprintf(stderr, "No input file specified.\n");
@@ -15,4 +17,8 @@ void parse_args(int argc, char** argv) {
 		fprintf(stderr, "Too many arguments specified.\n");
 		exit(6);
 	}
+}
+
+void convert() {
+	(void)convert_syxtobin();
 }

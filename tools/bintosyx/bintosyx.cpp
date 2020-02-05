@@ -1,4 +1,4 @@
-#include "common.h"
+#include "bintosyx.h"
 
 byte lp_target_family, lp_target;
 char* version;
@@ -50,7 +50,7 @@ void write_block(int* i, int j, byte update_type) {
 	output.data[(*i)++] = SYSEX_END;
 }
 
-void convert() {
+void convert_bintosyx() {
 	int blocks = ceil_div(input.size, BLOCK_SIZE_BYTES);
 
 	int metadata_size = 0;

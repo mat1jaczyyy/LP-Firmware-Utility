@@ -1,4 +1,4 @@
-#include "common.h"
+#include "syxtobin.h"
 
 void print_vector_error(int i, const char* error, std::vector<byte> v) {
 	if (v.size() == 0) fprintf(stderr, "Runtime error at position %08x: can't expect empty vector %s.", i, error);
@@ -58,10 +58,11 @@ void verify_uints(int i, uint a, uint b, const char* error) {
 	}
 }
 
-void convert() {
+byte convert_syxtobin() {
 	std::vector<byte> expected_types = {UPDATE_INIT};
 
 	byte family = LPX_FAMILY_ID;
+	byte target = LPX_PRODUCT_ID;
 	uint version = 0;
 	uint checksum = 0;
 	uint block = 0;
@@ -78,7 +79,8 @@ void convert() {
 				verify_byte(i, families, "LP_FAMILY_ID");
 				family = input.data[i++];
 
-				verify_byte(i++, *get_products(family), "LP_PRODUCT_ID");
+				verify_byte(i, *get_products(family), "LP_PRODUCT_ID");
+				target = input.data[i++];
 
 				version = nibbles_to_uint(&i, 6);
 
@@ -147,4 +149,6 @@ void convert() {
 	}
 
 	if (family == LPX_FAMILY_ID) verify_uints(input.size, checksum, crc32(&output), "CHECKSUM");
+
+	return target;
 }

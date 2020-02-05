@@ -17,6 +17,7 @@ const downloadCFW = async () => {
 }
 
 const wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
+const wasmVerify = Module.cwrap("verify_firmware", "number")
 
 const patchFirmware = async args => {
   try {
@@ -31,6 +32,22 @@ const patchFirmware = async args => {
   }
 
   return FS.readFile("firmware/output.syx")
+}
+
+const verifyFirmware = fw => {
+  let selected = null;
+
+  try {
+    FS.writeFile("firmware/input.syx", fw);
+    selected = wasmVerify();
+  } catch (e) {
+    console.log(
+      "Firmware verification failed with status code " + e.status + " " + e.message
+    )
+    return null
+  }
+
+  return selected
 }
 
 const portNeutralize = x =>
@@ -53,12 +70,18 @@ export default {
   flashFirmware: async args => {
     let fw;
     let selectedLp;
-    if(args.rawFW){
-      fw = args.rawFW
-      selectedLp = "Launchpad Pro"
+
+    if (args.rawFW) {
+      let result = verifyFirmware(args.rawFW);
+      if (result === null) return false;
+
+      fw = args.rawFW;
+      selectedLp = lpModels[result];
+
     } else {
       fw = await patchFirmware(args)
       if (fw === null) return false
+
       selectedLp = args.selectedLp
     }
 

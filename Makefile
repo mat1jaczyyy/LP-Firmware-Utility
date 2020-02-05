@@ -40,7 +40,7 @@ endif
 define wasm
 	$(MKDIR) "$(WASM_OUT)"
 	cd tools && "$(EMSDK_ENV)" --build=Release && emcc $(GPP_FLAGS) $(1) \
-		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp $(BINTOSYX)/$(BINTOSYX).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/main.cpp \
+		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp $(BINTOSYX)/$(BINTOSYX).cpp $(SYXTOBIN)/$(SYXTOBIN).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/wasm.cpp \
 		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 		--embed-file ../firmware/stock@firmware
 endef
