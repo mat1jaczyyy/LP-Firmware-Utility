@@ -218,6 +218,9 @@ export default {
     },
     uploadFirmware(file) {
       const {options, selectedLp} = this
+
+      if (file === undefined || file === null) return;
+
       file.arrayBuffer().then(ret => {
         logic.flashFirmware({
           selectedLp,
