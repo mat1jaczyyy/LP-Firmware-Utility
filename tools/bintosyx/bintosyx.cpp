@@ -1,4 +1,4 @@
-#include "bintosyx.h"
+#include "common.h"
 
 byte lp_target_family, lp_target;
 char* version;

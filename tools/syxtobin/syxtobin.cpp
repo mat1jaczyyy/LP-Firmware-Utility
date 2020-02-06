@@ -1,4 +1,4 @@
-#include "syxtobin.h"
+#include "common.h"
 
 void print_vector_error(int i, const char* error, std::vector<byte> v) {
 	if (v.size() == 0) fprintf(stderr, "Runtime error at position %08x: can't expect empty vector %s.", i, error);

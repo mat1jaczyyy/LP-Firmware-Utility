@@ -41,7 +41,7 @@ wasm void patch_firmware(int target, bool* args) {
 
 	read_input();
 
-    (*patch[target])(args);
+    patch(lp_target_family, target, args);
     
     convert_bintosyx();
 

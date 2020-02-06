@@ -2,23 +2,13 @@
 
 void write_buffer(bin_t* buffer, const uint start, const byte* data, const uint size) {
     if (start + size > buffer->size) {
-		fprintf(stderr, "Attempted to write to unallocated memory.\n");
-		exit(7);
+        if (!reallocate_buffer(&input, start + size - buffer->size, "firmware patches")) exit(7);
     }
 
     memcpy(&buffer->data[start], data, size);
 }
 
-void append_buffer(bin_t* buffer, const byte* data, const uint size) {
-    uint start = buffer->size;
-
-    if (!reallocate_buffer(&input, size, "firmware patches")) exit(7);
-
-    write_buffer(buffer, start, data, size);
-}
-
-#define LPX_PROGRAMMER_PATCH_SIZE 0x142
-const byte lpx_programmer_patch[LPX_PROGRAMMER_PATCH_SIZE] = {
+const std::vector<byte> lpx_programmer_patch = {
     0x06, 0xB4, 0xF5, 0xF7, 0xD9, 0xFA, 0x06, 0xBC, 0x7F, 0x28, 0x07, 0xD1, 0xDF, 0xF8, 0x16, 0x00,
     0x10, 0xF8, 0x08, 0x00, 0x00, 0xF0, 0xFF, 0x00, 0x8D, 0xF8, 0x0B, 0x00, 0x9D, 0xF8, 0x05, 0x00,
     0xF5, 0xF7, 0x78, 0xBD, 0xDE, 0xC9, 0x01, 0x08, 0x00, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72,
@@ -42,41 +32,7 @@ const byte lpx_programmer_patch[LPX_PROGRAMMER_PATCH_SIZE] = {
     0x09, 0xBD
 };
 
-void lpx_patch(bool* args) {
-    // Patch Programmer mode
-    if (args[0]) {
-        // Append LPX_PROGRAMMER_PATCH (custom code)
-        append_buffer(&input, lpx_programmer_patch, LPX_PROGRAMMER_PATCH_SIZE);
-
-        // Branches to LPX_PROGRAMMER_PATCH
-        *(uint*)&input.data[0x64C6] = 0xBA76F00A;
-        *(uint*)&input.data[0x6506] = 0xBAEAF00A;
-        *(uint*)&input.data[0xD10E] = 0xBC98F003;
-        
-        // Setup red color
-        input.data[0x749B] = 0x69;
-        *(ushort*)&input.data[0x1045C] = 0x0507;
-
-        // Setup text
-        write_buffer(&input, 0x7698, (byte*)"Cover\0mat1", 11);
-
-        // Use Pro-like top row mapping
-        if (args[1])
-            // Patch DR and XY tables from LPX_PROGRAMMER_PATCH
-            for (int i = 0; i < 9; i++) {
-                input.data[0x109DF + i] = (i != 8)? 0x1C + i : 0x1B;
-                input.data[0x10A79 + i] = (i != 0)? 0x5A + i : 0x63;
-                input.data[0x10ACA + i] = 0x00;
-            }
-    }
-
-    // Setup rename Live mode to Gay mode
-    if (args[2])
-        memcpy(&input.data[0x7690], "Gay", 4);
-}
-
-#define LPMINIMK3_PROGRAMMER_PATCH_SIZE 0x143
-const byte lpminimk3_programmer_patch[LPMINIMK3_PROGRAMMER_PATCH_SIZE] = {
+const std::vector<byte> lpminimk3_programmer_patch = {
     0xFF, 0x06, 0xB4, 0xF6, 0xF7, 0x54, 0xF8, 0x06, 0xBC, 0x7F, 0x28, 0x07, 0xD1, 0xDF, 0xF8, 0x14,
     0x00, 0x10, 0xF8, 0x08, 0x00, 0x00, 0xF0, 0xFF, 0x00, 0x8D, 0xF8, 0x0B, 0x00, 0x9D, 0xF8, 0x05,
     0x00, 0xF6, 0xF7, 0xF3, 0xBA, 0xCC, 0xC3, 0x01, 0x08, 0x00, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71,
@@ -100,47 +56,103 @@ const byte lpminimk3_programmer_patch[LPMINIMK3_PROGRAMMER_PATCH_SIZE] = {
     0xF7, 0x84, 0xBA
 };
 
-void lpminimk3_patch(bool* args) {
+template <typename T>
+struct map_element {
+    const uint address;
+    const T patch_value;
+
+    void patch(bin_t* buffer) const {
+        patch(buffer, patch_value);
+    }
+
+    void patch(bin_t* buffer, const T value) const {
+        patch(buffer, 0, value);
+    }
+
+    void patch(bin_t* buffer, const uint start, const T value) const {
+        write_buffer(buffer, address + start, (byte*)&value, sizeof(T));
+    }
+};
+
+template <typename T>
+struct map_element<T*> {
+    const uint address;
+    const T* patch_value;
+    const uint patch_count;
+
+    void patch(bin_t* buffer) const {
+        patch(buffer, patch_value, patch_count);
+    }
+
+    void patch(bin_t* buffer, const uint start) const {
+        patch(buffer, start, patch_value, patch_count);
+    }
+
+    void patch(bin_t* buffer, const T* value, const uint count) const {
+        patch(buffer, 0, value, count);
+    }
+
+    void patch(bin_t* buffer, const uint start, const T* value, const uint count) const {
+        write_buffer(buffer, address + start, (byte*)value, count * sizeof(T));
+    }
+};
+
+struct lpx_family_map {
+    const map_element<byte*> programmer_patch;
+    const map_element<uint> surface_branch;
+    const map_element<uint> cc_branch;
+    const map_element<uint> midi_branch;
+    const map_element<byte> setup_text_color;
+    const map_element<ushort> setup_pad_color;
+    const map_element<byte*> setup_text_live;
+    const map_element<byte> patch_table;
+};
+
+const std::vector<lpx_family_map> lpx_family_maps = {
+    {
+        {0x0, lpx_programmer_patch.data(), lpx_programmer_patch.size()},
+        {0x64C6, 0xBA76F00A}, {0x6506, 0xBAEAF00A}, {0xD10E, 0xBC98F003}, {0x749B}, {0x1045C}, {0x7690}, {0x109DF}
+    },
+    {
+        {0x0, lpminimk3_programmer_patch.data(), lpminimk3_programmer_patch.size()},
+        {0x69AA, 0xBCFBF009}, {0x69EA, 0xBD6FF009}, {0xCCB6, 0xBBBBF003}, {0x7973}, {0xFE48}, {0x7B60}, {0x103CD}
+    }
+};
+
+void lpx_family_patch(const byte target, bool* args) {
     // Patch Programmer mode
     if (args[0]) {
-        // Append LPMINIMK3_PROGRAMMER_PATCH (custom code)
-        append_buffer(&input, lpminimk3_programmer_patch, LPMINIMK3_PROGRAMMER_PATCH_SIZE);
+        lpx_family_maps[target].programmer_patch.patch(&input, input.size);
 
-        // Branches to LPMINIMK3_PROGRAMMER_PATCH
-        *(uint*)&input.data[0x69AA] = 0xBCFBF009;
-        *(uint*)&input.data[0x69EA] = 0xBD6FF009;
-        *(uint*)&input.data[0xCCB6] = 0xBBBBF003;
+        lpx_family_maps[target].surface_branch.patch(&input);
+        lpx_family_maps[target].cc_branch.patch(&input);
+        lpx_family_maps[target].midi_branch.patch(&input);
         
-        // Setup red color
-        input.data[0x7973] = 0x69;
-        *(ushort*)&input.data[0xFE48] = 0x0507;
+        lpx_family_maps[target].setup_text_color.patch(&input, 0x69);
+        lpx_family_maps[target].setup_pad_color.patch(&input, 0x0507);
 
-        // Setup text
-        write_buffer(&input, 0x7B68, (byte*)"Cover\0mat1", 11);
+        lpx_family_maps[target].setup_text_live.patch(&input, 8, (byte*)"Cover\0mat1", 11);
 
         // Use Pro-like top row mapping
         if (args[1])
-            // Patch DR and XY tables from LPMINIMK3_PROGRAMMER_PATCH
             for (int i = 0; i < 9; i++) {
-                input.data[0x103CD + i] = (i != 8)? 0x1C + i : 0x1B;
-                input.data[0x10467 + i] = (i != 0)? 0x5A + i : 0x63;
-                input.data[0x104B8 + i] = 0x00;
+                input.data[lpx_family_maps[target].patch_table.address       ] = (i != 8)? 0x1C + i : 0x1B;
+                input.data[lpx_family_maps[target].patch_table.address + 0x9A] = (i != 0)? 0x5A + i : 0x63;
+                input.data[lpx_family_maps[target].patch_table.address + 0xEB] = 0x00;
             }
     }
 
     // Setup rename Live mode to Gay mode
     if (args[2])
-        memcpy(&input.data[0x7B60], "Gay", 4);
+        lpx_family_maps[target].setup_text_live.patch(&input, (byte*)"Gay", 4);
 }
 
-void lppromk3_patch(bool* args) {
+void patch(const byte family, const byte target, bool* args) {
+    switch (family) {
+        case LPX_FAMILY_ID:
+            if (target != LPPROMK3_PRODUCT_ID)
+                lpx_family_patch(target, args);
 
-}
-
-void lpmk2_patch(bool* args) {
-
-}
-
-void lppro_patch(bool* args) {
-
+            break;
+    }
 }

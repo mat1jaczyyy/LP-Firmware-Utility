@@ -14,10 +14,10 @@ typedef unsigned int uint;
 
 int ceil_div(int a, int b);
 
-typedef struct {
+struct bin_t {
 	byte* data = NULL;
 	uint size = 0;
-} bin_t;
+};
 
 #define SYSEX_START 0xF0
 #define SYSEX_END 0xF7
