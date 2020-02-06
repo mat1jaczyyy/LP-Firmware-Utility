@@ -18,8 +18,8 @@
           span {{ subOption }}
 
     .finish
-      button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") flash
-      button(@click="finish('download')") download
+      button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") update
+      a(@click="finish('download')" :style="{cursor: 'pointer', fontSize: '15px', opacity: '0.25', textDecoration: 'underline'}") download
     input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")    
 
     .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden') }")
@@ -80,7 +80,7 @@ export default {
         this.konamiCounter++
         if (this.konamiCounter === konamiSequence.length) {
           this.konamiSuccess = true
-          lpModels.push("Custom SysEx File");
+          lpModels.push("Custom SysEx File")
         }
       } else this.konamiCounter = 0
     }
@@ -125,7 +125,7 @@ export default {
     selectedLp(n, o) {
       const self = this
       self.options = {}
-      if(self.selectedLp === "Custom SysEx File"){
+      if (self.selectedLp === "Custom SysEx File") {
         self.selectedLp = o
         self.$refs.file.click()
       } else {
@@ -192,32 +192,36 @@ export default {
     ) {
       if (this.displayNotice) this.clearNotice()
       this.noticeText = notice
-      this.noticeSvg = svg === null ? null : "./svg/" + svg + ".svg";
-      this.noticeBL = bl === null
+      this.noticeSvg = svg === null ? null : "./svg/" + svg + ".svg"
+      this.noticeBL =
+        bl === null
           ? ""
           : "You can enter the bootloader by holding " +
-              bl +
-              " while turning your Launchpad on."
+            bl +
+            " while turning your Launchpad on."
       this.noticeDismissable = dismissable
       this.displayNotice = true
       this.noticeCallback = callback
       this.showNoticeProgress = progres
     },
     uploadFirmware(file) {
-      const {options, selectedLp} = this
+      const { options, selectedLp } = this
 
-      if (file === undefined || file === null) return;
+      if (file === undefined || file === null) return
 
-      file.arrayBuffer().then(ret => {
-        logic.flashFirmware({
-          selectedLp,
-          options,
-          showNotice: this.showNotice,
-          clearNotice: this.clearNotice,
-          rawFW: new Uint8Array(ret)
+      file
+        .arrayBuffer()
+        .then(ret => {
+          logic.flashFirmware({
+            selectedLp,
+            options,
+            showNotice: this.showNotice,
+            clearNotice: this.clearNotice,
+            rawFW: new Uint8Array(ret),
+          })
         })
-      }).catch(e => console.log(e))
-    }
+        .catch(e => console.log(e))
+    },
   },
 }
 </script>
@@ -284,9 +288,12 @@ body, html
         height: 0
         margin: 0
         opacity: 0
-        
+
   .finish
     padding-bottom: 10px
+    display: flex
+    flex-direction: column
+    align-items: center
 
   button
     margin: 0 4px
@@ -298,6 +305,7 @@ body, html
     font-size: 1.3em
     text-transform: uppercase
     font-weight: bold
+    margin-bottom: 10px
 
     &:disabled
       opacity: 0.5
