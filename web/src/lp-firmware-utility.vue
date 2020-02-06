@@ -10,7 +10,7 @@
 
     .options
       .option(v-for="(subOptions, option, optionIndex) in lpOptions[selectedLp]")
-        .mainOption(:class="{ hidden: selectedLp === 'Launchpad X' && konamiSuccess === false && option === 'Rename Live mode to Gay mode'}")
+        .mainOption(:class="{ hidden: konamiSuccess === false && option === 'Rename Live mode to Gay mode'}")
           input(type="checkbox" v-model="options[option]")
           span {{ option }}
         .subOption(v-for="(subOption, subIndex) in subOptions" :style="{paddingLeft: '20px'}")
