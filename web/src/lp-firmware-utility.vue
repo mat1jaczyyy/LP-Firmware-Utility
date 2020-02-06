@@ -160,9 +160,8 @@ export default {
           })
         )
           this.showNotice(
-            "Firmware flashing failed. Please try again.",
-            true,
-            false
+            "Firmware update failed. Please try again.",
+            true, undefined, undefined, undefined, false
           )
       } else if (type === "download") {
         if (
@@ -173,8 +172,7 @@ export default {
         )
           this.showNotice(
             "Firmware download failed. Please try again.",
-            true,
-            false
+            true, undefined, undefined, undefined, false
           )
       }
     },

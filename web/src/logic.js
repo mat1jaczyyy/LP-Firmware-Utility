@@ -45,7 +45,7 @@ const verifyFirmware = args => {
     console.log(
       "Firmware verification failed with status code " + e.status + " " + e.message
     )
-    args.showNotice("The firmware file is invalid.", true, undefined, undefined, undefined, false)
+    args.showNotice("The firmware file is invalid. Please try again.", true, undefined, undefined, undefined, false)
     return null
   }
 
@@ -142,9 +142,9 @@ export default {
               MIDIfound.push(output)
 
               if (MIDIfound.length === 1)
-                WebMidi.addListener("disconnected", removeFlashing)
+                WebMidi.addListener("disconnected", removeUpdating)
 
-              args.showNotice("Flashing...")
+              args.showNotice("Updating...")
 
               flash(output)
             }
@@ -202,7 +202,7 @@ export default {
       WebMidi.removeListener("disconnected", scan)
     }
 
-    const removeFlashing = e => {
+    const removeUpdating = e => {
       for (let i = 0; i < MIDIfound.length; i++)
         if (MIDIfound[i].id === e.port.id) {
           MIDIfound.splice(i, 1)
