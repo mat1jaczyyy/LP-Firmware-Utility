@@ -19,10 +19,14 @@
 
     .finish
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") update
-      a(@click="finish('download')" :style="{cursor: 'pointer', fontSize: '15px', opacity: '0.25', textDecoration: 'underline'}") download
+
     input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")    
 
-    .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden') }")
+    .smol(:style="{ 'margin-top': '-5px' }")
+      span ...or
+      a(@click="finish('download')" href="javascript:;") download
+
+    .smol(:style="{ visibility: (isWindows? 'visible' : 'hidden'), 'margin-top': '20px' }")
       span Don't forget to install
       a(href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/nvnusbaudio-2.15.5.exe" target="_blank") Novation's USB driver
       span !
@@ -290,7 +294,6 @@ body, html
         opacity: 0
 
   .finish
-    padding-bottom: 10px
     display: flex
     flex-direction: column
     align-items: center
@@ -339,7 +342,6 @@ body, html
     margin-top: 10px
 
   .smol
-    margin-top: 15px
     font-size: 0.6em
 
     span
