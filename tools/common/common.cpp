@@ -1,9 +1,5 @@
 #include "common.h"
 
-int ceil_div(int a, int b) {
- return a / b + (a % b != 0);
-}
-
 const std::vector<byte>* get_products(byte family_id) {
 	if (family_id == LPX_FAMILY_ID) return &products_lpx;
 	if (family_id == LPRGB_FAMILY_ID) return &products_lprgb;

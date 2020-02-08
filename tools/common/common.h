@@ -12,7 +12,26 @@ typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 
-int ceil_div(int a, int b);
+inline int ceil_div(int a, int b) {
+	return a / b + (a % b != 0);
+}
+
+template <typename T>
+inline int vector_indexof(const std::vector<T>* v, T x) {
+	for (int i = 0; i < v->size(); i++)
+		if (x == (*v)[i]) return i;
+	
+	return -1;
+}
+
+inline int vector_indexof(const std::vector<const char*>* v, const char* x) {
+	for (int i = 0; i < v->size(); i++)
+		if (!strcmp((*v)[i], x)) return i;
+
+	return -1;
+}
+
+extern int vector_indexof(const std::vector<const char*>* v, const char* x);
 
 struct bin_t {
 	byte* data = NULL;

@@ -21,16 +21,13 @@ void lp_target_error(const char* error) {
 void parse_args(int argc, char** argv) {
 	if (argc <= 1) lp_target_error("No");
 
-	bool product_success = false;
+	int i = vector_indexof(&product_flags, argv[1]);
 
-	for (int i = 0; i < products_all.size(); i++)
-		if ((product_success = !strcmp(argv[1], product_flags[i]))) {
-			lp_target_family = families[i >= products_lpx.size()];
-			lp_target = products_all[i];
-			break;
-		}
-
-	if (!product_success) lp_target_error("Invalid");
+	if (i == -1) lp_target_error("Invalid");
+	else {
+		lp_target_family = families[i >= products_lpx.size()];
+		lp_target = products_all[i];
+	}
 
 	if (argc <= 2) {
 		fprintf(stderr, "No version specified.\n");

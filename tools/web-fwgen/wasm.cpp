@@ -56,13 +56,7 @@ wasm byte verify_firmware() {
 
 	read_input();
 
-    byte target = convert_syxtobin();
-
-    for (int i = 0; i < products_all.size(); i++)
-		if (target == products_all[i]) {
-			target = i;
-			break;
-		}
+    byte target = vector_indexof(&products_all, convert_syxtobin());
 
     free(input.data);
     free(output.data);
