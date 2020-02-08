@@ -147,11 +147,11 @@ void lpx_family_patch(const byte target, bool* args) {
         lpx_family_maps[target].setup_text_live.patch(&input, (byte*)"Gay", 4);
 }
 
-void patch(const byte family, const byte target, bool* args) {
+void patch(const byte family, const byte target, const byte index, bool* args) {
     switch (family) {
         case LPX_FAMILY_ID:
             if (target != LPPROMK3_PRODUCT_ID)
-                lpx_family_patch(target, args);
+                lpx_family_patch(index, args);
 
             break;
     }
