@@ -2,7 +2,7 @@
 
 import { register } from "register-service-worker"
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production")
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready() {
       console.log(
@@ -19,8 +19,11 @@ if (process.env.NODE_ENV === "production") {
     updatefound() {
       console.log("New content is downloading.")
     },
-    updated() {
+    updated(registration) {
       console.log("New content is available; please refresh.")
+      const worker = registration.waiting
+      worker.postMessage({ action: "skipWaiting" })
+      location.reload()
     },
     offline() {
       console.log(
@@ -31,4 +34,3 @@ if (process.env.NODE_ENV === "production") {
       console.error("Error during service worker registration:", error)
     },
   })
-}

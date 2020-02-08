@@ -4,7 +4,7 @@ import VTooltip from "v-tooltip"
 Vue.use(VTooltip)
 
 import App from "./lp-firmware-utility.vue"
-// import "./registerServiceWorker"'
+import "./registerServiceWorker"
 
 Vue.config.productionTip = false
 
