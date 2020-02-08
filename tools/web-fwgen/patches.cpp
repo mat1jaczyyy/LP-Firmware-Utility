@@ -136,9 +136,9 @@ void lpx_family_patch(const byte target, bool* args) {
         // Use Pro-like top row mapping
         if (args[1])
             for (int i = 0; i < 9; i++) {
-                input.data[lpx_family_maps[target].patch_table.address       ] = (i != 8)? 0x1C + i : 0x1B;
-                input.data[lpx_family_maps[target].patch_table.address + 0x9A] = (i != 0)? 0x5A + i : 0x63;
-                input.data[lpx_family_maps[target].patch_table.address + 0xEB] = 0x00;
+                input.data[lpx_family_maps[target].patch_table.address        + i] = (i != 8)? 0x1C + i : 0x1B;
+                input.data[lpx_family_maps[target].patch_table.address + 0x9A + i] = (i != 0)? 0x5A + i : 0x63;
+                input.data[lpx_family_maps[target].patch_table.address + 0xEB + i] = 0x00;
             }
     }
 
