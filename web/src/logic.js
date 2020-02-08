@@ -16,8 +16,13 @@ const downloadCFW = async () => {
   )
 }
 
-const wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
-const wasmVerify = Module.cwrap("verify_firmware", "number")
+let wasmPatch
+let wasmVerify
+
+window.fwgeninit = () => {
+  wasmPatch = Module.cwrap("patch_firmware", null, ["number", "array"])
+  wasmVerify = Module.cwrap("verify_firmware", "number")
+}
 
 const patchFirmware = async args => {
   try {

@@ -20,7 +20,7 @@
     .finish
       button(:disabled="!midiAvailable" @click="finish('flash')" v-tooltip.bottom="'Please use a browser with WebMIDI support.'") update
 
-    input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")    
+    input(type="file" accept=".syx" ref="file" :style="{display: 'none'}" @change="uploadFirmware($event.target.files[0])")
 
     .smol(:style="{ 'margin-top': '-5px' }")
       span ...or
@@ -110,6 +110,16 @@ export default {
     })()
     if (!webAss)
       this.showNotice("Please use a browser with WebAssembly support.", false)
+    else {
+      this.showNotice("Loading...", false)
+      const fwgen = document.createElement("script")
+      fwgen.src = "wasm/fwgen.js"
+      fwgen.onload = () => {
+        window.fwgeninit()
+        this.clearNotice()
+      }
+      document.body.appendChild(fwgen)
+    }
 
     WebMidi.enable(err => {
       if ((this.midiAvailable = !!!err))
