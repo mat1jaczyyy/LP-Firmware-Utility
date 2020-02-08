@@ -28,7 +28,14 @@ const patchFirmware = async args => {
     console.log(
       "Firmware patching failed with status code " + e.status + " " + e.message
     )
-    args.showNotice("Something went wrong while patching the firmware file.", true, undefined, undefined, undefined, false)
+    args.showNotice(
+      "Something went wrong while patching the firmware file.",
+      true,
+      undefined,
+      undefined,
+      undefined,
+      false
+    )
     return null
   }
 
@@ -36,16 +43,26 @@ const patchFirmware = async args => {
 }
 
 const verifyFirmware = args => {
-  let selected = null;
+  let selected = null
 
   try {
-    FS.writeFile("firmware/input.syx", args.rawFW);
-    selected = wasmVerify();
+    FS.writeFile("firmware/input.syx", args.rawFW)
+    selected = wasmVerify()
   } catch (e) {
     console.log(
-      "Firmware verification failed with status code " + e.status + " " + e.message
+      "Firmware verification failed with status code " +
+        e.status +
+        " " +
+        e.message
     )
-    args.showNotice("The firmware file is invalid. Please try again.", true, undefined, undefined, undefined, false)
+    args.showNotice(
+      "The firmware file is invalid. Please try again.",
+      true,
+      undefined,
+      undefined,
+      undefined,
+      false
+    )
     return null
   }
 
@@ -70,16 +87,15 @@ export default {
   },
 
   flashFirmware: async args => {
-    let fw;
-    let selectedLp;
+    let fw
+    let selectedLp
 
     if (args.rawFW) {
-      let result = verifyFirmware(args);
-      if (result === null) return false;
+      let result = verifyFirmware(args)
+      if (result === null) return false
 
-      fw = args.rawFW;
-      selectedLp = lpModels[result];
-
+      fw = args.rawFW
+      selectedLp = lpModels[result]
     } else {
       fw = await patchFirmware(args)
       if (fw === null) return false
@@ -99,8 +115,8 @@ export default {
     })
 
     const flash = outputPort => {
-      messages.forEach(message => {
-        outputPort.sendSysex([], message)
+      messages.forEach((message, index) => {
+        setTimeout(() => outputPort.sendSysex([], message), index * 5)
       })
     }
 
@@ -224,5 +240,5 @@ export default {
     saveAs(new Blob([fw.buffer]), "output.syx")
 
     return true
-  }
+  },
 }
