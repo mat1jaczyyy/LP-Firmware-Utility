@@ -50,7 +50,7 @@
 
 <script>
 import WebMidi from "webmidi"
-import { lpModels, lpOptions, konamiSequence } from "./constants"
+import { errorCodes, lpModels, lpOptions, konamiSequence } from "./constants"
 import logic from "./logic"
 
 export default {
@@ -74,6 +74,7 @@ export default {
   }),
   created() {
     this.selectedLp = lpModels[0]
+    logic.initializeMidi()
     window.notice = this.notice
 
     const konamiHandler = e => {
@@ -83,7 +84,6 @@ export default {
         this.konamiCounter++
         if (this.konamiCounter === konamiSequence.length) {
           this.konamiSuccess = true
-          lpModels.splice(2, 0, "Launchpad Pro MK3")
           lpModels.push("Custom SysEx File")
         }
       } else this.konamiCounter = 0
@@ -108,7 +108,6 @@ export default {
       } catch (e) {}
       return false
     })()
-
     if (!webAss)
       this.showNotice("Please use a browser with WebAssembly support.", false)
     else {
@@ -172,11 +171,7 @@ export default {
         )
           this.showNotice(
             "Firmware update failed. Please try again.",
-            true,
-            undefined,
-            undefined,
-            undefined,
-            false
+            true, undefined, undefined, undefined, false
           )
       } else if (type === "download") {
         if (
@@ -187,11 +182,7 @@ export default {
         )
           this.showNotice(
             "Firmware download failed. Please try again.",
-            true,
-            undefined,
-            undefined,
-            undefined,
-            false
+            true, undefined, undefined, undefined, false
           )
       }
     },

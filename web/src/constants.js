@@ -40,6 +40,13 @@ export const bltext = {
   "Launchpad Pro (CFW)": "the Setup button",
 }
 
+export const errorCodes = {
+  MIDI_UNSUPPORTED: 0,
+  NO_DEVICE: 1,
+  MULTIPLE_DEVICES: 2,
+  SELECTION_NOT_FOUND: 3,
+}
+
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39]
 
 export default { lpOptions, errorCodes, lpModels }
