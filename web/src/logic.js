@@ -115,7 +115,7 @@ export default {
 
     const flash = outputPort => {
       messages.forEach((message, index) => {
-        setTimeout(() => outputPort.sendSysex([], message), index * 3)
+        setTimeout(() => outputPort.sendSysex([], message), index * 4)
       })
     }
 
