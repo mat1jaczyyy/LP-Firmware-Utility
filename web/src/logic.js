@@ -114,9 +114,7 @@ export default {
     })
 
     const flash = outputPort => {
-      messages.forEach((message, index) => {
-        setTimeout(() => outputPort.sendSysex([], message), index * 25)
-      })
+      messages.forEach(message => outputPort.sendSysex([], message))
     }
 
     let MIDIresponded = 0
