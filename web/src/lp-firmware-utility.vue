@@ -50,7 +50,7 @@
 
 <script>
 import WebMidi from "webmidi"
-import { errorCodes, lpModels, lpOptions, konamiSequence } from "./constants"
+import { lpModels, lpOptions, konamiSequence } from "./constants"
 import logic from "./logic"
 
 export default {
@@ -74,7 +74,6 @@ export default {
   }),
   created() {
     this.selectedLp = lpModels[0]
-    logic.initializeMidi()
     window.notice = this.notice
 
     const konamiHandler = e => {
@@ -108,6 +107,7 @@ export default {
       } catch (e) {}
       return false
     })()
+    
     if (!webAss)
       this.showNotice("Please use a browser with WebAssembly support.", false)
     else {

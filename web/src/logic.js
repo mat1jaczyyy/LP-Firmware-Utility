@@ -1,6 +1,6 @@
 /* eslint-disable no-inline-comments */
 import WebMidi from "webmidi"
-import { lpModels, errorCodes, svgs, bltext } from "./constants"
+import { lpModels, svgs, bltext } from "./constants"
 import { saveAs } from "file-saver"
 import axios from "axios"
 
@@ -85,12 +85,6 @@ const portsMatch = (input, output) =>
   portNeutralize(input) === portNeutralize(output)
 
 export default {
-  initializeMidi: () => {
-    WebMidi.enable(err => {
-      if (err) return errorCodes.MIDI_UNSUPPORTED
-    }, true)
-  },
-
   flashFirmware: async args => {
     let fw
     let selectedLp
