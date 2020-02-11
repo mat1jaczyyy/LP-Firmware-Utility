@@ -9,14 +9,8 @@ export const lpModelsVisible = [LPX, LPMINIMK3, LPMK2, LPPRO, LPPROCFW]
 export const lpModelsAll = [LPX, LPMINIMK3, LPPROMK3, LPMK2, LPPRO, LPPROCFW]
 
 export const lpOptions = {
-  "Launchpad X": {
-    "Patch Programmer mode": ["Use Pro-like top row mapping"],
-    "Rename Live mode to Gay mode": [],
-  },
-  "Launchpad Mini MK3": {
-    "Patch Programmer mode": ["Use Pro-like top row mapping"],
-    "Rename Live mode to Gay mode": [],
-  },
+  "Launchpad X": {},
+  "Launchpad Mini MK3": {},
   "Launchpad Pro MK3": {},
   "Launchpad MK2": {},
   "Launchpad Pro": {},
