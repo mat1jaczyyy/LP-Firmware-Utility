@@ -228,6 +228,8 @@ export default {
     uploadFirmware(file) {
       const { options, selectedLp } = this
 
+      this.$refs.file.value = "";
+
       if (file === undefined || file === null) return
 
       file
