@@ -9,7 +9,7 @@ GPP_FLAGS = -std=c++11 -O2 -I common
 
 ifeq ($(OS),Windows_NT)
 
-EMSDK_ENV = %USERPROFILE%/emsdk/emsdk_env.bat
+EMSDK_ENV = "%USERPROFILE%/emsdk/emsdk_env.bat"
 	
 define rmdir
 	if exist "$(1)" rd /s /q "$(1)"
@@ -39,7 +39,7 @@ endif
 
 define wasm
 	$(MKDIR) "$(WASM_OUT)"
-	cd tools && "$(EMSDK_ENV)" --build=Release && emcc $(GPP_FLAGS) $(1) \
+	cd tools && $(EMSDK_ENV) --build=Release && emcc $(GPP_FLAGS) $(1) \
 		-o ../$(WASM_OUT)/$(FWGEN).js common/common.cpp $(BINTOSYX)/$(BINTOSYX).cpp $(SYXTOBIN)/$(SYXTOBIN).cpp web-$(FWGEN)/patches.cpp web-$(FWGEN)/wasm.cpp \
 		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 		--embed-file ../firmware/stock@firmware
