@@ -15,7 +15,7 @@ const std::vector<char*> firmware_files = {
 const std::vector<char*> firmware_versions = {
     (char*)"351",
     (char*)"407",
-    (char*)"440",
+    (char*)"450",
     (char*)"171",
     (char*)"182"
 };
