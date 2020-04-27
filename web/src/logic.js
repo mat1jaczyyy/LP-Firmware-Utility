@@ -27,7 +27,7 @@ window.fwgeninit = () => {
 const patchFirmware = async args => {
   try {
     if (args.selectedLp.includes("CFW")) return await downloadCFW()
-
+    console.log(Object.values(args.options))
     wasmPatch(lpModelsAll.indexOf(args.selectedLp), Object.values(args.options))
   } catch (e) {
     console.log(

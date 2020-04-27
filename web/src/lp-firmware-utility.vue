@@ -13,6 +13,7 @@
         .mainOption(:class="{ hidden: konamiSuccess === false && option === 'Rename Live mode to Gay mode'}")
           input(type="checkbox" v-model="options[option]")
           span {{ option }}
+          input(type="number" class="numeric" min="0" max="99" v-model="num")
         .subOption(v-for="(subOption, subIndex) in subOptions" :style="{paddingLeft: '20px'}")
           input(type="checkbox" v-model="options[subOption]" :disabled="(options[option] === false)")
           span {{ subOption }}
@@ -71,6 +72,7 @@ export default {
     isWindows: false,
     konamiCounter: 0,
     konamiSuccess: false,
+    num: 0,
   }),
   created() {
     this.selectedLp = lpModelsVisible[0]
@@ -159,9 +161,11 @@ export default {
   },
   methods: {
     finish(type) {
-      const { options, selectedLp } = this
+      const { options, num, selectedLp } = this
 
       if (type === "flash") {
+          options["num"] = parseInt(num, 10)
+          console.log(options)
         if (
           !logic.flashFirmware({
             selectedLp,
@@ -311,6 +315,10 @@ body, html
         height: 0
         margin: 0
         opacity: 0
+      
+      .numeric
+        margin-left: 5px
+        width: 40px
 
   .finish
     display: flex

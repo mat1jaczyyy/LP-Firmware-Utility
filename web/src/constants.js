@@ -9,7 +9,9 @@ export const lpModelsVisible = [LPX, LPMINIMK3, LPMK2, LPPRO, LPPROCFW]
 export const lpModelsAll = [LPX, LPMINIMK3, LPPROMK3, LPMK2, LPPRO, LPPROCFW]
 
 export const lpOptions = {
-  "Launchpad X": {},
+  "Launchpad X": {
+    "Patch name": []
+  },
   "Launchpad Mini MK3": {},
   "Launchpad Pro MK3": {},
   "Launchpad MK2": {},
