@@ -79,12 +79,10 @@ void convert_bintosyx() {
 
 		output.data[i++] = lp_target == LPPROMK3_PRODUCT_ID;
 
-		int version_len = strlen(version);
-
-		for (int j = 0; j < 6 - version_len; j++)
+		for (int j = 0; j < 3; j++)
 			output.data[i++] = 0x30;
 
-		for (int j = 0; j < version_len; j++)
+		for (int j = 0; j < 3; j++)
 			output.data[i++] = 0x30 | (version[j] & 0xF);
 
 		write_byte_array(&i, uint_to_nibbles(input.size));
