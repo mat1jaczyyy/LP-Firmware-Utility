@@ -105,8 +105,9 @@ export default {
               new WebAssembly.Instance(module) instanceof WebAssembly.Instance
             )
         }
-      } catch (e) {}
-      return false
+      } catch (e) {
+        return false;
+      }
     })()
     
     if (!webAss)
