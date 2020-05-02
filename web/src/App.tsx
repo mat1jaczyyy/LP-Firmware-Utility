@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import CloseIcon from "@material-ui/icons/CloseSharp";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
+import ReactTooltip from "react-tooltip";
 
 import {
   lpModelsVisible,
@@ -278,7 +279,14 @@ const App = () => {
 
               <div className="options">{getOptions(lpOptions[selectedLp])}</div>
 
-              <div className="finish">
+              <div
+                className="finish"
+                data-tip={
+                  midiAvailable
+                    ? undefined
+                    : "Please use a browser that supports WebMidi (eg. Chrome) to update firmware."
+                }
+              >
                 <button
                   onClick={() => flashFirmware(selectedLp, optionState)}
                   disabled={!midiAvailable}
@@ -286,6 +294,7 @@ const App = () => {
                   update
                 </button>
               </div>
+              <ReactTooltip effect="solid" place="top" />
               <input
                 type="file"
                 accept=".syx"
