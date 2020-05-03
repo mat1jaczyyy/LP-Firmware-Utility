@@ -6,7 +6,7 @@
 
     .launchpads
       select(v-model="selectedLp")
-        option(v-for="lp in lpModelsVisible" :value="lp") {{ lp }}
+        option(v-for="lp in lpModels" :value="lp") {{ lp }}
 
     .options
       .option(v-for="(subOptions, option, optionIndex) in lpOptions[selectedLp]")
@@ -50,13 +50,13 @@
 
 <script>
 import WebMidi from "webmidi"
-import { lpModelsVisible, lpModelsAll, lpOptions, konamiSequence } from "./constants"
+import { lpModels, lpOptions, konamiSequence } from "./constants"
 import logic from "./logic"
 
 export default {
   name: "lp-firmware-utility",
   data: () => ({
-    lpModelsVisible,
+    lpModels,
     lpOptions,
     selectedLp: null,
     options: {},
@@ -73,7 +73,7 @@ export default {
     konamiSuccess: false,
   }),
   created() {
-    this.selectedLp = lpModelsVisible[0]
+    this.selectedLp = lpModels[0]
     window.notice = this.notice
 
     const konamiHandler = e => {
@@ -83,8 +83,7 @@ export default {
         this.konamiCounter++
         if (this.konamiCounter === konamiSequence.length) {
           this.konamiSuccess = true
-          lpModelsAll.push("Custom SysEx File")
-          this.lpModelsVisible = lpModelsAll
+          lpModels.push("Custom SysEx File")
         }
       } else this.konamiCounter = 0
     }
@@ -172,11 +171,7 @@ export default {
         )
           this.showNotice(
             "Firmware update failed. Please try again.",
-            true,
-            undefined,
-            undefined,
-            undefined,
-            false
+            true, undefined, undefined, undefined, false
           )
       } else if (type === "download") {
         if (
@@ -187,11 +182,7 @@ export default {
         )
           this.showNotice(
             "Firmware download failed. Please try again.",
-            true,
-            undefined,
-            undefined,
-            undefined,
-            false
+            true, undefined, undefined, undefined, false
           )
       }
     },

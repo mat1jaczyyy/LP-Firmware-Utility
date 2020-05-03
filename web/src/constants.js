@@ -5,8 +5,7 @@ const LPMK2 = "Launchpad MK2"
 const LPPRO = "Launchpad Pro"
 const LPPROCFW = "Launchpad Pro (CFW)"
 
-export const lpModelsVisible = [LPX, LPMINIMK3, LPMK2, LPPRO, LPPROCFW]
-export const lpModelsAll = [LPX, LPMINIMK3, LPPROMK3, LPMK2, LPPRO, LPPROCFW]
+export const lpModels = [LPX, LPMINIMK3, LPPROMK3, LPMK2, LPPRO, LPPROCFW]
 
 export const lpOptions = {
   "Launchpad X": {},
@@ -37,4 +36,4 @@ export const bltext = {
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39]
 
-export default { lpOptions, lpModelsVisible, lpModelsAll }
+export default { lpOptions, lpModels }

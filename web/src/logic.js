@@ -1,6 +1,6 @@
 /* eslint-disable no-inline-comments */
 import WebMidi from "webmidi"
-import { lpModelsVisible, lpModelsAll, svgs, bltext } from "./constants"
+import { lpModels, svgs, bltext } from "./constants"
 import { saveAs } from "file-saver"
 import axios from "axios"
 
@@ -28,7 +28,7 @@ const patchFirmware = async args => {
   try {
     if (args.selectedLp.includes("CFW")) return await downloadCFW()
 
-    wasmPatch(lpModelsAll.indexOf(args.selectedLp), Object.values(args.options))
+    wasmPatch(lpModels.indexOf(args.selectedLp), Object.values(args.options))
   } catch (e) {
     console.log(
       "Firmware patching failed with status code " + e.status + " " + e.message
@@ -94,7 +94,7 @@ export default {
       if (result === null) return false
 
       fw = args.rawFW
-      selectedLp = lpModelsAll[result]
+      selectedLp = lpModels[result]
     } else {
       fw = await patchFirmware(args)
       if (fw === null) return false
@@ -140,7 +140,7 @@ export default {
               .slice(msg.length - 3)
               .reduce((prev, current) => "" + prev + current)
 
-            const selectedIndex = lpModelsAll.indexOf(selectedLp)
+            const selectedIndex = lpModels.indexOf(selectedLp)
 
             if (
               !MIDIfound.includes(output) &&
@@ -173,8 +173,8 @@ export default {
     const response = () => {
       if (++MIDIresponded === MIDItotal && MIDIfound.length === 0) {
         let lp =
-          lpModelsAll.indexOf(selectedLp) === lpModelsAll.length - 1
-            ? lpModelsAll[lpModelsAll.length - 2]
+          lpModels.indexOf(selectedLp) === lpModels.length - 1
+            ? lpModels[lpModels.length - 2]
             : selectedLp
 
         args.showNotice(
