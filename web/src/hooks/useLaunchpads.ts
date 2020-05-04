@@ -1,23 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import WebMidi from "webmidi";
+import { useDispatch } from "react-redux";
 
-import Launchpad from "../Launchpad";
+import Launchpad from "../classes/Launchpad";
 import { portsMatch, portNeutralize } from "../utils";
-import { BootloaderType } from "../constants";
+import { LaunchpadType } from "../constants";
+import { useAppState } from ".";
 
-const useMidi = () => {
-  const [midiAvailable, setMidiAvailable] = useState<boolean | undefined>();
+export default (isScanner = false) => {
+  const launchpads = useAppState(({ launchpads }) => launchpads.launchpads);
+  const midiAvailable = useAppState(({ midi }) => midi.available);
 
-  useEffect(() => {
-    WebMidi.enable((err) => setMidiAvailable(!!!err), true);
-  }, []);
-
-  return midiAvailable;
-};
-
-export default () => {
-  const [launchpads, setLaunchpads] = useState<Launchpad[]>([]);
-  const midiAvailable = useMidi();
+  const dispatch = useDispatch();
 
   const scanningTimestamp = useRef<Date | null>(new Date());
 
@@ -43,58 +37,66 @@ export default () => {
             output
           );
 
-          if ((await launchpad.getType()) !== BootloaderType.NOT_BOOTLOADER)
+          if ((await launchpad.getType()) !== LaunchpadType.UNUSED)
             launchpads.push(launchpad);
         }
       }
     }
 
     if (scanningTimestamp.current > currentTimestamp) return;
-
-    setLaunchpads(launchpads);
-
     return launchpads;
   }, []);
 
   useEffect(() => {
-    if (!midiAvailable) return;
+    if (!midiAvailable || !isScanner) return;
 
-    scan();
+    let listener = () =>
+      scan().then(
+        (lps) => lps && dispatch({ type: "SET_LAUNCHPADS", payload: lps })
+      );
+    listener();
 
-    WebMidi.addListener("connected", scan);
-    WebMidi.addListener("disconnected", scan);
+    WebMidi.addListener("connected", listener);
+    WebMidi.addListener("disconnected", listener);
 
     return () => {
-      WebMidi.removeListener("connected", scan);
-      WebMidi.removeListener("disconnected", scan);
+      WebMidi.removeListener("connected", listener);
+      WebMidi.removeListener("disconnected", listener);
     };
-  }, [midiAvailable, scan]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [midiAvailable, dispatch]);
 
-  const queueFirmwareFlash = (buffer: Uint8Array, targetLp: string) => {
-    let resolveAttempt: (val?: any) => void;
+  const queueFirmwareFlash = useCallback(
+    (buffer: Uint8Array, targetLp: string) => {
+      let resolveAttempt: (val?: any) => void;
 
-    let flashPromise = new Promise(async (resolve) => {
-      const attemptFlash = async () => {
-        const lps = await scan();
-        if (!lps || !lps.some((lp) => lp.type === targetLp)) return;
+      let flashPromise = new Promise(async (resolve) => {
+        const attemptFlash = async () => {
+          const lps = await scan();
+          if (!lps || !lps.some((lp) => lp.type === targetLp)) return;
 
-        resolveAttempt(async () =>
-          lps[lps.findIndex((lp) => lp.type === targetLp)].flashFirmware(buffer)
-        );
-      };
+          resolveAttempt(async () =>
+            lps[lps.findIndex((lp) => lp.type === targetLp)].flashFirmware(
+              buffer
+            )
+          );
+        };
 
-      attemptFlash();
+        attemptFlash();
 
-      WebMidi.addListener("connected", attemptFlash);
+        WebMidi.addListener("connected", attemptFlash);
 
-      resolveAttempt = (val) => {
-        WebMidi.removeListener("connected", attemptFlash);
-        resolve(val);
-      };
-    });
+        resolveAttempt = (val) => {
+          WebMidi.removeListener("connected", attemptFlash);
+          resolve(val);
+        };
+      });
 
-    return { cancelFlash: resolveAttempt!, flashPromise };
-  };
+      return { cancelFlash: resolveAttempt!, flashPromise };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   return { launchpads, midiAvailable, queueFirmwareFlash };
 };

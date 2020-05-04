@@ -24,6 +24,7 @@ body {
 .header {
   font-weight: bold;
   font-size: 1.4em;
+  text-align: center;
 }
 
 .hidden {
@@ -41,7 +42,7 @@ body {
   overflow: hidden;
 }
 
-.inner select {
+select {
   background: #212121;
   color: #fff;
   padding: 8px;
@@ -81,6 +82,7 @@ button {
   text-transform: uppercase;
   font-weight: bold;
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
 button:disabled {
@@ -144,25 +146,7 @@ button:disabled {
 }
 
 .tooltip {
-  display: block !important;
-  z-index: 10000;
-}
-
-.tooltip-inner {
-  background: #0e0e0e;
-  color: white;
-  border-radius: 16px;
-  padding: 5px 10px 4px;
-}
-
-.tooltip-arrow {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  position: absolute;
-  margin: 5px;
-  border-color: #0e0e0e;
-  z-index: 1;
+  opacity: 1 !important;
 }
 
 .fade-enter {
@@ -178,4 +162,44 @@ button:disabled {
 .fade-exit-active {
   opacity: 0;
   transition: opacity 200ms;
+}
+
+.saturation-white {
+  background: -webkit-linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+  background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+}
+.saturation-black {
+  background: -webkit-linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+  background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+}
+
+.hue {
+  background: linear-gradient(
+    to top,
+    #f00 0%,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00 100%
+  );
+  background: -webkit-linear-gradient(
+    to top,
+    #f00 0%,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00 100%
+  );
+}
+
+.absolute-stretch {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
