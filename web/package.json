@@ -16,6 +16,7 @@
     "react": "^16.9.0",
     "react-color": "^2.18.0",
     "react-dom": "^16.9.0",
+    "react-router": "^5.1.2",
     "react-scripts": "3.4.1",
     "react-tooltip": "^4.2.5",
     "react-transition-group": "^4.3.0",
