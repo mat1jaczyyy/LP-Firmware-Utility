@@ -9,6 +9,8 @@
     "@types/react": "^16.9.34",
     "@types/react-color": "^3.0.1",
     "@types/react-dom": "^16.9.7",
+    "@types/react-redux": "^7.1.8",
+    "@types/react-router-dom": "^5.1.5",
     "@types/webmidi": "^2.0.4",
     "axios": "^0.19.2",
     "cra-template-typescript": "1.0.3",
