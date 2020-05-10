@@ -1,31 +1,46 @@
 {
-  "name": "lp-firmware-utility",
+  "name": "lp-fw-updater",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
-  },
   "dependencies": {
+    "@material-ui/core": "^4.9.12",
+    "@material-ui/icons": "^4.9.1",
+    "@types/file-saver": "^2.0.1",
+    "@types/react": "^16.9.34",
+    "@types/react-color": "^3.0.1",
+    "@types/react-dom": "^16.9.7",
+    "@types/webmidi": "^2.0.4",
     "axios": "^0.19.2",
+    "cra-template-typescript": "1.0.3",
     "file-saver": "^2.0.2",
-    "register-service-worker": "^1.6.2",
-    "v-tooltip": "^2.0.3",
-    "vue": "^2.6.10",
-    "vue-midi": "^0.0.3",
+    "react": "^16.9.0",
+    "react-color": "^2.18.0",
+    "react-dom": "^16.9.0",
+    "react-scripts": "3.4.1",
+    "react-tooltip": "^4.2.5",
+    "react-transition-group": "^4.3.0",
+    "typescript": "^3.8.3",
     "webmidi": "^2.5.1"
   },
-  "devDependencies": {
-    "@vue/cli-plugin-pwa": "^4.1.0",
-    "@vue/cli-service": "^4.1.0",
-    "pug": "^2.0.4",
-    "pug-plain-loader": "^1.0.0",
-    "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "vue-template-compiler": "^2.6.10"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ]
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
