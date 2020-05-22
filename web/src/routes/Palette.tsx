@@ -1,20 +1,21 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { InputEventSysex } from "webmidi";
 
 import PaletteGrid from "../components/PaletteGrid";
 import ColorPicker from "../components/ColorPicker";
+
+import useLaunchpads from "../hooks/useLaunchpads";
+import { useAppState } from "../hooks";
+
+import { LaunchpadType } from "../constants";
 import {
   hexToRgb,
   hexToHsv,
   parseRetinaPalette,
   createRetinaPalette,
 } from "../utils";
-import useLaunchpads from "../hooks/useLaunchpads";
-import { LaunchpadType } from "../constants";
-import { Link } from "react-router-dom";
-import ReactTooltip from "react-tooltip";
-import { useAppState } from "../hooks";
-import { InputEventSysex } from "webmidi";
 
 const Palette = () => {
   const { launchpads } = useLaunchpads();
@@ -113,13 +114,16 @@ const Palette = () => {
   );
 
   const downloadedPalette = useRef<any>({});
-  const handleCFWSysex = useCallback(({ data }: InputEventSysex) => {
-    if (data[7] === 123) downloadedPalette.current = {};
-    else if (data[7] === 35)
-      downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
-    else if (data[7] === 125)
-      dispatch({ type: "SET_PALETTE", payload: downloadedPalette.current });
-  }, [dispatch]);
+  const handleCFWSysex = useCallback(
+    ({ data }: InputEventSysex) => {
+      if (data[7] === 123) downloadedPalette.current = {};
+      else if (data[7] === 35)
+        downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
+      else if (data[7] === 125)
+        dispatch({ type: "SET_PALETTE", payload: downloadedPalette.current });
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -155,7 +159,8 @@ const Palette = () => {
         selectedColor={selectedColor}
         onColorClicked={(index) => setSelectedColor(index)}
       />
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+      <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
         <ColorPicker
           hsv={hexToHsv(palette[selectedColor])}
           onColorChange={handleColorChanged}
@@ -177,44 +182,35 @@ const Palette = () => {
             ref={fileRef}
           />
           <button onClick={() => createRetinaPalette(palette)}>Export</button>
-          <div
-            style={{ marginTop: 25 }}
-            data-tip={
-              cfwPresent
-                ? undefined
-                : `Direct uploading requires a Launchpad Pro running custom firmware.<br/>To upload a palette to a normal Launcpad, finish editing<br/>and flash it with the Firmware Utility.`
-            }
-          >
-            <button disabled={!cfwPresent} onClick={handlePaletteUpload}>
-              Upload
-            </button>
-          </div>
+
           {cfwPresent && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
-              <select
-                onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
-                value={paletteIndex}
-                style={{ width: 40, height: 30 }}
+            <>
+              <button
+                style={{ marginTop: 25 }}
+                onClick={handlePaletteUpload}
               >
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-                <option value={3}>3</option>
-              </select>
-            </div>
+                Upload
+              </button>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
+                <select
+                  onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
+                  value={paletteIndex}
+                  style={{ width: 40, height: 30 }}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+              </div>
+            </>
           )}
-          <ReactTooltip
-            className="tooltip"
-            multiline={true}
-            effect="solid"
-            place="top"
-          />
         </div>
       </div>
       <Link to="/" style={{ color: "#888888", marginTop: 10 }}>

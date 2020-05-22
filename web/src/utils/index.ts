@@ -1,14 +1,14 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-declare var FS: any;
-
 export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
-    let children: any;
-    if (value !== false) {
-      children = flattenObject(value, recursion + 1);
+    let children: any = {};
+    if (value !== true) {
+      children = flattenObject({ [name]: value }, recursion + 1);
+    } else {
+      children[name] = value;
     }
     flattened = { ...flattened, ...children };
   });
@@ -196,5 +196,5 @@ export const createRetinaPalette = (palette: { [index: number]: number[] }) => {
       (fileString += `${index}, ${color[0]} ${color[1]} ${color[2]};\n`)
   );
 
-  saveAs(new Blob([fileString]), "palette.retina");
+  saveAs(new Blob([fileString]), "palette");
 };

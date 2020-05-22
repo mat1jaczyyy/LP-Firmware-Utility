@@ -6,6 +6,8 @@ import React, {
   useEffect,
 } from "react";
 
+import "./index.css"
+
 interface Props {
   width: number;
   height: number;

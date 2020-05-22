@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import {saveAs} from "file-saver"
+import { saveAs } from "file-saver";
 
-import { lpModels, lpOptions, svgs, bltext } from "../constants";
+import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
 import { useKonami, useLaunchpads, useWasm, useAppState } from "../hooks";
 import { flattenObject } from "../utils";
 import MidiButton from "../components/MidiButton";
@@ -14,6 +14,7 @@ const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
 const Firmware = () => {
   const [selectedLp, setSelectedLp] = useState(lpModels[0]);
+  const [optionList, setOptionList] = useState(lpOptions[selectedLp]);
   const [optionState, setOptionState]: any = useState({});
 
   const paletteDirty = useAppState(({ palette }) => palette.dirty);
@@ -36,13 +37,13 @@ const Firmware = () => {
           <div
             className={recursion === 0 ? "mainOption" : undefined}
             key={name}
-            style={{ paddingLeft: recursion * 15 }}
+            style={{ paddingLeft: recursion * 15, margin: "5px 0" }}
           >
             <input
               type="checkbox"
               disabled={!!parent && !optionState[parent]}
-              defaultChecked={false}
-              value={optionState[name]}
+              checked={optionState[name]}
+              style={{ marginRight: 5 }}
               onChange={() =>
                 setOptionState((s: any) => ({
                   ...s,
@@ -154,8 +155,12 @@ const Firmware = () => {
 
   // Update patch options when selected LP changed
   useEffect(() => {
+    if (paletteDirty) lpOptions[selectedLp]["Custom Palette"] = true;
+    else delete lpOptions[selectedLp]["Custom Palette"];
+    
+    setOptionList(lpOptions[selectedLp]);
     setOptionState(flattenObject(lpOptions[selectedLp]));
-  }, [selectedLp, setOptionState]);
+  }, [selectedLp, setOptionState, paletteDirty]);
 
   return (
     <div className="inner">
@@ -176,7 +181,24 @@ const Firmware = () => {
           ))}
       </select>
 
-      <div className="options">{getOptions(lpOptions[selectedLp])}</div>
+      <div className="options">
+        {getOptions(optionList)}
+      </div>
+
+      <Link to="/palette" style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}>
+        {"Palette Utility >"}
+      </Link>
+      
+      {optionState["Custom Palette"] && (
+        <>
+          <p style={{ margin: 0, transform: "translateY(10px)" }}>
+            Palette being applied:
+          </p>
+          <div style={{ transform: "scale(0.8)" }}>
+            <PaletteGrid />
+          </div>
+        </>
+      )}
 
       <MidiButton
         onClick={() => flashFirmware(selectedLp, optionState)}
@@ -215,21 +237,6 @@ const Firmware = () => {
           !
         </div>
       )}
-      
-      {paletteDirty && (
-        <>
-          {" "}
-          <p>Palette being applied:</p>
-          <PaletteGrid />
-        </>
-      )}
-
-      <Link
-        to="/palette"
-        style={{ color: "#FFF", opacity: 0.5, marginTop: 10 }}
-      >
-        {"Palette Utility >"}
-      </Link>
     </div>
   );
 };
