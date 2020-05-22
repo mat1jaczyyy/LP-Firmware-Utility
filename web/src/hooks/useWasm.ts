@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { downloadCFW } from "../utils";
+import { downloadCFW, paletteToArray } from "../utils";
 import { lpModels } from "../constants";
 import { useAppState } from ".";
 
@@ -31,10 +31,18 @@ export default () => {
   );
 
   const patchFirmware = useCallback(
-    async (selectedLp: string, options: any): Promise<Uint8Array> => {
+    async (
+      selectedLp: string,
+      options: any,
+      palette: any
+    ): Promise<Uint8Array> => {
       try {
         if (selectedLp.includes("CFW")) return await downloadCFW();
-        patch!(lpModels.indexOf(selectedLp), Object.values(options)); // todo pass palette array
+        patch!(
+          lpModels.indexOf(selectedLp),
+          Object.values(options),
+          paletteToArray(palette)
+        );
       } catch (e) {
         console.log(
           "Firmware patching failed with status code " +

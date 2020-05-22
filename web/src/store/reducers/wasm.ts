@@ -1,6 +1,6 @@
 export interface WasmState {
   verify?: () => number;
-  patch?: (lpModel: number, options: any) => any;
+  patch?: (lpModel: number, options: any, palette: any) => any;
   available?: boolean;
 }
 

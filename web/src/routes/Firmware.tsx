@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 
-import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
+import { lpModels, lpOptions, svgs, bltext } from "../constants";
 import { useKonami, useLaunchpads, useWasm, useAppState } from "../hooks";
 import { flattenObject } from "../utils";
 import MidiButton from "../components/MidiButton";
@@ -18,6 +18,7 @@ const Firmware = () => {
   const [optionState, setOptionState]: any = useState({});
 
   const paletteDirty = useAppState(({ palette }) => palette.dirty);
+  const palette = useAppState(({ palette }) => palette.colors);
 
   const dispatch = useDispatch();
 
@@ -63,12 +64,14 @@ const Firmware = () => {
     async (
       selectedLp: string,
       options: { [key: string]: any },
+      palette: any,
       rawFW?: Uint8Array
     ) => {
       try {
         let firmware: Uint8Array = new Uint8Array();
 
-        if (!rawFW) firmware = await patchFirmware(selectedLp, options);
+        if (!rawFW)
+          firmware = await patchFirmware(selectedLp, options, palette);
 
         let targetLp =
           lpModels.indexOf(selectedLp) === 6 ? lpModels[5] : selectedLp;
@@ -115,9 +118,9 @@ const Firmware = () => {
   );
 
   const downloadFirmware = useCallback(
-    async (selectedLp: string, options: any) => {
+    async (selectedLp: string, options: any, palette: any) => {
       try {
-        const fw = await patchFirmware(selectedLp, options);
+        const fw = await patchFirmware(selectedLp, options, palette);
 
         saveAs(new Blob([fw.buffer]), "output.syx");
       } catch (e) {
@@ -157,7 +160,7 @@ const Firmware = () => {
   useEffect(() => {
     if (paletteDirty) lpOptions[selectedLp]["Custom Palette"] = true;
     else delete lpOptions[selectedLp]["Custom Palette"];
-    
+
     setOptionList(lpOptions[selectedLp]);
     setOptionState(flattenObject(lpOptions[selectedLp]));
   }, [selectedLp, setOptionState, paletteDirty]);
@@ -181,14 +184,15 @@ const Firmware = () => {
           ))}
       </select>
 
-      <div className="options">
-        {getOptions(optionList)}
-      </div>
+      <div className="options">{getOptions(optionList)}</div>
 
-      <Link to="/palette" style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}>
+      <Link
+        to="/palette"
+        style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}
+      >
         {"Palette Utility >"}
       </Link>
-      
+
       {optionState["Custom Palette"] && (
         <>
           <p style={{ margin: 0, transform: "translateY(10px)" }}>
@@ -201,7 +205,7 @@ const Firmware = () => {
       )}
 
       <MidiButton
-        onClick={() => flashFirmware(selectedLp, optionState)}
+        onClick={() => flashFirmware(selectedLp, optionState, palette)}
         action="flash firmware"
       />
       <input
@@ -214,7 +218,7 @@ const Firmware = () => {
 
       <div style={{ marginTop: -15 }} className="smol">
         <span>...or</span>
-        <p onClick={() => downloadFirmware(selectedLp, optionState)}>
+        <p onClick={() => downloadFirmware(selectedLp, optionState, palette)}>
           download
         </p>
       </div>

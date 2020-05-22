@@ -198,3 +198,13 @@ export const createRetinaPalette = (palette: { [index: number]: number[] }) => {
 
   saveAs(new Blob([fileString]), "palette");
 };
+
+export const paletteToArray = (palette: any) => {
+  const array = new Uint8Array(384);
+
+  Object.entries(palette).forEach(([index, rgb]: any) => {
+    array[index * 3] = rgb[0];
+    array[index * 3 + 1] = rgb[1];
+    array[index * 3 + 2] = rgb[2];
+  });
+};
