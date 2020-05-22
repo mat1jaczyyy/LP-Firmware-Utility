@@ -34,7 +34,7 @@ export default () => {
     async (selectedLp: string, options: any): Promise<Uint8Array> => {
       try {
         if (selectedLp.includes("CFW")) return await downloadCFW();
-        patch!(lpModels.indexOf(selectedLp), Object.values(options));
+        patch!(lpModels.indexOf(selectedLp), Object.values(options)); // todo pass palette array
       } catch (e) {
         console.log(
           "Firmware patching failed with status code " +
