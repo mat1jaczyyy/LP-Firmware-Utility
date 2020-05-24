@@ -207,4 +207,6 @@ export const paletteToArray = (palette: any) => {
     array[index * 3 + 1] = rgb[1];
     array[index * 3 + 2] = rgb[2];
   });
+
+  return array;
 };

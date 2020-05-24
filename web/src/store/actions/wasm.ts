@@ -21,6 +21,7 @@ export const initWasm: ThunkAction = () => async (dispatch) => {
             let patch = Module.cwrap("patch_firmware", null, [
               "number",
               "array",
+              "array"
             ]);
             let verify = Module.cwrap("verify_firmware", "number");
             let action = {
