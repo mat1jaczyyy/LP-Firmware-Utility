@@ -49,7 +49,7 @@ export default class Launchpad {
             else if (msg[7] === 0x69)
               type = LaunchpadType.BL_LPMK2;
             else if (msg[7] === 0x51) {
-              if (versionStr === "000") type = LaunchpadType.BL_LPPRO;
+              if (versionStr === "\0\0\0") type = LaunchpadType.BL_LPPRO;
               else if (versionStr === "cfw" || versionStr === "cfx")
                 type = LaunchpadType.CFW;
             }
