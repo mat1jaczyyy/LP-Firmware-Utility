@@ -14,34 +14,19 @@ export const ColorPicker = ({
 
   const colorRef = useRef(hsv);
   useEffect(() => {
-    colorRef.current = hsv;
+    if (colorRef.current !== hsv) colorRef.current = hsv;
   }, [hsv]);
 
-  useEffect(() => parentHsv && setHsv(parentHsv), [parentHsv]);
-
-  const handleSaturationChange = useCallback(
-    (sat: number, val: number) => setHsv((a) => [a[0], sat, val]),
-    []
-  );
-
-  const handleHueChange = useCallback(
-    (hue: number) => setHsv((a) => [hue, a[1], a[2]]),
-    []
-  );
-
-  const handleTextChange = useCallback((hsv: number[]) => setHsv(hsv), []);
-
-  const updateColor = useCallback(
-    (color) => onColorChange(hsvToHex(color || hsv)),
-    [onColorChange, hsv]
-  );
+  useEffect(() => {
+    if (parentHsv) setHsv(parentHsv);
+  }, [parentHsv]);
 
   return (
     <div
       style={{ display: "flex", flexDirection: "column", ...style }}
       onMouseDown={() => {
         window.addEventListener("mouseup", function listener() {
-          updateColor(colorRef.current);
+          onColorChange(hsvToHex(colorRef.current || hsv));
           window.removeEventListener("mouseup", listener);
         });
       }}
@@ -53,14 +38,16 @@ export const ColorPicker = ({
           width={200}
           height={200}
           hsv={hsv}
-          onColorChanged={handleSaturationChange}
+          onColorChanged={(sat: number, val: number) =>
+            setHsv((a) => [a[0], sat, val])
+          }
         />
         <Hue
           style={{ margin: "0 5px" }}
           hsv={hsv}
           width={30}
           height={200}
-          onColorChanged={handleHueChange}
+          onColorChanged={(hue: number) => setHsv((a) => [hue, a[1], a[2]])}
         />
       </div>
       <div
@@ -71,7 +58,7 @@ export const ColorPicker = ({
           height: 40,
         }}
       >
-        <Input onColorChanged={handleTextChange} hsv={hsv} />
+        <Input onColorChanged={(hsv: number[]) => setHsv(hsv)} hsv={hsv} />
         <div
           style={{
             width: 40,

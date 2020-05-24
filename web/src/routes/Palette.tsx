@@ -21,6 +21,7 @@ const Palette = () => {
   const { launchpads } = useLaunchpads();
 
   const palette = useAppState(({ palette }) => palette.colors);
+  const [hsv, setHsv] = useState([0, 0, 0]);
 
   const [selectedColor, setSelectedColor] = useState(0);
   const [paletteIndex, setPaletteIndex] = useState(1);
@@ -145,6 +146,14 @@ const Palette = () => {
     };
   }, [launchpads, handleCFWSysex]);
 
+  const selectedRef = useRef(0);
+  useEffect(() => {
+    if (selectedRef.current !== selectedColor) {
+      setHsv(hexToHsv(palette[selectedColor]));
+      selectedRef.current = selectedColor;
+    }
+  }, [palette, selectedColor]);
+
   let cfwPresent = launchpads.some((lp) => lp.type === LaunchpadType.CFW);
 
   return (
@@ -161,10 +170,7 @@ const Palette = () => {
       />
       <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
       <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-        <ColorPicker
-          hsv={hexToHsv(palette[selectedColor])}
-          onColorChange={handleColorChanged}
-        />
+        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} />
         <div
           style={{
             display: "flex",
@@ -185,10 +191,7 @@ const Palette = () => {
 
           {cfwPresent && (
             <>
-              <button
-                style={{ marginTop: 25 }}
-                onClick={handlePaletteUpload}
-              >
+              <button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
                 Upload
               </button>
               <div
