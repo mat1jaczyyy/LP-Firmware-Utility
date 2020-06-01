@@ -26,7 +26,7 @@ extern char* version;
 void convert_bintosyx();
 byte convert_syxtobin();
 
-wasm void patch_firmware(int target, bool* args) {
+wasm void patch_firmware(int target, bool* args, byte* palette) {
     if (target >= products_all.size()) {
 		fprintf(stderr, "Invalid target Launchpad specified.\n");
 		exit(6);
@@ -41,7 +41,7 @@ wasm void patch_firmware(int target, bool* args) {
 
 	read_input();
 
-    patch(lp_target_family, lp_target, target, args);
+    patch(lp_target_family, lp_target, target, args, palette);
     
     convert_bintosyx();
 

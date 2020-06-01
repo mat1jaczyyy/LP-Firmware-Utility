@@ -49,10 +49,36 @@ struct map_element<T*> {
     }
 };
 
-struct lpx_family_map {
-    const map_element<byte*> setup_text_live;
+byte palette_data[512];
+
+const std::vector<const map_element<byte*>> palette_maps = {
+    {0xCDB4,  palette_data, 512},
+    {0xC95C,  palette_data, 512},
+    {0x5C610, palette_data, 512},
+    {0x3A43,  palette_data, 384},
+    {0x13D4C, palette_data, 384},
 };
 
-void patch(const byte family, const byte target, const byte index, bool* args) {
-    // :(
+void verify_and_copy_palette(const byte family, byte* palette) {
+    for (int i = 0; i < 384; i++) {
+        if (palette[i] > 0x3F) {
+            fprintf(stderr, "Invalid palette received for patching.\n");
+            exit(7);
+        }
+
+        if (family == LPX_FAMILY_ID)
+            palette_data[i / 3 * 4 + 2 - i % 3] = palette[i] << 2;
+
+        else if (family == LPRGB_FAMILY_ID)
+            palette_data[i] = palette[i];
+    }
+}
+
+void patch(const byte family, const byte target, const byte index, bool* args, byte* palette) {
+    if (target == LPPROMK3_PRODUCT_ID) return;
+
+    if (args[0]) { // Patch palette
+        verify_and_copy_palette(family, palette);
+        palette_maps[index].patch(&input);
+    }
 }
