@@ -54,7 +54,16 @@ const Firmware = () => {
                 }))
               }
             />
-            <span>{name}</span>
+            <span
+              onClick={() =>
+                setOptionState((s: any) => ({
+                  ...s,
+                  [name]: !s[name],
+                }))
+              }
+            >
+              {name}
+            </span>
             {children}
           </div>
         );
@@ -189,14 +198,14 @@ const Firmware = () => {
 
       <div className="options">{getOptions(optionList)}</div>
       
-      {selectedLp === LaunchpadType.BL_LPPROMK3 && paletteDirty && <p style={{margin: 0, marginBottom: 10, textAlign: 'center'}}>Custom palettes not available <br/> on this Launchpad</p>}
-
-      <Link
-        to="/palette"
-        style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}
-      >
-        {"Palette Utility >"}
-      </Link>
+      {selectedLp !== LaunchpadType.BL_LPPROMK3 && (
+        <Link
+          to="/palette"
+          style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}
+        >
+          {"Palette Utility >"}
+        </Link>
+      )}
 
       {optionState["Custom Palette"] && (
         <>
