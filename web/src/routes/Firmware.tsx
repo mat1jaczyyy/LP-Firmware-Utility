@@ -3,17 +3,19 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 
-import { lpModels, lpOptions, svgs, bltext } from "../constants";
+import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
+import MidiButton from "../components/MidiButton";
+import PaletteGrid from "../components/PaletteGrid";
 import { useKonami, useLaunchpads, useWasm, useAppState } from "../hooks";
 import { flattenObject } from "../utils";
-import MidiButton from "../components/MidiButton";
 import { showNotice, hideNotice } from "../store/actions/notice";
-import PaletteGrid from "../components/PaletteGrid";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
 const Firmware = () => {
-  const [selectedLp, setSelectedLp] = useState(lpModels[0]);
+  const [selectedLp, setSelectedLp] = useState<LaunchpadType>(
+    lpModels[0] as LaunchpadType
+  );
   const [optionList, setOptionList] = useState(lpOptions[selectedLp]);
   const [optionState, setOptionState]: any = useState({});
 
@@ -64,7 +66,7 @@ const Firmware = () => {
     async (
       selectedLp: string,
       options: { [key: string]: any },
-      palette: any,
+      palette: { [index: number]: number[] },
       rawFW?: Uint8Array
     ) => {
       try {
@@ -143,7 +145,7 @@ const Firmware = () => {
       try {
         const targetLp = verifyFirmware(firmware);
 
-        flashFirmware(targetLp, {}, firmware);
+        flashFirmware(targetLp, {}, palette, firmware);
       } catch (e) {
         dispatch(
           showNotice({
@@ -153,12 +155,13 @@ const Firmware = () => {
         );
       }
     },
-    [flashFirmware, verifyFirmware, dispatch]
+    [flashFirmware, verifyFirmware, dispatch, palette]
   );
 
   // Update patch options when selected LP changed
   useEffect(() => {
-    if (paletteDirty) lpOptions[selectedLp]["Custom Palette"] = true;
+    if (paletteDirty && selectedLp !== LaunchpadType.BL_LPPROMK3)
+      lpOptions[selectedLp]["Custom Palette"] = true;
     else delete lpOptions[selectedLp]["Custom Palette"];
 
     setOptionList(lpOptions[selectedLp]);
@@ -172,7 +175,7 @@ const Firmware = () => {
         onChange={(e) =>
           e.target.value === "Custom SysEx File"
             ? fileRef.current?.click()
-            : setSelectedLp(e.target.value)
+            : setSelectedLp(e.target.value as LaunchpadType)
         }
       >
         {lpModels
@@ -185,6 +188,8 @@ const Firmware = () => {
       </select>
 
       <div className="options">{getOptions(optionList)}</div>
+      
+      {selectedLp === LaunchpadType.BL_LPPROMK3 && paletteDirty && <p style={{margin: 0, marginBottom: 10, textAlign: 'center'}}>Custom palettes not available <br/> on this Launchpad</p>}
 
       <Link
         to="/palette"

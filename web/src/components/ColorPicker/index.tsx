@@ -1,7 +1,9 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+
 import Saturation from "./Saturation";
 import Hue from "./Hue";
 import Input from "./Input";
+
 import { hsvToHex, squashFullHex } from "../../utils";
 
 export const ColorPicker = ({

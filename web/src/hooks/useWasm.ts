@@ -34,13 +34,13 @@ export default () => {
     async (
       selectedLp: string,
       options: any,
-      palette: any
+      palette: { [index: number]: number[] }
     ): Promise<Uint8Array> => {
       try {
         if (selectedLp.includes("CFW")) return await downloadCFW();
         patch!(
           lpModels.indexOf(selectedLp),
-          Object.values(options),
+          Object.values({ "Custom Palette": false, ...options }),
           paletteToArray(palette)
         );
       } catch (e) {
