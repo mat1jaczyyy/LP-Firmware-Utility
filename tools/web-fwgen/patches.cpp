@@ -75,6 +75,8 @@ void verify_and_copy_palette(const byte family, byte* palette) {
 }
 
 void patch(const byte family, const byte target, const byte index, bool* args, byte* palette) {
+    if (target == LPPROMK3_PRODUCT_ID) return;
+
     if (args[0]) { // Patch palette
         verify_and_copy_palette(family, palette);
         palette_maps[index].patch(&input);
