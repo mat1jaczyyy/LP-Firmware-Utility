@@ -1,53 +1,47 @@
 import React from "react";
-import { useAppState } from "../hooks";
-import { useDispatch } from "react-redux";
 import CloseIcon from "@material-ui/icons/Close";
-
-import { hideNotice } from "../store/actions/notice";
+import { useStore } from "../hooks";
+import { useObserver } from "mobx-react-lite";
 
 const Notice = () => {
-  const noticeState = useAppState(({ notice }) => notice);
+  const noticeStore = useStore(({ notice }) => notice);
 
-  const dispatch = useDispatch();
-  return (
+  const state = noticeStore.state;
+
+  return useObserver(() => (
     <div className={`notice`}>
       <div>
-        <span>{noticeState.text}</span>
-        {noticeState.dismissable && (
-          <CloseIcon
-            className="closeIcon"
-            onClick={() => dispatch(hideNotice)}
-          />
+        <span>{state.text}</span>
+        {state.dismissable && (
+          <CloseIcon className="closeIcon" onClick={noticeStore.hide} />
         )}
       </div>
       <img
-        src={noticeState.svg || ""}
+        src={state.svg || ""}
         style={{
-          margin: noticeState.svg ? "50px 0" : 0,
-          visibility: noticeState.svg ? "visible" : "hidden",
+          margin: state.svg ? "50px 0" : 0,
+          visibility: state.svg ? "visible" : "hidden",
         }}
         alt=""
       />
-      <span style={{ visibility: !!noticeState.svg ? "visible" : "hidden" }}>
-        {noticeState.bl}
+      <span style={{ visibility: !!state.svg ? "visible" : "hidden" }}>
+        {state.bl}
       </span>
       <div
         className="progressDiv"
         style={{
-          visibility: noticeState.showProgress ? "visible" : "hidden",
+          visibility: state.showProgress ? "visible" : "hidden",
         }}
       >
         <progress
           style={{
             visibility:
-              noticeState.showProgress && noticeState.visible
-                ? "visible"
-                : "hidden",
+              state.showProgress && state.visible ? "visible" : "hidden",
           }}
         />
       </div>
     </div>
-  );
+  ));
 };
 
 export default Notice;

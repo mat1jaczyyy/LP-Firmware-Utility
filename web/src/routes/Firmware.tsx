@@ -1,32 +1,27 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
+import { useObserver } from "mobx-react-lite";
 
 import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
 import MidiButton from "../components/MidiButton";
 import PaletteGrid from "../components/PaletteGrid";
-import { useKonami, useLaunchpads, useWasm, useAppState } from "../hooks";
+import { useKonami, useStore } from "../hooks";
 import { flattenObject } from "../utils";
-import { showNotice, hideNotice } from "../store/actions/notice";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
 const Firmware = () => {
-  const [selectedLp, setSelectedLp] = useState<LaunchpadType>(
-    lpModels[0] as LaunchpadType
-  );
-  const [optionList, setOptionList] = useState(lpOptions[selectedLp]);
+  const uiStore = useStore(({ ui }) => ui);
+  const paletteStore = useStore(({ palette }) => palette);
+  const wasmStore = useStore(({ wasm }) => wasm);
+  const launchpadStore = useStore(({ launchpads }) => launchpads);
+  const noticeStore = useStore(({ notice }) => notice);
+
+  const [optionList, setOptionList] = useState(lpOptions[uiStore.selectedLp]);
   const [optionState, setOptionState]: any = useState({});
 
-  const paletteDirty = useAppState(({ palette }) => palette.dirty);
-  const palette = useAppState(({ palette }) => palette.colors);
-
-  const dispatch = useDispatch();
-
   const konamiSuccess = useKonami();
-  const { patchFirmware, verifyFirmware } = useWasm();
-  const { launchpads, queueFirmwareFlash } = useLaunchpads();
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -35,6 +30,12 @@ const Firmware = () => {
       Object.entries(options).map(([name, value]) => {
         let children: any;
         if (value !== false) children = getOptions(value, recursion + 1, name);
+
+        if (
+          name === "Custom Palette" &&
+          uiStore.selectedLp === LaunchpadType.CFW
+        )
+          return null;
 
         return (
           <div
@@ -68,12 +69,12 @@ const Firmware = () => {
           </div>
         );
       }),
-    [optionState, setOptionState]
+    [optionState, setOptionState, uiStore.selectedLp]
   );
 
   const flashFirmware = useCallback(
     async (
-      selectedLp: string,
+      selectedLp: LaunchpadType,
       options: { [key: string]: any },
       palette: { [index: number]: number[] },
       rawFW?: Uint8Array
@@ -82,12 +83,14 @@ const Firmware = () => {
         let firmware: Uint8Array = new Uint8Array();
 
         if (!rawFW)
-          firmware = await patchFirmware(selectedLp, options, palette);
+          firmware = await wasmStore.patch(selectedLp, options, palette);
 
         let targetLp =
-          lpModels.indexOf(selectedLp) === 6 ? lpModels[5] : selectedLp;
+          selectedLp === LaunchpadType.CFW
+            ? LaunchpadType.BL_LPPRO
+            : selectedLp;
 
-        let { cancelFlash, flashPromise } = queueFirmwareFlash(
+        let { cancelFlash, flashPromise } = launchpadStore.queueFirmwareFlash(
           rawFW || firmware,
           targetLp
         );
@@ -95,55 +98,47 @@ const Firmware = () => {
         flashPromise
           .then(async (continueFlashing: any) => {
             if (!continueFlashing) return;
-            dispatch(
-              showNotice({
-                text: "Updating...",
-                dismissable: false,
-                showProgress: true,
-              })
-            );
+            noticeStore.show({
+              text: "Updating...",
+              dismissable: false,
+              showProgress: true,
+            });
             return await continueFlashing();
           })
-          .then(() => dispatch(hideNotice));
+          .then(noticeStore.hide);
 
-        if (!launchpads.some((lp) => lp.type === targetLp))
-          dispatch(
-            showNotice({
-              text: `Please connect a ${selectedLp} in bootloader mode to continue flashing.`,
-              dismissable: true,
-              svg: `./svg/${svgs[selectedLp]}.svg`,
-              bl: `You can enter the bootloader by holding ${bltext[selectedLp]} while turning your Launchpad on.`,
-              callback: cancelFlash,
-            })
-          );
-      } catch (e) {
-        dispatch(
-          showNotice({
-            text: e.toString(),
+        if (!launchpadStore.launchpads.some((lp) => lp.type === targetLp))
+          noticeStore.show({
+            text: `Please connect a ${selectedLp} in bootloader mode to continue flashing.`,
             dismissable: true,
-          })
-        );
+            svg: `./svg/${svgs[selectedLp]}.svg`,
+            bl: `You can enter the bootloader by holding ${bltext[selectedLp]} while turning your Launchpad on.`,
+            callback: cancelFlash,
+          });
+      } catch (e) {
+        noticeStore.show({
+          text: e.toString(),
+          dismissable: true,
+        });
       }
     },
-    [patchFirmware, queueFirmwareFlash, launchpads, dispatch]
+    [wasmStore, launchpadStore, noticeStore]
   );
 
   const downloadFirmware = useCallback(
     async (selectedLp: string, options: any, palette: any) => {
       try {
-        const fw = await patchFirmware(selectedLp, options, palette);
+        const fw = await wasmStore.patch(selectedLp, options, palette);
 
         saveAs(new Blob([fw.buffer]), "output.syx");
       } catch (e) {
-        dispatch(
-          showNotice({
-            text: e.toString(),
-            dismissable: true,
-          })
-        );
+        noticeStore.show({
+          text: e.toString(),
+          dismissable: true,
+        });
       }
     },
-    [patchFirmware, dispatch]
+    [wasmStore, noticeStore]
   );
 
   const uploadFirmware = useCallback(
@@ -152,40 +147,40 @@ const Firmware = () => {
       let firmware = new Uint8Array(await file.arrayBuffer());
 
       try {
-        const targetLp = verifyFirmware(firmware);
+        const targetLp = wasmStore.verify(firmware);
 
-        flashFirmware(targetLp, {}, palette, firmware);
+        flashFirmware(targetLp, {}, paletteStore.palette, firmware);
       } catch (e) {
-        dispatch(
-          showNotice({
-            text: e.toString(),
-            dismissable: true,
-          })
-        );
+        noticeStore.show({
+          text: e.toString(),
+          dismissable: true,
+        });
       }
     },
-    [flashFirmware, verifyFirmware, dispatch, palette]
+    [flashFirmware, wasmStore, paletteStore.palette, noticeStore]
   );
 
-  // Update patch options when selected LP changed
   useEffect(() => {
-    if (paletteDirty && selectedLp !== LaunchpadType.BL_LPPROMK3)
+    let selectedLp = uiStore.selectedLp;
+
+    if (paletteStore.dirty && selectedLp !== LaunchpadType.BL_LPPROMK3)
       lpOptions[selectedLp]["Custom Palette"] = true;
     else delete lpOptions[selectedLp]["Custom Palette"];
 
     setOptionList(lpOptions[selectedLp]);
     setOptionState(flattenObject(lpOptions[selectedLp]));
-  }, [selectedLp, setOptionState, paletteDirty]);
+  }, [paletteStore.dirty, uiStore.selectedLp]);
 
-  return (
+  return useObserver(() => (
     <div className="inner">
       <select
         className="launchpads"
         onChange={(e) =>
           e.target.value === "Custom SysEx File"
             ? fileRef.current?.click()
-            : setSelectedLp(e.target.value as LaunchpadType)
+            : (uiStore.selectedLp = e.target.value as LaunchpadType)
         }
+        value={uiStore.selectedLp}
       >
         {lpModels
           .concat(konamiSuccess ? ["Custom SysEx File"] : [])
@@ -197,8 +192,17 @@ const Firmware = () => {
       </select>
 
       <div className="options">{getOptions(optionList)}</div>
-      
-      {selectedLp !== LaunchpadType.BL_LPPROMK3 && (
+
+      {uiStore.selectedLp === LaunchpadType.CFW &&
+        optionState["Custom Palette"] && (
+          <p style={{ margin: 0, textAlign: "center", opacity: 0.5 }}>
+            Upload custom palettes
+            <br />
+            to CFW using the
+          </p>
+        )}
+
+      {uiStore.selectedLp !== LaunchpadType.BL_LPPROMK3 && (
         <Link
           to="/palette"
           style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}
@@ -207,19 +211,22 @@ const Firmware = () => {
         </Link>
       )}
 
-      {optionState["Custom Palette"] && (
-        <>
-          <p style={{ margin: 0, transform: "translateY(10px)" }}>
-            Palette being applied:
-          </p>
-          <div style={{ transform: "scale(0.8)" }}>
-            <PaletteGrid />
-          </div>
-        </>
-      )}
+      {optionState["Custom Palette"] &&
+        uiStore.selectedLp !== LaunchpadType.CFW && (
+          <>
+            <p style={{ margin: 0, transform: "translateY(10px)" }}>
+              Palette being applied:
+            </p>
+            <div style={{ transform: "scale(0.8)" }}>
+              <PaletteGrid />
+            </div>
+          </>
+        )}
 
       <MidiButton
-        onClick={() => flashFirmware(selectedLp, optionState, palette)}
+        onClick={() =>
+          flashFirmware(uiStore.selectedLp, optionState, paletteStore.palette)
+        }
         action="flash firmware"
       />
       <input
@@ -232,7 +239,15 @@ const Firmware = () => {
 
       <div style={{ marginTop: -15 }} className="smol">
         <span>...or</span>
-        <p onClick={() => downloadFirmware(selectedLp, optionState, palette)}>
+        <p
+          onClick={() =>
+            downloadFirmware(
+              uiStore.selectedLp,
+              optionState,
+              paletteStore.palette
+            )
+          }
+        >
           download
         </p>
       </div>
@@ -256,7 +271,7 @@ const Firmware = () => {
         </div>
       )}
     </div>
-  );
+  ));
 };
 
 export default Firmware;

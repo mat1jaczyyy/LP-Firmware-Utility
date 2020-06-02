@@ -1,27 +1,29 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
-import { useAppState } from "../hooks";
+import { useObserver } from "mobx-react-lite";
+
+import { useStore } from "../hooks";
 
 const MidiButton = ({ action, ...props }: any) => {
-  const midiAvailable = useAppState(({ midi }) => midi.available);
+  const launchpadStore = useStore(({ launchpads }) => launchpads);
 
-  return (
+  return useObserver(() => (
     <>
       <div
         className="finish"
         data-tip={
-          midiAvailable
+          launchpadStore.available
             ? undefined
             : `Please use a browser that supports WebMidi (eg. Chrome) to ${action}.`
         }
       >
-        <button {...props} disabled={!midiAvailable}>
+        <button {...props} disabled={!launchpadStore.available}>
           update
         </button>
       </div>
       <ReactTooltip className="tooltip" effect="solid" place="top" />
     </>
-  );
+  ));
 };
 
 export default MidiButton;

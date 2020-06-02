@@ -12,7 +12,7 @@ export enum LaunchpadType {
   BL_LPMK2 = "Launchpad MK2",
   BL_LPPRO = "Launchpad Pro",
   CFW = "Launchpad Pro (CFW)",
-  UNUSED = "UNUSED"
+  UNUSED = "UNUSED",
 }
 
 interface Map {
@@ -50,7 +50,7 @@ export const bltext: Map = {
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];
 
-export const novationPalette = (() => {
+export const novationPalette: { [index: number]: number[] } = (() => {
   let obj: any = {};
   let arr = [
     [0, 0, 0],
@@ -202,7 +202,7 @@ export const CFW_PALETTE_UPLOAD_WRITE = [
   0x49,
   0x4e,
   0x41,
-  0x3D
+  0x3d,
 ];
 export const CFW_PALETTE_UPLOAD_END = [
   0x52,

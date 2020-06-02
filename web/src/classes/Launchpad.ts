@@ -18,7 +18,7 @@ export default class Launchpad {
     this.output = output;
   }
 
-  async getType() {
+  getType() {
     return new Promise(async (resolve) => {
       const listenerTimer = setTimeout(() => {
         this.input.removeListener("sysex", "all");
@@ -30,6 +30,7 @@ export default class Launchpad {
         clearTimeout(listenerTimer);
 
         this.input.removeListener("sysex", "all");
+        
 
         if (e.data.length === 17) {
           const msg = e.data.slice(1, e.data.length - 1);
