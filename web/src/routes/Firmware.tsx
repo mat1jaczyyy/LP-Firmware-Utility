@@ -261,7 +261,7 @@ const Firmware = () => {
         >
           Don't forget to install
           <a
-            href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/nvnusbaudio-2.15.5.exe"
+            href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/novationusbmidi.exe"
             target="_blank"
             rel="noopener noreferrer"
           >
