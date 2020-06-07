@@ -20,7 +20,7 @@ import {
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
-  
+
   const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
 
   const [selectedColor, setSelectedColor] = useState(0);
@@ -101,11 +101,12 @@ const Palette = () => {
   const importPalette = useCallback(
     (file?: File) => {
       if (!file) return;
-      parseRetinaPalette(file).then(
-        (newPalette) => (paletteStore.palette = observable(newPalette))
-      );
+      parseRetinaPalette(file).then((newPalette) => {
+        paletteStore.palette = observable(newPalette);
+        paletteStore.dirty = true;
+      });
     },
-    [paletteStore.palette]
+    [paletteStore.palette, paletteStore.dirty]
   );
 
   const downloadedPalette = useRef<any>({});
@@ -114,10 +115,12 @@ const Palette = () => {
       if (data[7] === 123) downloadedPalette.current = {};
       else if (data[7] === 35)
         downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
-      else if (data[7] === 125)
+      else if (data[7] === 125) {
         paletteStore.palette = observable(downloadedPalette.current);
+        paletteStore.dirty = true;
+      }
     },
-    [paletteStore.palette]
+    [paletteStore.palette, paletteStore.dirty]
   );
 
   useEffect(() => {
