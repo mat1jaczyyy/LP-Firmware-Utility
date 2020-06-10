@@ -16,8 +16,11 @@ export default class LaunchpadStore extends BaseStore {
   constructor(rootStore: RootStore) {
     super(rootStore);
     WebMidi.enable((e) => {
-      if (e) this.available = false;
-      else this.available = true;
+      if (e) {
+        this.available = false;
+        return
+      } 
+      this.available = true;
 
       let listener = () =>
         this.scan().then((lps) => {
@@ -54,7 +57,7 @@ export default class LaunchpadStore extends BaseStore {
             input,
             output
           );
-        
+
           // When new launchpads are connected, give them some time to boot before sending version query
           await new Promise((res) => setTimeout(() => res(), 50));
 
