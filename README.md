@@ -11,5 +11,4 @@ Launchpad Firmware Utility is a small web tool which allows you to update your L
 Extra hidden features (Konami code):
 
 * Custom SysEx file flashing
-* Experimental Launchpad Pro MK3 support
 * ;)
