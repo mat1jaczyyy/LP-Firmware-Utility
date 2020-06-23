@@ -6,7 +6,7 @@ import { useObserver } from "mobx-react-lite";
 import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
 import MidiButton from "../components/MidiButton";
 import PaletteGrid from "../components/PaletteGrid";
-import { useKonami, useStore } from "../hooks";
+import { useStore } from "../hooks";
 import { flattenObject } from "../utils";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
@@ -20,8 +20,6 @@ const Firmware = () => {
 
   const [optionList, setOptionList] = useState(lpOptions[uiStore.selectedLp]);
   const [optionState, setOptionState]: any = useState({});
-
-  const konamiSuccess = useKonami();
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -183,7 +181,7 @@ const Firmware = () => {
         value={uiStore.selectedLp}
       >
         {lpModels
-          .concat(konamiSuccess ? ["Custom SysEx File"] : [])
+          .concat(uiStore.konamiSuccess ? ["Custom SysEx File"] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}
