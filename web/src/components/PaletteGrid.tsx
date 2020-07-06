@@ -2,7 +2,8 @@ import React from "react";
 
 import PaletteColor from "./PaletteColor";
 import { paletteColorString } from "../utils";
-import { useAppState } from "../hooks";
+import { useStore } from "../hooks";
+import { useObserver } from "mobx-react-lite";
 
 interface Props {
   selectedColor?: number;
@@ -15,9 +16,9 @@ const PaletteGrid = ({
   onColorClicked,
   ...props
 }: Props & React.HTMLAttributes<HTMLDivElement>) => {
-  const palette = useAppState(({ palette }) => palette.colors);
+  const paletteStore = useStore(({ palette }) => palette);
 
-  return (
+  return useObserver(() => (
     <div
       {...props}
       style={{
@@ -28,7 +29,7 @@ const PaletteGrid = ({
       }}
     >
       <div style={{ display: "flex", flex: 1, flexWrap: "wrap" }}>
-        {Object.entries(palette)
+        {Object.entries(paletteStore.palette)
           .slice(0, 64)
           .map(([index, color]) => (
             <PaletteColor
@@ -40,7 +41,7 @@ const PaletteGrid = ({
           ))}
       </div>
       <div style={{ display: "flex", flex: 1, flexWrap: "wrap" }}>
-        {Object.entries(palette)
+        {Object.entries(paletteStore.palette)
           .slice(64, 128)
           .map(([index, color]) => (
             <PaletteColor
@@ -52,7 +53,7 @@ const PaletteGrid = ({
           ))}
       </div>
     </div>
-  );
+  ));
 };
 
 export default PaletteGrid;

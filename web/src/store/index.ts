@@ -1,24 +1,19 @@
-import { createStore, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import { composeWithDevTools } from "redux-devtools-extension";
+import { createContext } from "react";
 
-import rootReducer from "./reducers";
+import UIStore from "./UIStore";
+import PaletteStore from "./PaletteStore";
+import WasmStore from "./WasmStore";
+import LaunchpadStore from "./LaunchpadStore";
+import NoticeStore from "./NoticeStore";
 
-import { LaunchpadsState } from "./reducers/launchpads";
-import { MidiState } from "./reducers/midi";
-import { WasmState } from "./reducers/wasm";
-import { NoticeState } from "./reducers/notice";
-import { PaletteState } from "./reducers/palette";
-
-export interface AppState {
-  launchpads: LaunchpadsState;
-  midi: MidiState;
-  wasm: WasmState;
-  notice: NoticeState;
-  palette: PaletteState;
+export class RootStore {
+  ui = new UIStore(this);
+  palette = new PaletteStore(this);
+  wasm = new WasmStore(this);
+  launchpads = new LaunchpadStore(this);
+  notice = new NoticeStore(this)
 }
 
-export default createStore(
-  rootReducer,
-  composeWithDevTools(applyMiddleware(thunk))
-);
+export const store = new RootStore();
+
+export const StoreContext = createContext<RootStore>(store);

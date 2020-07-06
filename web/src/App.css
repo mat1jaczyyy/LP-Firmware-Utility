@@ -52,7 +52,7 @@ select {
 
 .options {
   width: auto;
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .option {
@@ -175,7 +175,7 @@ button:disabled {
 
 .hue {
   background: linear-gradient(
-    to top,
+    -90deg,
     #f00 0%,
     #ff0 17%,
     #0f0 33%,
@@ -185,7 +185,7 @@ button:disabled {
     #f00 100%
   );
   background: -webkit-linear-gradient(
-    to top,
+    -90deg,
     #f00 0%,
     #ff0 17%,
     #0f0 33%,

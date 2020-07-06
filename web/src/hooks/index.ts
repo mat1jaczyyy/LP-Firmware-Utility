@@ -1,18 +1,7 @@
-import { TypedUseSelectorHook, useSelector } from "react-redux";
+import { useContext } from "react";
 
-import wasm from "./useWasm";
-import launchpads from "./useLaunchpads";
-import midi from "./useMidi";
-import konami from "./useKonami";
+import { RootStore, StoreContext } from "../store";
 
-import { AppState } from "../store";
-
-export const useWasm = wasm;
-
-export const useLaunchpads = launchpads;
-
-export const useMidi = midi;
-
-export const useKonami = konami;
-
-export const useAppState: TypedUseSelectorHook<AppState> = useSelector;
+export const useStore = <T extends unknown>(
+  selector: (store: RootStore) => T
+): T => selector(useContext(StoreContext));

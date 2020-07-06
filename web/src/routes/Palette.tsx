@@ -1,32 +1,32 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { InputEventSysex } from "webmidi";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react-lite";
 
 import PaletteGrid from "../components/PaletteGrid";
 import ColorPicker from "../components/ColorPicker";
+
+import { useStore } from "../hooks";
+
+import { LaunchpadType } from "../constants";
 import {
   hexToRgb,
   hexToHsv,
   parseRetinaPalette,
   createRetinaPalette,
 } from "../utils";
-import useLaunchpads from "../hooks/useLaunchpads";
-import { LaunchpadType } from "../constants";
-import { Link } from "react-router-dom";
-import ReactTooltip from "react-tooltip";
-import { useAppState } from "../hooks";
-import { InputEventSysex } from "webmidi";
 
 const Palette = () => {
-  const { launchpads } = useLaunchpads();
+  const paletteStore = useStore(({ palette }) => palette);
+  const launchpadStore = useStore(({ launchpads }) => launchpads);
 
-  const palette = useAppState(({ palette }) => palette.colors);
+  const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
 
   const [selectedColor, setSelectedColor] = useState(0);
   const [paletteIndex, setPaletteIndex] = useState(1);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
-
-  const dispatch = useDispatch();
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -71,26 +71,22 @@ const Palette = () => {
   );
 
   const handleColorChanged = useCallback(
-    (color) =>
-      selectedColor !== undefined &&
-      dispatch({
-        type: "SET_PALETTE_COLOR",
-        payload: {
-          index: selectedColor,
-          color: hexToRgb(color),
-        },
-      }),
-
-    [dispatch, selectedColor]
+    (color) => {
+      if (selectedColor !== undefined) {
+        paletteStore.palette[selectedColor] = hexToRgb(color);
+        paletteStore.dirty = true;
+      }
+    },
+    [selectedColor, paletteStore.dirty, paletteStore.palette]
   );
 
   const handlePaletteUpload = useCallback(() => {
-    launchpads.forEach((lp) => {
+    launchpadStore.launchpads.forEach((lp) => {
       if (lp.type !== LaunchpadType.CFW) return;
 
       let convertedPalette = new Array<number>(512);
 
-      Object.entries(palette).forEach(([index, color]) => {
+      Object.entries(paletteStore.palette).forEach(([index, color]) => {
         let colorIndex = parseInt(index) * 4;
         convertedPalette[colorIndex] = parseInt(index);
         convertedPalette[colorIndex + 1] = color[0];
@@ -100,26 +96,32 @@ const Palette = () => {
 
       lp.uploadPalette(convertedPalette, paletteIndex - 1);
     });
-  }, [launchpads, palette, paletteIndex]);
+  }, [launchpadStore.launchpads, paletteStore.palette, paletteIndex]);
 
   const importPalette = useCallback(
     (file?: File) => {
       if (!file) return;
-      parseRetinaPalette(file).then((newPalette) =>
-        dispatch({ type: "SET_PALETTE", payload: newPalette })
-      );
+      parseRetinaPalette(file).then((newPalette) => {
+        paletteStore.palette = observable(newPalette);
+        paletteStore.dirty = true;
+      });
     },
-    [dispatch]
+    [paletteStore.palette, paletteStore.dirty]
   );
 
   const downloadedPalette = useRef<any>({});
-  const handleCFWSysex = useCallback(({ data }: InputEventSysex) => {
-    if (data[7] === 123) downloadedPalette.current = {};
-    else if (data[7] === 35)
-      downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
-    else if (data[7] === 125)
-      dispatch({ type: "SET_PALETTE", payload: downloadedPalette.current });
-  }, [dispatch]);
+  const handleCFWSysex = useCallback(
+    ({ data }: InputEventSysex) => {
+      if (data[7] === 123) downloadedPalette.current = {};
+      else if (data[7] === 35)
+        downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
+      else if (data[7] === 125) {
+        paletteStore.palette = observable(downloadedPalette.current);
+        paletteStore.dirty = true;
+      }
+    },
+    [paletteStore.palette, paletteStore.dirty]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -127,23 +129,29 @@ const Palette = () => {
   }, [handleKeyDown]);
 
   useEffect(() => {
-    launchpads.forEach(
+    launchpadStore.launchpads.forEach(
       (lp) =>
         lp.type === LaunchpadType.CFW &&
         lp.input.addListener("sysex", "all", handleCFWSysex)
     );
     return () => {
-      launchpads.forEach(
+      launchpadStore.launchpads.forEach(
         (lp) =>
           lp.type === LaunchpadType.CFW &&
           lp.input.removeListener("sysex", "all", handleCFWSysex)
       );
     };
-  }, [launchpads, handleCFWSysex]);
+  }, [launchpadStore.launchpads, handleCFWSysex]);
 
-  let cfwPresent = launchpads.some((lp) => lp.type === LaunchpadType.CFW);
+  const selectedRef = useRef(0);
+  useEffect(() => {
+    if (selectedRef.current !== selectedColor) {
+      setHsv(hexToHsv(paletteStore.palette[selectedColor]));
+      selectedRef.current = selectedColor;
+    }
+  }, [paletteStore.palette, selectedColor]);
 
-  return (
+  return useObserver(() => (
     <div
       style={{
         display: "flex",
@@ -155,11 +163,9 @@ const Palette = () => {
         selectedColor={selectedColor}
         onColorClicked={(index) => setSelectedColor(index)}
       />
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-        <ColorPicker
-          hsv={hexToHsv(palette[selectedColor])}
-          onColorChange={handleColorChanged}
-        />
+      <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} />
         <div
           style={{
             display: "flex",
@@ -176,52 +182,42 @@ const Palette = () => {
             type="file"
             ref={fileRef}
           />
-          <button onClick={() => createRetinaPalette(palette)}>Export</button>
-          <div
-            style={{ marginTop: 25 }}
-            data-tip={
-              cfwPresent
-                ? undefined
-                : `Direct uploading requires a Launchpad Pro running custom firmware.<br/>To upload a palette to a normal Launcpad, finish editing<br/>and flash it with the Firmware Utility.`
-            }
-          >
-            <button disabled={!cfwPresent} onClick={handlePaletteUpload}>
-              Upload
-            </button>
-          </div>
-          {cfwPresent && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
-              <select
-                onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
-                value={paletteIndex}
-                style={{ width: 40, height: 30 }}
+          <button onClick={() => createRetinaPalette(paletteStore.palette)}>
+            Export
+          </button>
+
+          {launchpadStore.cfwPresent && (
+            <>
+              <button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
+                Upload
+              </button>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-                <option value={3}>3</option>
-              </select>
-            </div>
+                <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
+                <select
+                  onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
+                  value={paletteIndex}
+                  style={{ width: 50, height: 38 }}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+              </div>
+            </>
           )}
-          <ReactTooltip
-            className="tooltip"
-            multiline={true}
-            effect="solid"
-            place="top"
-          />
         </div>
       </div>
       <Link to="/" style={{ color: "#888888", marginTop: 10 }}>
         {"< Firmware Utility"}
       </Link>
     </div>
-  );
+  ));
 };
 
 export default Palette;
