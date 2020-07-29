@@ -38,6 +38,24 @@ export const downloadCFW = async () => {
   }
 };
 
+export const downloadCFY = async () => {
+  try {
+    const response = await axios.get(
+      "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx?ref=cfy"
+    );
+
+    return new Uint8Array(
+      atob(response.data.content)
+        .split("")
+        .map((c) => c.charCodeAt(0))
+    );
+  } catch (e) {
+    throw new Error(
+      "An error occured while downloading the CFY. Please try again."
+    );
+  }
+};
+
 export const paletteColorString = (color: number[]) =>
   `${((color[0] + 1) * 4 - 1).toString(16).padStart(2, "0")}${(
     (color[1] + 1) * 4 -

@@ -84,7 +84,7 @@ const Firmware = () => {
           firmware = await wasmStore.patch(selectedLp, options, palette);
 
         let targetLp =
-          selectedLp === LaunchpadType.CFW
+          (selectedLp === LaunchpadType.CFW || selectedLp === LaunchpadType.CFY)
             ? LaunchpadType.BL_LPPRO
             : selectedLp;
 
@@ -107,7 +107,7 @@ const Firmware = () => {
 
         if (!launchpadStore.launchpads.some((lp) => lp.type === targetLp))
           noticeStore.show({
-            text: `Please connect a ${selectedLp} in bootloader mode to continue flashing.`,
+            text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
             dismissable: true,
             svg: `./svg/${svgs[selectedLp]}.svg`,
             bl: `You can enter the bootloader by holding ${bltext[selectedLp]} while turning your Launchpad on.`,
@@ -181,7 +181,7 @@ const Firmware = () => {
         value={uiStore.selectedLp}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? ["Custom SysEx File"] : [])
+          .concat(uiStore.konamiSuccess ? [LaunchpadType.CFY, "Custom SysEx File"] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}

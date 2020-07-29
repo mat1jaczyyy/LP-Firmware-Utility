@@ -1,7 +1,7 @@
 import BaseStore from "./BaseStore";
 import { observable, action } from "mobx";
 import { RootStore } from ".";
-import { downloadCFW, paletteToArray } from "../utils";
+import { downloadCFW, paletteToArray, downloadCFY } from "../utils";
 import { lpModels, LaunchpadType } from "../constants";
 
 declare let Module: any;
@@ -51,6 +51,7 @@ export default class WasmStore extends BaseStore {
   ) => {
     try {
       if (selectedLp.includes("CFW")) return await downloadCFW();
+      else if (selectedLp.includes("CFY")) return await downloadCFY();
       this._patch!(
         lpModels.indexOf(selectedLp),
         Object.values({ "Custom Palette": false, ...options }),
