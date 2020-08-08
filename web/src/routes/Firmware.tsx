@@ -181,7 +181,7 @@ const Firmware = () => {
         value={uiStore.selectedLp}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? [LaunchpadType.CFY, "Custom SysEx File"] : [])
+          .concat(uiStore.konamiSuccess ? ["Custom SysEx File"] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}
