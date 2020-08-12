@@ -10,6 +10,7 @@ export const ColorPicker = ({
   style,
   onColorChange,
   hsv: parentHsv,
+  onTextFocusChanged,
   ...props
 }: any) => {
   const [hsv, setHsv] = useState([1, 1, 1]);
@@ -60,7 +61,12 @@ export const ColorPicker = ({
           height: 40,
         }}
       >
-        <Input onColorChanged={(hsv: number[]) => setHsv(hsv)} hsv={hsv} />
+        <Input
+          onColorChanged={(hsv: number[]) => setHsv(hsv)}
+          hsv={hsv}
+          onBlur={() => onTextFocusChanged(false)}
+          onFocus={() => onTextFocusChanged(true)}
+        />
         <div
           style={{
             width: 40,

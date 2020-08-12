@@ -9,6 +9,7 @@ interface Props {
 const Input = ({
   onColorChanged,
   hsv,
+  ...props
 }: Props & HTMLAttributes<HTMLInputElement>) => {
   const [text, setText] = useState("");
 
@@ -61,6 +62,7 @@ const Input = ({
         if (text.length === 6) handleChange(e);
       }}
       value={`#${text.toUpperCase()}`}
+      {...props}
     />
   );
 };

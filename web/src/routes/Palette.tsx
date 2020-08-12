@@ -165,7 +165,11 @@ const Palette = () => {
       />
       <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
       <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} />
+        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} onTextFocusChanged={(focused: boolean) => {
+          console.log(focused)
+          if (focused) window.removeEventListener("keydown", handleKeyDown)
+          else window.addEventListener("keydown", handleKeyDown)
+        }} />
         <div
           style={{
             display: "flex",
