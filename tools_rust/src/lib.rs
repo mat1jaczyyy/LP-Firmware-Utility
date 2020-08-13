@@ -1,4 +1,6 @@
-const fn ceil_div(a: usize, b: usize) -> usize {
+use std::path::Path;
+
+pub const fn ceil_div(a: usize, b: usize) -> usize {
     a / b + (a % b != 0) as usize
 }
 
@@ -55,5 +57,42 @@ pub fn get_products(family_id: u8) -> Vec<u8> {
         LPX_FAMILY_ID => return PRODUCTS_LPX.to_vec(),
         LPRGB_FAMILY_ID => return PRODUCTS_LPRGB.to_vec(),
         _ => panic!("Attempted to get products for invalid family id")
+    }
+}
+
+pub fn uint_to_nibbles(mut n: u32) -> [u8; 8] {
+    let mut ret: [u8; 8] = [0; 8];
+    
+    for i in 0..8 {
+        ret[i] = ((n & 0xF0000000) >> 0x1C) as u8;
+        n <<= 0x04;
+    }
+    
+    ret
+}
+
+pub fn input_validate(path: String) -> Result<(), String> {
+    match Path::new(&path).exists() {
+        true => Ok(()),
+        false => Err("Input file not found!".to_string())
+    }
+}
+
+pub fn print_vector_error(i: usize, error: &str, v: &Vec<u8>) {
+    if v.len() == 0 {
+        println!("Runtime error at position {:#08x}: can't expect empty vector {}", i, error);
+    } else {
+        print!("Parse error at position {:#08x}: expected {} ({:#02x}", i, error, v[0]);
+        
+        for j in 1..v.len() {
+            print!(", {:#02x}", v[j]);
+        }
+        println!(").");
+    }
+}
+
+pub fn verify_uints(i: usize, a: u32, b: u32, error: &str) {
+    if a != b {
+        panic!("Syntax error at position {:#08x}: mismatching {}.", i, error);
     }
 }

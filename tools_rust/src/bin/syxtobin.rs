@@ -1,53 +1,33 @@
+use std::{path::PathBuf, option::Option};
 use structopt::StructOpt;
 use tools_rust::*;
-use std::option::Option;
 
-fn print_vector_error(i: usize, error: &str, v: &Vec<u8>) {
-    if v.len() == 0 {
-        println!("Runtime error at position {:#08x}: can't expect empty vector {}", i, error);
-    } else {
-        print!("Parse error at position {:#08x}: expected {} ({:#02x}", i, error, v[0]);
-        
-        for j in 1..v.len() {
-            print!(", {:#02x}", v[j]);
-        }
-        println!(").");
-    }
-}
-
-fn verify_uints(i: usize, a: u32, b: u32, error: &str) {
-    if a != b {
-        panic!("Syntax error at position {:#08x}: mismatching {}.", i, error);
-    }
-}
-
-struct Converter {
+pub struct SyxToBin {
     input: Vec<u8>,
     output: Vec<u8>,
     expected_types: Vec<u8>,
     family: u8,
     target: u8,
-    version: u32,
-    checksum: u32,
     block: usize
 }
 
-impl Converter {
-    fn new(input: Vec<u8>) -> Converter {
-        Converter {
+impl SyxToBin {
+    fn new(input: Vec<u8>) -> SyxToBin {
+        SyxToBin {
             input,
             output: vec![],
             expected_types: vec![UPDATE_INIT],
             family: LPX_FAMILY_ID,
             target: LPX_PRODUCT_ID,
-            version: 0,
-            checksum: 0,
             block: 0,
         }
     }
     
     fn convert(&mut self) -> &Vec<u8> {
         let mut i: usize = 0;
+        let mut version: u32 = 0;
+        let mut checksum: u32 = 0;
+        
         self.output = Vec::new();
         
         while i < self.input.len() {
@@ -63,7 +43,7 @@ impl Converter {
                     i += self.verify_byte_in_array(i, &get_products(self.family), "LP_PRODUCT_ID");
                     self.target = self.input[i - 1];
                     
-                    self.version = self.nibbles_to_u32(&mut i, 6);
+                    version = self.nibbles_to_u32(&mut i, 6);
                     
                     if self.family == LPX_FAMILY_ID {
                         self.expected_types = vec![UPDATE_HEADER];
@@ -78,10 +58,10 @@ impl Converter {
                 UPDATE_HEADER => {
                     i += 1;
                     
-                    verify_uints(i, self.version, self.nibbles_to_u32(&mut i, 6), "VERSION");
+                    verify_uints(i, version, self.nibbles_to_u32(&mut i, 6), "VERSION");
                     
                     self.output.append(&mut vec![0; self.nibbles_to_u32(&mut i, 8) as usize]);
-                    self.checksum = self.nibbles_to_u32(&mut i, 8);
+                    checksum = self.nibbles_to_u32(&mut i, 8);
                     
                     self.block = 1;
                     self.expected_types = vec![UPDATE_WRITE, UPDATE_FINISH];
@@ -107,7 +87,7 @@ impl Converter {
             i += self.verify_byte(i, SYSEX_END, "SYSEX_END");
         }
         if self.family == LPX_FAMILY_ID {
-            verify_uints(self.input.len(), self.checksum, crc32(&self.output), "CHECKSUM");
+            verify_uints(self.input.len(), checksum, crc32(&self.output), "CHECKSUM");
         }
         
         &self.output
@@ -176,34 +156,30 @@ impl Converter {
 
 #[derive(StructOpt)]
 struct Cli {
-    path: std::path::PathBuf,
-    out: Option<String> 
+    #[structopt(validator(input_validate), help("Path to input .syx file"))]
+    input: PathBuf,
+    
+    #[structopt(help("Optional output file name. If none is present, output name will be the same as the input but with .bin extension."))]
+    output: Option<String> 
 }
 
 fn main() {
     let args = Cli::from_args();
     
-    let mut path = args.path;
+    let mut path = args.input;
     
-    let input_syx = match std::fs::read(&path) {
-        Ok(vec) => vec,
-        Err(_) => panic!("File not found!")
-    };
-    
-    path.set_extension("bin");
-    
-    let out_path = match args.out {
+    let input_syx = std::fs::read(&path).unwrap();
+        
+    let out_path = match args.output {
         Some(s) => s,
-        None => path.file_name().unwrap().to_str().unwrap().to_string()
+        None => {
+            path.set_extension("bin");
+            path.file_name().unwrap().to_str().unwrap().to_string()
+        }
     };
-    
-    let out_str = out_path.as_str();
-    
-    let mut converter = Converter::new(input_syx);
-    let converted_bin = converter.convert();
-    
-    match std::fs::write(out_str, converted_bin) {
-        Ok(_) =>  println!("Success! Saved to {}", out_str),
+        
+    match std::fs::write(&out_path, SyxToBin::new(input_syx).convert()) {
+        Ok(_) =>  println!("Success! Saved to {}", &out_path),
         Err(err) => panic!(err)
     }
 }
