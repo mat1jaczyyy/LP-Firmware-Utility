@@ -11,17 +11,18 @@ export default class UIStore extends BaseStore {
   constructor(root: RootStore) {
     super(root);
 
-    let listener = (e: KeyboardEvent) => {
-      if (this.konamiSuccess) return;
+    window.addEventListener("keydown", this.konamiListener);
+  }
 
-      if (e.keyCode === konamiSequence[this.konamiInput.length]) {
-        this.konamiInput.push(e.keyCode);
-        if (this.konamiInput.length === konamiSequence.length)
-          this.konamiSuccess = true;
-      } else this.konamiInput = [];
-    };
-
-    window.addEventListener("keydown", listener);
+  @action.bound
+  konamiListener(e: KeyboardEvent) {
+    if (e.keyCode === konamiSequence[this.konamiInput.length]) {
+      this.konamiInput.push(e.keyCode);
+      if (this.konamiInput.length === konamiSequence.length) {
+        this.konamiSuccess = true;
+        window.removeEventListener("keydown", this.konamiListener);
+      }
+    } else this.konamiInput = [];
   }
 
   @action
