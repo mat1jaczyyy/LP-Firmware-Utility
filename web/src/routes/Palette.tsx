@@ -175,23 +175,21 @@ const Palette = () => {
             else window.addEventListener("keydown", handleKeyDown);
           }}
         />
-        <div className="flex flex-col ml-4 p-2 h-full space-between">
-          <div className="space-y-2 flex flex-col">
-            <Button onClick={() => fileRef.current!.click()}>Import</Button>
-            <input
-              style={{ display: "none" }}
-              onChange={(e) => importPalette(e.target.files?.[0])}
-              type="file"
-              ref={fileRef}
-            />
-            <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
-              Export
-            </Button>
-          </div>
+        <div className="flex flex-col ml-4 p-2 h-full space-y-2">
+          <Button onClick={() => fileRef.current!.click()}>Import</Button>
+          <input
+            style={{ display: "none" }}
+            onChange={(e) => importPalette(e.target.files?.[0])}
+            type="file"
+            ref={fileRef}
+          />
+          <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
+            Export
+          </Button>
 
           {launchpadStore.current && isCustomFW(launchpadStore.current.type!) && (
-            <div className="space-y-2 flex flex-col">
-              <Button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
+            <>
+              <Button onClick={handlePaletteUpload}>
                 Upload
               </Button>
               <div className="flex items-center justify-center text-lg">
@@ -206,7 +204,7 @@ const Palette = () => {
                   <option value={3}>3</option>
                 </select>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
