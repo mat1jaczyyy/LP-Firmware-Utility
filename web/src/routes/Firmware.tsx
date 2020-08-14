@@ -272,7 +272,7 @@ const Firmware = () => {
       </p>
 
       {isWindows && (
-        <p className="mt-4">
+        <p className="pt-4">
           <span className="opacity-50">Don't forget to install </span>
           <a
             href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/novationusbmidi.exe"
