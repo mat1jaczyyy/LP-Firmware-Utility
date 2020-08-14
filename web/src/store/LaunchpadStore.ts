@@ -9,7 +9,7 @@ import { portsMatch, portNeutralize } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
   readonly launchpads: IObservableArray<Launchpad> = observable([]);
-  
+
   @observable available?: boolean = undefined;
 
   private lastScan?: Date = undefined;
@@ -51,7 +51,7 @@ export default class LaunchpadStore extends BaseStore {
 
   @computed
   get current(): Launchpad | undefined {
-    return this.launchpads[0]
+    return this.launchpads.length > 0 ? this.launchpads[0] : undefined;
   }
 
   @action.bound
@@ -83,9 +83,9 @@ export default class LaunchpadStore extends BaseStore {
       }
     }
     if (this.lastScan > currentTimestamp) return;
-    this.setLaunchpads(launchpads)
+    this.setLaunchpads(launchpads);
     return launchpads;
-  };
+  }
 
   @action
   queueFirmwareFlash = (buffer: Uint8Array, targetLp: string) => {

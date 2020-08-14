@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, useHistory } from "react-router-dom";
 import { useObserver } from "mobx-react-lite";
 import { autorun } from "mobx";
+
+import { headers } from "./routes";
 import Firmware from "./routes/Firmware";
 import Palette from "./routes/Palette";
 
@@ -30,6 +32,7 @@ const TransitionRoute = ({ component: Component, ...props }: any) => (
 const App = () => {
   const wasmStore = useStore(({ wasm }) => wasm);
   const noticeStore = useStore(({ notice }) => notice);
+  const history = useHistory();
 
   useEffect(
     () =>
@@ -49,6 +52,9 @@ const App = () => {
     [noticeStore, wasmStore.available]
   );
 
+  if (!Object.keys(headers).includes(history.location.pathname.slice(1)))
+    history.push("/firmware");
+
   return useObserver(() => (
     <div className="w-screen h-screen flex flex-col items-center overflow-hidden">
       <Header disabled={noticeStore.state.visible} />
@@ -61,17 +67,29 @@ const App = () => {
             }}
             key={noticeStore.state.visible.toString()}
           >
-        {noticeStore.state.visible ? (
-          <Notice />
-        ) : (
-          <>
-            <TransitionRoute path="/firmware" component={Firmware} />
-            <TransitionRoute path="/palette" component={Palette} />
-            <Redirect to="/firmware" />
-          </>
-        )}
-        </CSSTransition>
+            {noticeStore.state.visible ? (
+              <Notice />
+            ) : (
+              <>
+                <TransitionRoute path="/firmware" component={Firmware} />
+                <TransitionRoute path="/palette" component={Palette} />
+              </>
+            )}
+          </CSSTransition>
         </SwitchTransition>
+        <span className="w-full bottom-0 pb-2 text-center absolute">
+          <span className="opacity-25">
+            built by Brendonovich & mat1jaczyyy ©{" "}
+          </span>
+          <a
+            href="https://github.com/mat1jaczyyy/LP-Firmware-Utility"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-75 underline"
+          >
+            github
+          </a>
+        </span>
       </div>
     </div>
   ));

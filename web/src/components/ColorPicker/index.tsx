@@ -7,7 +7,6 @@ import Input from "./Input";
 import { hsvToHex, squashFullHex } from "../../utils";
 
 export const ColorPicker = ({
-  style,
   onColorChange,
   hsv: parentHsv,
   onTextFocusChanged,
@@ -26,7 +25,7 @@ export const ColorPicker = ({
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", ...style }}
+      className="flex flex-col"
       onMouseDown={() => {
         window.addEventListener("mouseup", function listener() {
           onColorChange(hsvToHex(colorRef.current || hsv));

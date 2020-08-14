@@ -61,6 +61,7 @@ const Hue = ({
         height,
         ...style,
       }}
+      className="hue border border-2 border-black"
       onMouseDown={(e) => {
         handleMouseMove(e);
         window.addEventListener("mousemove", handleMouseMove);
@@ -71,15 +72,12 @@ const Hue = ({
       }}
       ref={container}
       {...props}
-      className="hue"
     >
       <div
         style={{
-          position: "absolute",
-          left: "0px",
-          right: "0px",
           top: `${hue * 100}%`,
         }}
+        className="absolute left-0 right-0"
       >
         <div
           style={{

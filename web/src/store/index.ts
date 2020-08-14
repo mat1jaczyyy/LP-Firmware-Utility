@@ -5,7 +5,6 @@ import PaletteStore from "./PaletteStore";
 import WasmStore from "./WasmStore";
 import LaunchpadStore from "./LaunchpadStore";
 import NoticeStore from "./NoticeStore";
-import { autorun } from "mobx";
 
 export class RootStore {
   ui = new UIStore(this);
@@ -16,9 +15,5 @@ export class RootStore {
 }
 
 export const store = new RootStore();
-
-autorun(() => {
-  console.log(store.launchpads.current);
-});
 
 export const StoreContext = createContext<RootStore>(store);

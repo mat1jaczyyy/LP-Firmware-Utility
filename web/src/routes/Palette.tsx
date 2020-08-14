@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import { InputEventSysex } from "webmidi";
 import { observable, runInAction } from "mobx";
 import { useObserver } from "mobx-react-lite";
@@ -175,50 +174,38 @@ const Palette = () => {
             else window.addEventListener("keydown", handleKeyDown);
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            marginLeft: 10,
-            padding: 5,
-            height: "100%",
-          }}
-        >
-          <Button onClick={() => fileRef.current!.click()}>Import</Button>
-          <input
-            style={{ display: "none" }}
-            onChange={(e) => importPalette(e.target.files?.[0])}
-            type="file"
-            ref={fileRef}
-          />
-          <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
-            Export
-          </Button>
+        <div className="flex flex-col ml-4 p-2 h-full space-between">
+          <div className="space-y-2 flex flex-col">
+            <Button onClick={() => fileRef.current!.click()}>Import</Button>
+            <input
+              style={{ display: "none" }}
+              onChange={(e) => importPalette(e.target.files?.[0])}
+              type="file"
+              ref={fileRef}
+            />
+            <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
+              Export
+            </Button>
+          </div>
 
           {launchpadStore.current?.type === LaunchpadType.CFW && (
-            <>
+            <div className="space-y-2 flex flex-col">
               <Button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
                 Upload
               </Button>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className="flex items-center justify-center text-lg">
                 <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
                 <select
                   onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
                   value={paletteIndex}
-                  style={{ width: 50, height: 38 }}
+                  className="p-1 text-xl"
                 >
                   <option value={1}>1</option>
                   <option value={2}>2</option>
                   <option value={3}>3</option>
                 </select>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

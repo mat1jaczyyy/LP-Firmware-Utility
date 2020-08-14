@@ -4,7 +4,6 @@ import { saveAs } from "file-saver";
 import { useObserver } from "mobx-react-lite";
 
 import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
-import MidiButton from "../components/MidiButton";
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
@@ -38,7 +37,7 @@ const Firmware = () => {
 
         return (
           <div
-            className={recursion === 0 ? "mainOption" : undefined}
+            className={recursion === 0 ? "w-auto" : undefined}
             key={name}
             style={{ paddingLeft: recursion * 15, margin: "5px 0" }}
           >
@@ -174,9 +173,9 @@ const Firmware = () => {
     <div className="w-full space-y-2 flex flex-col justify-center items-center top-0 bottom-0 absolute">
       <select
         style={{
-          width: `${uiStore.selectedLp.length * 0.6 + 2}em`,
+          width: `${uiStore.selectedLp.length * 0.55 + 2.5}em`,
         }}
-        className="py-2 px-4 text-3xl font-normal font-sans"
+        className="py-2 px-4 text-3xl font-normal font-sans appearance-none custom-select"
         onChange={(e) =>
           e.target.value === "Custom SysEx File"
             ? fileRef.current?.click()
