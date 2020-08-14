@@ -17,15 +17,11 @@ nav {
 }
 
 select {
-  background: #212121;
-  border: 1px solid #444;
-  border-radius: 0.3em;
+  background: #252525;
 }
 
 button {
-  border: 2px solid #444;
-  border-radius: 0.4em;
-  background: #212121;
+  background: #252525;
 }
 
 button:hover {
