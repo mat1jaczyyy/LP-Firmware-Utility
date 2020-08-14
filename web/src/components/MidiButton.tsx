@@ -17,7 +17,7 @@ const MidiButton = ({ action, ...props }: any) => {
             : `Please use a browser that supports WebMidi (eg. Chrome) to ${action}.`
         }
       >
-        <button {...props} disabled={!launchpadStore.available}>
+        <button {...props} className="font-sans" disabled={!launchpadStore.available}>
           update
         </button>
       </div>

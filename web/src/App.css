@@ -7,18 +7,13 @@ body {
   user-select: none;
 }
 
+nav {
+  background: #292929;
+}
+
 @font-face {
   font-family: "Roboto Mono";
   src: url("./assets/RobotoMono-Regular.ttf");
-}
-
-.lp-firmware-utility {
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
 }
 
 .header {
@@ -44,15 +39,6 @@ body {
 
 select {
   background: #212121;
-  color: #fff;
-  padding: 8px;
-  border: none;
-  font-size: 1.3em;
-}
-
-.options {
-  width: auto;
-  margin: 10px 0;
 }
 
 .option {
@@ -105,13 +91,8 @@ button:disabled {
 }
 
 .closeIcon {
-  margin-left: 0.5em;
   opacity: 0.75;
   cursor: pointer;
-}
-
-.progressDiv {
-  margin-top: 10px;
 }
 
 .smol {
@@ -203,3 +184,54 @@ button:disabled {
   right: 0;
   bottom: 0;
 }
+
+.progress {
+  border-radius: 999px;
+  background: white;
+  position: relative;
+  clip-path: inset(0 0 0 0);
+}
+
+.progress::before {
+  position: absolute;
+  border-radius: 999px;
+  width: 20%;
+  height: 100%;
+  left: -20%;
+  top: 0;
+  background: rgb(0, 115, 255);
+  content: "";
+  animation: infinite 1.5s progress_anim linear;
+}
+
+@keyframes progress_anim {
+  from {
+    left: -20%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+.fall-enter {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.fall-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.fall-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fall-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+

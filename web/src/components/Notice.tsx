@@ -2,6 +2,7 @@ import React from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import { useStore } from "../hooks";
 import { useObserver } from "mobx-react-lite";
+import clsx from "clsx";
 
 const Notice = () => {
   const noticeStore = useStore(({ notice }) => notice);
@@ -9,11 +10,14 @@ const Notice = () => {
   const state = noticeStore.state;
 
   return useObserver(() => (
-    <div className={`notice`}>
+    <div className="w-full h-full flex flex-col justify-center items-center text-center overflow-hidden text-3xl">
       <div>
         <span>{state.text}</span>
         {state.dismissable && (
-          <CloseIcon className="closeIcon" onClick={noticeStore.hide} />
+          <CloseIcon
+            className="opacity-75 cursor-pointer"
+            onClick={noticeStore.hide}
+          />
         )}
       </div>
       <img
@@ -28,18 +32,11 @@ const Notice = () => {
         {state.bl}
       </span>
       <div
-        className="progressDiv"
-        style={{
-          visibility: state.showProgress ? "visible" : "hidden",
-        }}
-      >
-        <progress
-          style={{
-            visibility:
-              state.showProgress && state.visible ? "visible" : "hidden",
-          }}
-        />
-      </div>
+        className={clsx(
+          "progress w-64 h-2 mt-4",
+          !state.showProgress && "hidden"
+        )}
+      />
     </div>
   ));
 };

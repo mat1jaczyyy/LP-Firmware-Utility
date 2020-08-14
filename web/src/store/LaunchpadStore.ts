@@ -1,4 +1,4 @@
-import { observable, action, computed, IObservableArray } from "mobx";
+import { observable, action, computed, IObservableArray, autorun } from "mobx";
 import WebMidi from "webmidi";
 
 import BaseStore from "./BaseStore";
@@ -9,28 +9,39 @@ import { portsMatch, portNeutralize } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
   readonly launchpads: IObservableArray<Launchpad> = observable([]);
+  
   @observable available?: boolean = undefined;
 
   private lastScan?: Date = undefined;
 
   constructor(rootStore: RootStore) {
     super(rootStore);
-    WebMidi.enable((e) => {
-      if (e) {
-        this.available = false;
-        return
-      } 
-      this.available = true;
+    WebMidi.enable(this.midiInit, true);
+  }
 
-      let listener = () =>
-        this.scan().then((lps) => {
-          if (lps !== undefined) this.launchpads.replace(lps);
-        });
-      listener();
+  @action.bound
+  midiInit(e?: Error) {
+    if (e) {
+      this.available = false;
+      return;
+    }
+    this.available = true;
 
-      WebMidi.addListener("connected", listener);
-      WebMidi.addListener("disconnected", listener);
-    }, true);
+    let listener = () => {
+      this.scan().then((lps) => {
+        if (lps !== undefined) this.setLaunchpads(lps);
+      });
+    };
+
+    listener();
+
+    WebMidi.addListener("connected", listener);
+    WebMidi.addListener("disconnected", listener);
+  }
+
+  @action.bound
+  setLaunchpads(lps: Launchpad[]) {
+    this.launchpads.replace(lps);
   }
 
   @computed
@@ -38,8 +49,13 @@ export default class LaunchpadStore extends BaseStore {
     return this.launchpads.some((lp) => lp.type === LaunchpadType.CFW);
   }
 
-  @action
-  scan = async () => {
+  @computed
+  get current(): Launchpad | undefined {
+    return this.launchpads[0]
+  }
+
+  @action.bound
+  async scan() {
     const launchpads: Launchpad[] = [];
 
     let currentTimestamp = new Date();
@@ -67,6 +83,7 @@ export default class LaunchpadStore extends BaseStore {
       }
     }
     if (this.lastScan > currentTimestamp) return;
+    this.setLaunchpads(launchpads)
     return launchpads;
   };
 
@@ -76,6 +93,13 @@ export default class LaunchpadStore extends BaseStore {
 
     let flashPromise = new Promise(async (resolve) => {
       const attemptFlash = async () => {
+        const target = new Promise((res) => {
+          autorun(() => {
+            if (this.current !== undefined && this.current.type === targetLp)
+              res(this.current);
+          });
+        });
+
         const lps = await this.scan();
         if (!lps || !lps.some((lp) => lp.type === targetLp)) return;
 

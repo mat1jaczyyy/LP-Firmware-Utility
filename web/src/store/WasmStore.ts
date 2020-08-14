@@ -1,5 +1,5 @@
 import BaseStore from "./BaseStore";
-import { observable, action } from "mobx";
+import { observable, action, runInAction } from "mobx";
 import { RootStore } from ".";
 import { downloadCFW, paletteToArray, downloadCFY } from "../utils";
 import { lpModels, LaunchpadType } from "../constants";
@@ -15,6 +15,11 @@ export default class WasmStore extends BaseStore {
   constructor(rootStore: RootStore) {
     super(rootStore);
 
+    this.init();
+  }
+
+  @action
+  init() {
     try {
       if (
         typeof WebAssembly === "object" &&
@@ -33,7 +38,7 @@ export default class WasmStore extends BaseStore {
               "array",
             ]);
             this._verify = Module.cwrap("verify_firmware", "number");
-            this.available = true;
+            runInAction(() => (this.available = true));
           };
           document.body.appendChild(fwgen);
         } else this.available = false;

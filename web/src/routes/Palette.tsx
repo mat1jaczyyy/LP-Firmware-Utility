@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { InputEventSysex } from "webmidi";
-import { observable } from "mobx";
+import { observable, runInAction } from "mobx";
 import { useObserver } from "mobx-react-lite";
 
 import PaletteGrid from "../components/PaletteGrid";
@@ -16,6 +16,7 @@ import {
   parseRetinaPalette,
   createRetinaPalette,
 } from "../utils";
+import Button from "../components/Button";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
@@ -73,8 +74,10 @@ const Palette = () => {
   const handleColorChanged = useCallback(
     (color) => {
       if (selectedColor !== undefined) {
-        paletteStore.palette[selectedColor] = hexToRgb(color);
-        paletteStore.dirty = true;
+        runInAction(() => {
+          paletteStore.palette[selectedColor] = hexToRgb(color);
+          paletteStore.dirty = true;
+        });
       }
     },
     [selectedColor, paletteStore.dirty, paletteStore.palette]
@@ -102,8 +105,10 @@ const Palette = () => {
     (file?: File) => {
       if (!file) return;
       parseRetinaPalette(file).then((newPalette) => {
-        paletteStore.palette = observable(newPalette);
-        paletteStore.dirty = true;
+        runInAction(() => {
+          paletteStore.palette = observable(newPalette);
+          paletteStore.dirty = true;
+        });
       });
     },
     [paletteStore.palette, paletteStore.dirty]
@@ -116,8 +121,10 @@ const Palette = () => {
       else if (data[7] === 35)
         downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
       else if (data[7] === 125) {
-        paletteStore.palette = observable(downloadedPalette.current);
-        paletteStore.dirty = true;
+        runInAction(() => {
+          paletteStore.palette = observable(downloadedPalette.current);
+          paletteStore.dirty = true;
+        });
       }
     },
     [paletteStore.palette, paletteStore.dirty]
@@ -152,24 +159,22 @@ const Palette = () => {
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
+    <div className="w-full flex flex-col items-center justify-center space-y-2 top-0 bottom-0 absolute">
       <PaletteGrid
         selectedColor={selectedColor}
         onColorClicked={(index) => setSelectedColor(index)}
+        width={450}
       />
-      <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} onTextFocusChanged={(focused: boolean) => {
-          console.log(focused)
-          if (focused) window.removeEventListener("keydown", handleKeyDown)
-          else window.addEventListener("keydown", handleKeyDown)
-        }} />
+      <p className="text-xl">Selected Velocity: {selectedColor}</p>
+      <div className="flex flex-row pt-4">
+        <ColorPicker
+          hsv={hsv}
+          onColorChange={handleColorChanged}
+          onTextFocusChanged={(focused: boolean) => {
+            if (focused) window.removeEventListener("keydown", handleKeyDown);
+            else window.addEventListener("keydown", handleKeyDown);
+          }}
+        />
         <div
           style={{
             display: "flex",
@@ -179,22 +184,22 @@ const Palette = () => {
             height: "100%",
           }}
         >
-          <button onClick={() => fileRef.current!.click()}>Import</button>
+          <Button onClick={() => fileRef.current!.click()}>Import</Button>
           <input
             style={{ display: "none" }}
             onChange={(e) => importPalette(e.target.files?.[0])}
             type="file"
             ref={fileRef}
           />
-          <button onClick={() => createRetinaPalette(paletteStore.palette)}>
+          <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
             Export
-          </button>
+          </Button>
 
-          {launchpadStore.cfwPresent && (
+          {launchpadStore.current?.type === LaunchpadType.CFW && (
             <>
-              <button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
+              <Button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
                 Upload
-              </button>
+              </Button>
               <div
                 style={{
                   display: "flex",
@@ -217,9 +222,6 @@ const Palette = () => {
           )}
         </div>
       </div>
-      <Link to="/" style={{ color: "#888888", marginTop: 10 }}>
-        {"< Firmware Utility"}
-      </Link>
     </div>
   ));
 };

@@ -1,21 +1,21 @@
 import React from "react";
 import { squashFullHex } from "../utils";
 
-const PaletteColor = ({ color, selected, ...props }: any) => {
+const PaletteColor = React.memo(({ color, selected, size, ...props }: any) => {
   return (
     <div
       {...props}
       style={{
-        width: 25,
-        height: 25,
+        ...props.style,
         backgroundColor: `#${squashFullHex(color)}`,
-        margin: 2,
         outline: selected ? "solid 2px white" : undefined,
         boxSizing: "border-box",
         cursor: "pointer",
+        width: size,
+        height: size,
       }}
     />
   );
-};
+});
 
 export default PaletteColor;
