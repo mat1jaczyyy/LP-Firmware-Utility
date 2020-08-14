@@ -10,7 +10,7 @@ export default class Launchpad {
   name: string;
   input: Input;
   output: Output;
-  type?: LaunchpadTypes;
+  type: LaunchpadTypes = LaunchpadTypes.BLANK;
 
   constructor(name: string, input: Input, output: Output) {
     this.name = name;

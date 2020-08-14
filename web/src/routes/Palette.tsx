@@ -14,6 +14,7 @@ import {
   hexToHsv,
   parseRetinaPalette,
   createRetinaPalette,
+  isCustomFW,
 } from "../utils";
 import Button from "../components/Button";
 
@@ -188,7 +189,7 @@ const Palette = () => {
             </Button>
           </div>
 
-          {launchpadStore.current?.type === LaunchpadTypes.CFW && (
+          {launchpadStore.current && isCustomFW(launchpadStore.current.type!) && (
             <div className="space-y-2 flex flex-col">
               <Button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
                 Upload
