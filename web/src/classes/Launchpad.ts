@@ -100,6 +100,10 @@ export default class Launchpad {
                 type = LaunchpadTypes.CFY;
                 break;
               }
+              default: {
+                type = LaunchpadTypes.LPPRO;
+                break;
+              }
             }
             break;
           }
