@@ -3,7 +3,14 @@ import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 import { useObserver } from "mobx-react-lite";
 
-import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
+import {
+  lpModels,
+  lpOptions,
+  svgs,
+  bltext,
+  LaunchpadTypes,
+  FirmwareTypes,
+} from "../constants";
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
@@ -18,20 +25,24 @@ const Firmware = () => {
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const noticeStore = useStore(({ notice }) => notice);
 
-  const [optionList, setOptionList] = useState(lpOptions[uiStore.selectedLp]);
-  const [optionState, setOptionState]: any = useState({});
+  const [optionList, setOptionList] = useState<undefined | any>(
+    lpOptions[uiStore.selectedFirmware]
+  );
+
+  const [optionState, setOptionState] = useState<Record<string, boolean>>({});
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  const getOptions = useCallback(
+  const renderOptions = useCallback(
     (options: any, recursion = 0, parent?: string) =>
       Object.entries(options).map(([name, value]) => {
         let children: any;
-        if (value !== false) children = getOptions(value, recursion + 1, name);
+        if (value !== false)
+          children = renderOptions(value, recursion + 1, name);
 
         if (
           name === "Apply Palette" &&
-          uiStore.selectedLp === LaunchpadType.CFW
+          uiStore.selectedFirmware === LaunchpadTypes.CFW
         )
           return null;
 
@@ -67,12 +78,12 @@ const Firmware = () => {
           </div>
         );
       }),
-    [optionState, setOptionState, uiStore.selectedLp]
+    [optionState, setOptionState, uiStore.selectedFirmware]
   );
 
   const flashFirmware = useCallback(
     async (
-      selectedLp: LaunchpadType,
+      selectedLp: FirmwareTypes,
       options: { [key: string]: any },
       palette: { [index: number]: number[] },
       rawFW?: Uint8Array
@@ -84,16 +95,16 @@ const Firmware = () => {
           firmware = await wasmStore.patch(selectedLp, options, palette);
 
         let targetLp =
-          selectedLp === LaunchpadType.CFW || selectedLp === LaunchpadType.CFY
-            ? LaunchpadType.BL_LPPRO
+          selectedLp === FirmwareTypes.CFW || selectedLp === FirmwareTypes.CFY
+            ? FirmwareTypes.LPPRO
             : selectedLp;
 
-        let { cancelFlash, flashPromise } = launchpadStore.queueFirmwareFlash(
-          rawFW || firmware,
-          targetLp
-        );
+        let {
+          cancelFlash,
+          flashPromise: startFlash,
+        } = launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
 
-        flashPromise
+        startFlash()
           .then(async (continueFlashing: any) => {
             if (!continueFlashing) return;
             noticeStore.show({
@@ -124,7 +135,7 @@ const Firmware = () => {
   );
 
   const downloadFirmware = useCallback(
-    async (selectedLp: string, options: any, palette: any) => {
+    async (selectedLp: FirmwareTypes, options: any, palette: any) => {
       try {
         const fw = await wasmStore.patch(selectedLp, options, palette);
 
@@ -159,32 +170,37 @@ const Firmware = () => {
   );
 
   useEffect(() => {
-    let selectedLp = uiStore.selectedLp;
+    let selectedFw = uiStore.selectedFirmware;
 
-    if (paletteStore.dirty && selectedLp !== LaunchpadType.BL_LPPROMK3)
-      lpOptions[selectedLp]["Apply Palette"] = true;
-    else delete lpOptions[selectedLp]["Apply Palette"];
+    if (
+      paletteStore.dirty &&
+      selectedFw !== FirmwareTypes.LPPROMK3 &&
+      lpOptions[selectedFw] !== undefined
+    )
+      lpOptions[selectedFw]!["Apply Palette"] = true;
+    else if (selectedFw === FirmwareTypes.LPPROMK3)
+      delete lpOptions[selectedFw]["Apply Palette"];
 
-    setOptionList(lpOptions[selectedLp]);
-    setOptionState(flattenObject(lpOptions[selectedLp]));
-  }, [paletteStore.dirty, uiStore.selectedLp]);
+    setOptionList(lpOptions[selectedFw]);
+    setOptionState(flattenObject(lpOptions[selectedFw]));
+  }, [paletteStore.dirty, uiStore.selectedFirmware]);
 
   return useObserver(() => (
     <div className="w-full space-y-2 flex flex-col justify-center items-center top-0 bottom-0 absolute">
       <select
         style={{
-          width: `${uiStore.selectedLp.length * 0.55 + 2.5}em`,
+          width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
         }}
         className="py-2 px-4 text-3xl font-normal font-sans appearance-none custom-select"
         onChange={(e) =>
-          e.target.value === "Custom SysEx File"
+          e.target.value === FirmwareTypes.CUSTOM_SYSEX
             ? fileRef.current?.click()
-            : uiStore.setSelectedLp(e.target.value as LaunchpadType)
+            : uiStore.setSelectedFirmware(e.target.value as FirmwareTypes)
         }
-        value={uiStore.selectedLp}
+        value={uiStore.selectedFirmware}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? ["Custom SysEx File"] : [])
+          .concat(uiStore.konamiSuccess ? [FirmwareTypes.CUSTOM_SYSEX] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}
@@ -192,9 +208,9 @@ const Firmware = () => {
           ))}
       </select>
 
-      <div className="w-auto">{getOptions(optionList)}</div>
+      <div className="w-auto">{renderOptions(optionList)}</div>
 
-      {uiStore.selectedLp === LaunchpadType.CFW &&
+      {uiStore.selectedFirmware === LaunchpadTypes.CFW &&
         optionState["Apply Palette"] && (
           <p className=" text-md text-center">
             <span className="opacity-50">
@@ -206,16 +222,25 @@ const Firmware = () => {
           </p>
         )}
 
-      {paletteStore.dirty && uiStore.selectedLp !== LaunchpadType.CFW && (
-        <div className="flex flex-col items-center py-2 space-y-2">
-          <p className="text-lg">Current Palette:</p>
-          <PaletteGrid width={350} />
-        </div>
-      )}
+      {paletteStore.dirty &&
+        ([
+          FirmwareTypes.CFW,
+          FirmwareTypes.CFY,
+          FirmwareTypes.LPPROMK3,
+        ] as FirmwareTypes[]).includes(uiStore.selectedFirmware) && (
+          <div className="flex flex-col items-center py-2 space-y-2">
+            <p className="text-lg">Current Palette:</p>
+            <PaletteGrid width={350} />
+          </div>
+        )}
 
       <Button
         onClick={() =>
-          flashFirmware(uiStore.selectedLp, optionState, paletteStore.palette)
+          flashFirmware(
+            uiStore.selectedFirmware,
+            optionState,
+            paletteStore.palette
+          )
         }
         disabled={!launchpadStore.available}
       >
@@ -235,7 +260,7 @@ const Firmware = () => {
         <span
           onClick={() =>
             downloadFirmware(
-              uiStore.selectedLp,
+              uiStore.selectedFirmware,
               optionState,
               paletteStore.palette
             )

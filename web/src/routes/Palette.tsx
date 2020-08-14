@@ -8,7 +8,7 @@ import ColorPicker from "../components/ColorPicker";
 
 import { useStore } from "../hooks";
 
-import { LaunchpadType } from "../constants";
+import { LaunchpadTypes } from "../constants";
 import {
   hexToRgb,
   hexToHsv,
@@ -84,7 +84,7 @@ const Palette = () => {
 
   const handlePaletteUpload = useCallback(() => {
     launchpadStore.launchpads.forEach((lp) => {
-      if (lp.type !== LaunchpadType.CFW) return;
+      if (lp.type !== LaunchpadTypes.CFW) return;
 
       let convertedPalette = new Array<number>(512);
 
@@ -137,13 +137,13 @@ const Palette = () => {
   useEffect(() => {
     launchpadStore.launchpads.forEach(
       (lp) =>
-        lp.type === LaunchpadType.CFW &&
+        lp.type === LaunchpadTypes.CFW &&
         lp.input.addListener("sysex", "all", handleCFWSysex)
     );
     return () => {
       launchpadStore.launchpads.forEach(
         (lp) =>
-          lp.type === LaunchpadType.CFW &&
+          lp.type === LaunchpadTypes.CFW &&
           lp.input.removeListener("sysex", "all", handleCFWSysex)
       );
     };
@@ -188,7 +188,7 @@ const Palette = () => {
             </Button>
           </div>
 
-          {launchpadStore.current?.type === LaunchpadType.CFW && (
+          {launchpadStore.current?.type === LaunchpadTypes.CFW && (
             <div className="space-y-2 flex flex-col">
               <Button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
                 Upload

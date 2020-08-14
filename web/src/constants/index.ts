@@ -1,64 +1,76 @@
-const LPX = "Launchpad X";
-const LPMINIMK3 = "Launchpad Mini MK3";
-const LPPROMK3 = "Launchpad Pro MK3";
-const LPMK2 = "Launchpad MK2";
-const LPPRO = "Launchpad Pro";
-const LPPROCFW = "Launchpad Pro (CFW)";
-const LPPROCFY = "Launchpad Pro (CFY - Beta)";
-
-export enum LaunchpadType {
-  BL_LPX = "Launchpad X",
-  BL_LPMINIMK3 = "Launchpad Mini MK3",
-  BL_LPPROMK3 = "Launchpad Pro MK3",
-  BL_LPMK2 = "Launchpad MK2",
-  BL_LPPRO = "Launchpad Pro",
+export enum LaunchpadTypes {
+  BL_LPX = "Launchpad X (BL)",
+  BL_LPMINIMK3 = "Launchpad Mini MK3 (BL)",
+  BL_LPPROMK3 = "Launchpad Pro MK3 (BL)",
+  BL_LPMK2 = "Launchpad MK2 (BL)",
+  BL_LPPRO = "Launchpad Pro (BL)",
+  LPX = "Launchpad X",
+  LPMINIMK3 = "Launchpad Mini MK3",
+  LPPROMK3 = "Launchpad Pro MK3",
+  LPMK2 = "Launchpad MK2",
+  LPPRO = "Launchpad Pro",
   CFW = "Launchpad Pro (CFW)",
   CFY = "Launchpad Pro (CFY - Beta)",
-  UNUSED = "UNUSED",
+  BLANK = "BLANK",
 }
+
+export const FirmwareTypes = {
+  LPX: LaunchpadTypes.LPX,
+  LPMINIMK3: LaunchpadTypes.LPMINIMK3,
+  LPPROMK3: LaunchpadTypes.LPPROMK3,
+  LPMK2: LaunchpadTypes.LPMK2,
+  LPPRO: LaunchpadTypes.LPPRO,
+  CFW: LaunchpadTypes.CFW,
+  CFY: LaunchpadTypes.CFY,
+  CUSTOM_SYSEX: "Custom SysEx File",
+} as const;
+
+export type FirmwareTypes = typeof FirmwareTypes[keyof typeof FirmwareTypes];
 
 interface Map {
   [key: string]: any;
 }
 
-export const lpModels = [
-  LPX,
-  LPMINIMK3,
-  LPPROMK3,
-  LPMK2,
-  LPPRO,
-  LPPROCFW,
-  LPPROCFY
+export const lpModels: FirmwareTypes[] = [
+  FirmwareTypes.LPX,
+  FirmwareTypes.LPMINIMK3,
+  FirmwareTypes.LPPROMK3,
+  FirmwareTypes.LPMK2,
+  FirmwareTypes.LPPRO,
+  FirmwareTypes.CFW,
+  FirmwareTypes.CFY,
 ];
 
-export const lpOptions: Map = {
-  "Launchpad X": {},
-  "Launchpad Mini MK3": {},
-  "Launchpad Pro MK3": {},
-  "Launchpad MK2": {},
-  "Launchpad Pro": {},
-  "Launchpad Pro (CFW)": {},
-  "Launchpad Pro (CFY - Beta)": {},
+type FirmwareMap<T> = { [key in FirmwareTypes]: T };
+
+export const lpOptions: FirmwareMap<Record<string, any>> = lpModels.reduce<
+  FirmwareMap<Record<string, any>>
+>((obj, e) => {
+  let newObj = { ...obj };
+  newObj[e] = {};
+  return newObj;
+}, {} as FirmwareMap<any>);
+
+export const svgs: { [key in FirmwareTypes]: any } = {
+  [FirmwareTypes.LPX]: "x",
+  [FirmwareTypes.LPMINIMK3]: "x",
+  [FirmwareTypes.LPPROMK3]: "promk3",
+  [FirmwareTypes.LPMK2]: "mk2",
+  [FirmwareTypes.LPPRO]: "pro",
+  [FirmwareTypes.CFW]: "pro",
+  [FirmwareTypes.CFY]: "pro",
+  [FirmwareTypes.CUSTOM_SYSEX]: "",
 };
 
-export const svgs: Map = {
-  "Launchpad X": "x",
-  "Launchpad Mini MK3": "x",
-  "Launchpad Pro MK3": "promk3",
-  "Launchpad MK2": "mk2",
-  "Launchpad Pro": "pro",
-  "Launchpad Pro (CFW)": "pro",
-  "Launchpad Pro (CFY - Beta)": "pro",
-};
-
-export const bltext: Map = {
-  "Launchpad X": "the Capture MIDI button",
-  "Launchpad Mini MK3": "the User button",
-  "Launchpad Pro MK3": "the Setup button",
-  "Launchpad MK2": "Session, User 1, User 2 and Mixer",
-  "Launchpad Pro": "the Setup button",
-  "Launchpad Pro (CFW)": "the Setup button",
-  "Launchpad Pro (CFY - Beta)": "the Setup button",
+export const bltext: { [key in FirmwareTypes]: string } = {
+  [FirmwareTypes.LPX]: "the Capture MIDI button",
+  [FirmwareTypes.LPMINIMK3]: "the User button",
+  [FirmwareTypes.LPPROMK3]: "the Setup button",
+  [FirmwareTypes.LPMK2]: "Session, User 1, User 2 and Mixer",
+  [FirmwareTypes.LPPRO]: "the Setup button",
+  [FirmwareTypes.CFW]: "the Setup button",
+  [FirmwareTypes.CFY]: "the Setup button",
+  [FirmwareTypes.CUSTOM_SYSEX]: "",
 };
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];

@@ -1,11 +1,11 @@
-import { observable, action, computed, IObservableArray, autorun } from "mobx";
+import { observable, action, computed, IObservableArray, reaction } from "mobx";
 import WebMidi from "webmidi";
 
 import BaseStore from "./BaseStore";
 import Launchpad from "../classes/Launchpad";
 import { RootStore } from ".";
-import { LaunchpadType } from "../constants";
-import { portsMatch, portNeutralize } from "../utils";
+import { LaunchpadTypes, FirmwareTypes } from "../constants";
+import { portsMatch, portNeutralize, deviceIsBLForFW } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
   readonly launchpads: IObservableArray<Launchpad> = observable([]);
@@ -46,7 +46,7 @@ export default class LaunchpadStore extends BaseStore {
 
   @computed
   get cfwPresent() {
-    return this.launchpads.some((lp) => lp.type === LaunchpadType.CFW);
+    return this.launchpads.some((lp) => lp.type === LaunchpadTypes.CFW);
   }
 
   @computed
@@ -77,7 +77,7 @@ export default class LaunchpadStore extends BaseStore {
           // When new launchpads are connected, give them some time to boot before sending version query
           await new Promise((res) => setTimeout(() => res(), 50));
 
-          if ((await launchpad.getType()) !== LaunchpadType.UNUSED)
+          if ((await launchpad.getType()) !== LaunchpadTypes.BLANK)
             launchpads.push(launchpad);
         }
       }
@@ -88,36 +88,31 @@ export default class LaunchpadStore extends BaseStore {
   }
 
   @action
-  queueFirmwareFlash = (buffer: Uint8Array, targetLp: string) => {
-    let resolveAttempt: (val?: any) => void;
+  queueFirmwareFlash = (buffer: Uint8Array, targetLp: FirmwareTypes) => {
+    let cancelFlash: () => void;
+    let dispose: Function;
 
-    let flashPromise = new Promise(async (resolve) => {
-      const attemptFlash = async () => {
-        const target = new Promise((res) => {
-          autorun(() => {
-            if (this.current !== undefined && this.current.type === targetLp)
-              res(this.current);
-          });
-        });
+    let flashPromise = () =>
+      new Promise(async (resolve) => {
+        cancelFlash = resolve;
 
-        const lps = await this.scan();
-        if (!lps || !lps.some((lp) => lp.type === targetLp)) return;
-
-        resolveAttempt(async () =>
-          lps[lps.findIndex((lp) => lp.type === targetLp)].flashFirmware(buffer)
+        dispose = reaction(
+          () => this.current,
+          () => {
+            if (
+              this.current?.type &&
+              deviceIsBLForFW(this.current.type, targetLp)
+            ) {
+              resolve(async () => {
+                await this.current!.flashFirmware(buffer);
+                dispose();
+              });
+            }
+          },
+          { fireImmediately: true }
         );
-      };
+      });
 
-      attemptFlash();
-
-      WebMidi.addListener("connected", attemptFlash);
-
-      resolveAttempt = (val) => {
-        WebMidi.removeListener("connected", attemptFlash);
-        resolve(val);
-      };
-    });
-
-    return { cancelFlash: resolveAttempt!, flashPromise };
+    return { cancelFlash: cancelFlash!, flashPromise };
   };
 }

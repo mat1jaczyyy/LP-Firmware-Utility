@@ -2,7 +2,7 @@ import BaseStore from "./BaseStore";
 import { observable, action, runInAction } from "mobx";
 import { RootStore } from ".";
 import { downloadCFW, paletteToArray, downloadCFY } from "../utils";
-import { lpModels, LaunchpadType } from "../constants";
+import { lpModels, FirmwareTypes } from "../constants";
 
 declare let Module: any;
 declare let FS: any;
@@ -50,13 +50,13 @@ export default class WasmStore extends BaseStore {
 
   @action
   patch = async (
-    selectedLp: string,
+    selectedLp: FirmwareTypes,
     options: any,
     palette: { [index: number]: number[] }
   ) => {
     try {
-      if (selectedLp.includes("CFW")) return await downloadCFW();
-      else if (selectedLp.includes("CFY")) return await downloadCFY();
+      if (selectedLp === FirmwareTypes.CFW) return await downloadCFW();
+      else if (selectedLp === FirmwareTypes.CFY) return await downloadCFY();
       this._patch!(
         lpModels.indexOf(selectedLp),
         Object.values({ "Custom Palette": false, ...options }),
@@ -76,7 +76,7 @@ export default class WasmStore extends BaseStore {
   };
 
   @action
-  verify = (firmware: Uint8Array): LaunchpadType => {
+  verify = (firmware: Uint8Array): FirmwareTypes => {
     let selected = null;
 
     try {
@@ -92,6 +92,6 @@ export default class WasmStore extends BaseStore {
       throw new Error("The firmware file is invalid. Please try again.");
     }
 
-    return lpModels[selected] as LaunchpadType;
+    return lpModels[selected];
   };
 }

@@ -1,10 +1,10 @@
 import { observable, action } from "mobx";
-import { LaunchpadType, konamiSequence } from "../constants";
+import { konamiSequence, FirmwareTypes } from "../constants";
 import BaseStore from "./BaseStore";
 import { RootStore } from ".";
 
 export default class UIStore extends BaseStore {
-  @observable selectedLp = LaunchpadType.BL_LPX;
+  @observable selectedFirmware: FirmwareTypes = FirmwareTypes.LPX;
   @observable konamiSuccess = false;
   konamiInput: number[] = [];
 
@@ -26,7 +26,7 @@ export default class UIStore extends BaseStore {
   }
 
   @action
-  setSelectedLp(lp: LaunchpadType): void {
-    this.selectedLp = lp;
+  setSelectedFirmware(fw: FirmwareTypes): void {
+    this.selectedFirmware = fw;
   }
 }

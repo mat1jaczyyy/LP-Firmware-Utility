@@ -1,6 +1,8 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
+import { LaunchpadTypes, FirmwareTypes } from "../constants";
+
 export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
@@ -228,3 +230,27 @@ export const paletteToArray = (palette: any) => {
 
   return array;
 };
+
+export const deviceIsBLForFW = (
+  device: LaunchpadTypes,
+  fw: FirmwareTypes
+): boolean =>
+  (([
+    FirmwareTypes.CFW,
+    FirmwareTypes.CFY,
+    FirmwareTypes.LPPRO,
+  ] as FirmwareTypes[]).includes(fw) &&
+    device === LaunchpadTypes.BL_LPPRO) ||
+  (fw === FirmwareTypes.LPMINIMK3 && device === LaunchpadTypes.BL_LPMINIMK3) ||
+  (fw === FirmwareTypes.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
+  (fw === FirmwareTypes.LPPROMK3 && device === LaunchpadTypes.BL_LPPROMK3) ||
+  (fw === FirmwareTypes.LPX && device === LaunchpadTypes.BL_LPX);
+
+export const isBL = (device: LaunchpadTypes): boolean =>
+  [
+    LaunchpadTypes.BL_LPMINIMK3,
+    LaunchpadTypes.BL_LPMK2,
+    LaunchpadTypes.BL_LPPRO,
+    LaunchpadTypes.BL_LPPROMK3,
+    LaunchpadTypes.BL_LPX,
+  ].includes(device);
