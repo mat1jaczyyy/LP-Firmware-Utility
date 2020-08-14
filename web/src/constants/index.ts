@@ -4,6 +4,7 @@ const LPPROMK3 = "Launchpad Pro MK3";
 const LPMK2 = "Launchpad MK2";
 const LPPRO = "Launchpad Pro";
 const LPPROCFW = "Launchpad Pro (CFW)";
+const LPPROCFY = "Launchpad Pro (CFY - Beta)";
 
 export enum LaunchpadType {
   BL_LPX = "Launchpad X",
@@ -12,7 +13,7 @@ export enum LaunchpadType {
   BL_LPMK2 = "Launchpad MK2",
   BL_LPPRO = "Launchpad Pro",
   CFW = "Launchpad Pro (CFW)",
-  CFY = "Launchpad Pro (CFY) BETA",
+  CFY = "Launchpad Pro (CFY - Beta)",
   UNUSED = "UNUSED",
 }
 
@@ -27,6 +28,7 @@ export const lpModels = [
   LPMK2,
   LPPRO,
   LPPROCFW,
+  LPPROCFY
 ];
 
 export const lpOptions: Map = {
@@ -36,7 +38,7 @@ export const lpOptions: Map = {
   "Launchpad MK2": {},
   "Launchpad Pro": {},
   "Launchpad Pro (CFW)": {},
-  "Launchpad Pro (CFY) BETA": {},
+  "Launchpad Pro (CFY - Beta)": {},
 };
 
 export const svgs: Map = {
@@ -46,7 +48,7 @@ export const svgs: Map = {
   "Launchpad MK2": "mk2",
   "Launchpad Pro": "pro",
   "Launchpad Pro (CFW)": "pro",
-  "Launchpad Pro (CFY) BETA": "pro",
+  "Launchpad Pro (CFY - Beta)": "pro",
 };
 
 export const bltext: Map = {
@@ -56,7 +58,7 @@ export const bltext: Map = {
   "Launchpad MK2": "Session, User 1, User 2 and Mixer",
   "Launchpad Pro": "the Setup button",
   "Launchpad Pro (CFW)": "the Setup button",
-  "Launchpad Pro (CFY) BETA": "the Setup button",
+  "Launchpad Pro (CFY - Beta)": "the Setup button",
 };
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];

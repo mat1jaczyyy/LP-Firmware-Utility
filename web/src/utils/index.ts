@@ -41,7 +41,7 @@ export const downloadCFW = async () => {
 export const downloadCFY = async () => {
   try {
     const response = await axios.get(
-      "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx?ref=cfy"
+      "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx?ref=73d490a71a908c15e145f91de910a77f75f38a6a"
     );
 
     return new Uint8Array(
