@@ -3,6 +3,8 @@ import { saveAs } from "file-saver";
 
 import { LaunchpadTypes, FirmwareTypes } from "../constants";
 
+const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
+
 export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
@@ -194,16 +196,17 @@ export const hexToRgb = (hex: string) => [
 export const parseRetinaPalette = async (paletteFile: File) => {
   const fileText = await paletteFile.text();
 
+  if (!paletteRegex.test(fileText)) throw new Error();
+
   let colors: string[] = fileText.split(";");
 
   let newPalette: any = {};
 
-  colors.forEach((color) => {
+  for (let color in colors) {
     let [index, rgb] = color.split(",");
-    if (rgb === undefined) return;
     let rgbArr = rgb.split(" ").slice(1);
     newPalette[parseInt(index)] = rgbArr.map((v) => parseInt(v));
-  });
+  }
 
   return newPalette;
 };

@@ -16,6 +16,7 @@ import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
 import { flattenObject, deviceIsBLForFW } from "../utils";
 import RouteContainer from "../components/RouteContainer";
+import { useDropzone } from "react-dropzone";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -173,6 +174,13 @@ const Firmware = () => {
     [flashFirmware, wasmStore, paletteStore.palette, noticeStore]
   );
 
+  const onDrop = useCallback(
+    ([file]: File[]) => uiStore.konamiSuccess && uploadFirmware(file),
+    [uiStore.konamiSuccess, uploadFirmware]
+  );
+
+  const { getInputProps, getRootProps } = useDropzone({ onDrop });
+
   useEffect(() => {
     let selectedFw = uiStore.selectedFirmware;
 
@@ -190,7 +198,7 @@ const Firmware = () => {
   }, [paletteStore.dirty, uiStore.selectedFirmware]);
 
   return useObserver(() => (
-    <RouteContainer>
+    <RouteContainer {...getRootProps()}>
       <select
         style={{
           width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
@@ -227,7 +235,7 @@ const Firmware = () => {
         )}
 
       {paletteStore.dirty &&
-        ([
+        !([
           FirmwareTypes.CFW,
           FirmwareTypes.CFY,
           FirmwareTypes.LPPROMK3,
@@ -252,6 +260,7 @@ const Firmware = () => {
       </Button>
 
       <input
+        {...getInputProps()}
         type="file"
         accept=".syx"
         style={{ display: "none" }}

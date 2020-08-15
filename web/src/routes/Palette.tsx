@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { InputEventSysex } from "webmidi";
 import { observable, runInAction } from "mobx";
 import { useObserver } from "mobx-react-lite";
+import { useDropzone } from "react-dropzone";
 
 import PaletteGrid from "../components/PaletteGrid";
 import ColorPicker from "../components/ColorPicker";
@@ -18,12 +19,14 @@ import {
 } from "../utils";
 import Button from "../components/Button";
 import RouteContainer from "../components/RouteContainer";
+import clsx from "clsx";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
 
   const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
+  const [paletteError, setPaletteError] = useState<any>();
 
   const [selectedColor, setSelectedColor] = useState(0);
   const [paletteIndex, setPaletteIndex] = useState(1);
@@ -106,12 +109,14 @@ const Palette = () => {
   const importPalette = useCallback(
     (file?: File) => {
       if (!file) return;
-      parseRetinaPalette(file).then((newPalette) => {
-        runInAction(() => {
-          paletteStore.palette = observable(newPalette);
-          paletteStore.dirty = true;
-        });
-      });
+      parseRetinaPalette(file)
+        .then((newPalette) => {
+          runInAction(() => {
+            paletteStore.palette = observable(newPalette);
+            paletteStore.dirty = true;
+          });
+        })
+        .catch(() => setPaletteError("Invalid palette file!"));
     },
     [paletteStore.palette, paletteStore.dirty]
   );
@@ -132,10 +137,22 @@ const Palette = () => {
     [paletteStore.palette, paletteStore.dirty]
   );
 
+  const onDrop = useCallback(([file]: File[]) => importPalette(file), [
+    importPalette,
+  ]);
+
+  const { getInputProps, getRootProps } = useDropzone({ onDrop });
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    if (paletteError === undefined) return;
+    let cancel = setTimeout(() => setPaletteError(undefined), 3000);
+    return () => clearTimeout(cancel);
+  }, [paletteError]);
 
   useEffect(() => {
     if (launchpadStore.launchpad?.type === LaunchpadTypes.CFW)
@@ -163,13 +180,15 @@ const Palette = () => {
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
-    <RouteContainer>
+    <RouteContainer {...getRootProps()}>
       <PaletteGrid
         selectedColor={selectedColor}
         onColorClicked={(index) => setSelectedColor(index)}
         width={450}
       />
-      <p className="text-xl">Selected Velocity: {selectedColor}</p>
+      <p className={clsx("text-xl", paletteError && "text-red-500")}>
+        {paletteError || `Selected Velocity: ${selectedColor}`}
+      </p>
       <div className="flex flex-row pt-4">
         <ColorPicker
           hsv={hsv}
@@ -182,6 +201,7 @@ const Palette = () => {
         <div className="flex flex-col ml-4 p-2 h-full space-y-2">
           <Button onClick={() => fileRef.current!.click()}>Import</Button>
           <input
+            {...getInputProps()}
             style={{ display: "none" }}
             onChange={(e) => importPalette(e.target.files?.[0])}
             type="file"

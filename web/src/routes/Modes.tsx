@@ -12,6 +12,7 @@ import {
   CFY_MODE_UPLOAD_WRITE,
   CFY_MODE_UPLOAD_END,
 } from "../constants";
+import { useDropzone } from "react-dropzone";
 
 const ModeSlots = (type?: LaunchpadTypes) => {
   switch (type) {
@@ -54,10 +55,7 @@ const Modes = () => {
         for (let k = 0; k < Math.ceil(data.length / 300); k++) {
           lpStore.launchpad.sendSysex([
             ...CFY_MODE_UPLOAD_WRITE,
-            ...data.slice(
-              k * 256,
-              Math.min(data.length, (k + 1) * 300)
-            ),
+            ...data.slice(k * 256, Math.min(data.length, (k + 1) * 300)),
           ]);
         }
       }
@@ -66,14 +64,21 @@ const Modes = () => {
     }
   }, [index, lpStore.launchpad, modeStore.modeBinary]);
 
+  const onDrop = useCallback(([file]: File[]) => importMode(file), [
+    importMode,
+  ]);
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
   useEffect(() => {
     if (index >= ModeSlots(lpStore.launchpad?.type)) setIndex(3);
   }, [lpStore.launchpad, index]);
 
   return useObserver(() => (
-    <RouteContainer>
+    <RouteContainer {...getRootProps()}>
       <Button onClick={() => fileRef.current?.click()}>Import</Button>
       <input
+        {...getInputProps()}
         style={{ display: "none" }}
         onChange={(e) => importMode(e.target.files?.[0])}
         type="file"

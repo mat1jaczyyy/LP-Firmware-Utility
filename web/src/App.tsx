@@ -59,7 +59,7 @@ const App = () => {
   return useObserver(() => (
     <div className="w-screen h-screen flex flex-col items-center overflow-hidden">
       <Header disabled={noticeStore.state.visible} />
-      <div className="w-full h-full container mx-auto relative">
+      <div className="w-full h-full relative">
         <SwitchTransition mode="out-in">
           <CSSTransition
             classNames="fade"
