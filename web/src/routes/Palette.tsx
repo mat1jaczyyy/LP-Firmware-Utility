@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { InputEventSysex } from "webmidi";
-import { observable, runInAction } from "mobx";
+import { observable, runInAction, autorun } from "mobx";
 import { useObserver } from "mobx-react-lite";
 import { useDropzone } from "react-dropzone";
 import clsx from "clsx";
@@ -23,6 +23,7 @@ import RouteContainer from "../components/RouteContainer";
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
+  const uiStore = useStore(({ ui }) => ui);
 
   const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
   const [paletteError, setPaletteError] = useState<any>();
@@ -172,23 +173,34 @@ const Palette = () => {
 
   const selectedRef = useRef(0);
   useEffect(() => {
-    if (selectedRef.current !== selectedColor) {
+    autorun(() => {
       setHsv(hexToHsv(paletteStore.palette[selectedColor]));
       selectedRef.current = selectedColor;
-    }
+    });
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
     <RouteContainer {...getRootProps()}>
-      <PaletteGrid
-        selectedColor={selectedColor}
-        onColorClicked={(index) => setSelectedColor(index)}
-        width={450}
-      />
-      <p className={clsx("text-xl", paletteError && "text-red-500")}>
-        {paletteError || `Selected Velocity: ${selectedColor}`}
-      </p>
-      <div className="flex flex-row pt-4">
+      <div>
+        <PaletteGrid
+          selectedColor={selectedColor}
+          onColorClicked={(index) => setSelectedColor(index)}
+          width={450}
+        />
+        <div className="flex flex-row items-center py-1">
+          <div className="flex-1" />
+          <p className={clsx("text-xl", paletteError && "text-red-500")}>
+            {paletteError || `Selected Velocity: ${selectedColor}`}
+          </p>
+          <p
+            onClick={() => paletteStore.reset()}
+            className="flex-1 font-semibold cursor-pointer text-lg opacity-75 hover:opacity-100 duration-100 transition-opacity text-right"
+          >
+            {uiStore.konamiSuccess ? "RESTET" : "RESET"}
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-row">
         <ColorPicker
           hsv={hsv}
           onColorChange={handleColorChanged}
@@ -197,23 +209,24 @@ const Palette = () => {
             else window.addEventListener("keydown", handleKeyDown);
           }}
         />
-        <div className="flex flex-col ml-4 p-2 h-full space-y-2">
-          <Button onClick={() => fileRef.current!.click()}>Import</Button>
-          <input
-            {...getInputProps()}
-            style={{ display: "none" }}
-            onChange={(e) => importPalette(e.target.files?.[0])}
-            type="file"
-            ref={fileRef}
-          />
-          <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
-            Export
-          </Button>
+        <div className="flex flex-col ml-4 h-full justify-between ">
+          <div className="flex flex-col space-y-2">
+            <input
+              {...getInputProps()}
+              style={{ display: "none" }}
+              onChange={(e) => importPalette(e.target.files?.[0])}
+              type="file"
+              ref={fileRef}
+            />
+            <Button onClick={() => fileRef.current!.click()}>Import</Button>
+            <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
+              Export
+            </Button>
+          </div>
 
           {launchpadStore.launchpad &&
             isCustomFW(launchpadStore.launchpad.type!) && (
-              <>
-                <Button onClick={handlePaletteUpload}>Upload</Button>
+              <div className="flex flex-col items-center space-y-2">
                 <div className="flex items-center justify-center text-lg">
                   <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
                   <select
@@ -226,7 +239,8 @@ const Palette = () => {
                     <option value={3}>3</option>
                   </select>
                 </div>
-              </>
+                <Button onClick={handlePaletteUpload}>Upload</Button>
+              </div>
             )}
         </div>
       </div>
