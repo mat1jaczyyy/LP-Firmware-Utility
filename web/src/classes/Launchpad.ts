@@ -5,6 +5,7 @@ import {
   CFW_PALETTE_UPLOAD_END,
   CFW_PALETTE_UPLOAD_START,
 } from "../constants";
+import { isCustomFW } from "../utils";
 
 export default class Launchpad {
   name: string;
@@ -169,7 +170,7 @@ export default class Launchpad {
   }
 
   uploadPalette(palette: number[], paletteIndex: number = 0) {
-    if (this.type !== LaunchpadTypes.CFW)
+    if (!isCustomFW(this.type))
       throw new Error(
         "Uploading palettes requires a Launchpad Pro running the Custom Firmware"
       );

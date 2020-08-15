@@ -3,13 +3,13 @@ import { InputEventSysex } from "webmidi";
 import { observable, runInAction } from "mobx";
 import { useObserver } from "mobx-react-lite";
 import { useDropzone } from "react-dropzone";
+import clsx from "clsx";
 
 import PaletteGrid from "../components/PaletteGrid";
 import ColorPicker from "../components/ColorPicker";
 
 import { useStore } from "../hooks";
 
-import { LaunchpadTypes } from "../constants";
 import {
   hexToRgb,
   hexToHsv,
@@ -19,7 +19,6 @@ import {
 } from "../utils";
 import Button from "../components/Button";
 import RouteContainer from "../components/RouteContainer";
-import clsx from "clsx";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
@@ -155,7 +154,7 @@ const Palette = () => {
   }, [paletteError]);
 
   useEffect(() => {
-    if (launchpadStore.launchpad?.type === LaunchpadTypes.CFW)
+    if (launchpadStore.launchpad && isCustomFW(launchpadStore.launchpad.type))
       launchpadStore.launchpad.input.addListener(
         "sysex",
         "all",
