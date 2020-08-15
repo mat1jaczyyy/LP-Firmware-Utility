@@ -48,15 +48,15 @@ const Modes = () => {
       let i = bin.findIndex((j) => j === 0x7f)!;
       let data = bin.slice(i + 1, -1);
 
-      if (data.length < 256)
+      if (data.length < 300)
         lpStore.launchpad.sendSysex([...CFY_MODE_UPLOAD_WRITE, ...data]);
       else {
-        for (let k = 0; k < Math.ceil(data.length / 256); k++) {
+        for (let k = 0; k < Math.ceil(data.length / 300); k++) {
           lpStore.launchpad.sendSysex([
             ...CFY_MODE_UPLOAD_WRITE,
             ...data.slice(
               k * 256,
-              Math.min(data.length, (k + 1) * 256)
+              Math.min(data.length, (k + 1) * 300)
             ),
           ]);
         }
