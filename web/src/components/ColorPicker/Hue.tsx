@@ -61,7 +61,7 @@ const Hue = ({
         height,
         ...style,
       }}
-      className="hue border border-2 border-black"
+      className="hue border-2 border-black"
       onMouseDown={(e) => {
         handleMouseMove(e);
         window.addEventListener("mousemove", handleMouseMove);
