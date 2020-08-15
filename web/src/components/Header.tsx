@@ -28,11 +28,11 @@ const Header = ({ disabled }: any) => {
       </div>
       <div className="flex-1 flex flex-row items-center justify-end px-4">
         <span className="flex flex-row items-center text-xl">
-          {lpStore.current?.type || "No Launchpad Detected"}
+          {lpStore.launchpad?.type || "No Launchpad Detected"}
           <div
             className={clsx(
               "w-4 h-4 ml-4 rounded-full border border-black",
-              lpStore.launchpads.length > 0 ? "bg-green-700" : "bg-red-700"
+              lpStore.launchpad ? "bg-green-700" : "bg-red-700"
             )}
           />
         </span>

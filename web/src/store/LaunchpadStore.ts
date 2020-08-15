@@ -8,7 +8,7 @@ import { LaunchpadTypes, FirmwareTypes } from "../constants";
 import { portsMatch, portNeutralize, deviceIsBLForFW } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
-  readonly launchpads: IObservableArray<Launchpad> = observable([]);
+  @observable launchpad?: Launchpad = undefined;
 
   @observable available?: boolean = undefined;
 
@@ -27,11 +27,7 @@ export default class LaunchpadStore extends BaseStore {
     }
     this.available = true;
 
-    let listener = () => {
-      this.scan().then((lps) => {
-        if (lps !== undefined) this.setLaunchpads(lps);
-      });
-    };
+    let listener = () => this.scan().then((lp) => this.setLaunchpad(lp));
 
     listener();
 
@@ -40,24 +36,12 @@ export default class LaunchpadStore extends BaseStore {
   }
 
   @action.bound
-  setLaunchpads(lps: Launchpad[]) {
-    this.launchpads.replace(lps);
-  }
-
-  @computed
-  get cfwPresent() {
-    return this.launchpads.some((lp) => lp.type === LaunchpadTypes.CFW);
-  }
-
-  @computed
-  get current(): Launchpad | undefined {
-    return this.launchpads.length > 0 ? this.launchpads[0] : undefined;
+  setLaunchpad(lp?: Launchpad) {
+    this.launchpad = lp;
   }
 
   @action.bound
   async scan() {
-    const launchpads: Launchpad[] = [];
-
     let currentTimestamp = new Date();
 
     if (this.lastScan === undefined || this.lastScan < currentTimestamp)
@@ -77,14 +61,14 @@ export default class LaunchpadStore extends BaseStore {
           // When new launchpads are connected, give them some time to boot before sending version query
           await new Promise((res) => setTimeout(() => res(), 50));
 
-          if ((await launchpad.getType()) !== LaunchpadTypes.BLANK)
-            launchpads.push(launchpad);
+          if ((await launchpad.getType()) !== LaunchpadTypes.BLANK) {
+            this.setLaunchpad(launchpad);
+            return launchpad;
+          }
         }
       }
     }
     if (this.lastScan > currentTimestamp) return;
-    this.setLaunchpads(launchpads);
-    return launchpads;
   }
 
   @action
@@ -97,18 +81,14 @@ export default class LaunchpadStore extends BaseStore {
         cancelFlash = resolve;
 
         dispose = reaction(
-          () => this.current,
-          () => {
-            if (
-              this.current?.type &&
-              deviceIsBLForFW(this.current.type, targetLp)
-            ) {
-              resolve(async () => {
-                await this.current!.flashFirmware(buffer);
-                dispose();
-              });
-            }
-          },
+          () => this.launchpad,
+          () =>
+            this.launchpad?.type &&
+            deviceIsBLForFW(this.launchpad.type, targetLp) &&
+            resolve(async () => {
+              await this.launchpad!.flashFirmware(buffer);
+              dispose();
+            }),
           { fireImmediately: true }
         );
       });

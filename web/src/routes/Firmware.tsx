@@ -14,7 +14,7 @@ import {
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
-import { flattenObject } from "../utils";
+import { flattenObject, deviceIsBLForFW } from "../utils";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -116,7 +116,10 @@ const Firmware = () => {
           })
           .then(noticeStore.hide);
 
-        if (!launchpadStore.launchpads.some((lp) => lp.type === targetLp))
+        if (
+          !launchpadStore.launchpad ||
+          !deviceIsBLForFW(launchpadStore.launchpad.type, targetLp)
+        )
           noticeStore.show({
             text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
             dismissable: true,

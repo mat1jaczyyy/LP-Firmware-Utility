@@ -31,7 +31,7 @@ export default class NoticeStore extends BaseStore {
 
   @action
   hide = () => {
-    if (this.state.callback !== null) this.state.callback();
+    if (this.state.callback) this.state.callback();
     this.state = { ...defaultState, visible: false };
   };
 }

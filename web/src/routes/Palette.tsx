@@ -84,9 +84,7 @@ const Palette = () => {
   );
 
   const handlePaletteUpload = useCallback(() => {
-    launchpadStore.launchpads.forEach((lp) => {
-      if (lp.type !== LaunchpadTypes.CFW) return;
-
+    if (launchpadStore.launchpad && isCustomFW(launchpadStore.launchpad.type)) {
       let convertedPalette = new Array<number>(512);
 
       Object.entries(paletteStore.palette).forEach(([index, color]) => {
@@ -97,9 +95,12 @@ const Palette = () => {
         convertedPalette[colorIndex + 3] = color[2];
       });
 
-      lp.uploadPalette(convertedPalette, paletteIndex - 1);
-    });
-  }, [launchpadStore.launchpads, paletteStore.palette, paletteIndex]);
+      launchpadStore.launchpad.uploadPalette(
+        convertedPalette,
+        paletteIndex - 1
+      );
+    }
+  }, [launchpadStore.launchpad, paletteStore.palette, paletteIndex]);
 
   const importPalette = useCallback(
     (file?: File) => {
@@ -136,19 +137,21 @@ const Palette = () => {
   }, [handleKeyDown]);
 
   useEffect(() => {
-    launchpadStore.launchpads.forEach(
-      (lp) =>
-        lp.type === LaunchpadTypes.CFW &&
-        lp.input.addListener("sysex", "all", handleCFWSysex)
-    );
+    if (launchpadStore.launchpad?.type === LaunchpadTypes.CFW)
+      launchpadStore.launchpad.input.addListener(
+        "sysex",
+        "all",
+        handleCFWSysex
+      );
+
     return () => {
-      launchpadStore.launchpads.forEach(
-        (lp) =>
-          lp.type === LaunchpadTypes.CFW &&
-          lp.input.removeListener("sysex", "all", handleCFWSysex)
+      launchpadStore.launchpad?.input.removeListener(
+        "sysex",
+        "all",
+        handleCFWSysex
       );
     };
-  }, [launchpadStore.launchpads, handleCFWSysex]);
+  }, [launchpadStore.launchpad, handleCFWSysex]);
 
   const selectedRef = useRef(0);
   useEffect(() => {
@@ -187,25 +190,24 @@ const Palette = () => {
             Export
           </Button>
 
-          {launchpadStore.current && isCustomFW(launchpadStore.current.type!) && (
-            <>
-              <Button onClick={handlePaletteUpload}>
-                Upload
-              </Button>
-              <div className="flex items-center justify-center text-lg">
-                <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
-                <select
-                  onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
-                  value={paletteIndex}
-                  className="p-1 text-xl"
-                >
-                  <option value={1}>1</option>
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                </select>
-              </div>
-            </>
-          )}
+          {launchpadStore.launchpad &&
+            isCustomFW(launchpadStore.launchpad.type!) && (
+              <>
+                <Button onClick={handlePaletteUpload}>Upload</Button>
+                <div className="flex items-center justify-center text-lg">
+                  <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
+                  <select
+                    onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
+                    value={paletteIndex}
+                    className="p-1 text-xl"
+                  >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                  </select>
+                </div>
+              </>
+            )}
         </div>
       </div>
     </div>
