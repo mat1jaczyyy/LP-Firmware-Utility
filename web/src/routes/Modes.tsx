@@ -77,6 +77,7 @@ const Modes = () => {
         style={{ display: "none" }}
         onChange={(e) => importMode(e.target.files?.[0])}
         type="file"
+        accept=".syx"
         ref={fileRef}
       />
       <p className="text-lg">
