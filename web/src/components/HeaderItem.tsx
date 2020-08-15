@@ -9,7 +9,7 @@ const HeaderItem = ({ name, path, disabled }: any) => {
   return (
     <Link
       className={clsx(
-        "px-3 h-full flex items-center justify-center border-b-2 box-border transition-opacity duration-100",
+        "px-6 h-full flex items-center justify-center border-b-2 box-border transition-opacity duration-100",
         location.pathname === `/${path}`
           ? "bg-gray-700 border-white"
           : "hover:bg-head_hov border-transparent",
