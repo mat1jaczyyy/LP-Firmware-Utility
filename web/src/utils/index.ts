@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { LaunchpadTypes, FirmwareTypes } from "../constants";
+import { LaunchpadTypes, FirmwareTypes, LPX_MODE_HEADER } from "../constants";
 
 const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
 
@@ -265,3 +265,8 @@ export const canHaveCustomMode = (type: LaunchpadTypes): boolean =>
   [LaunchpadTypes.CFY, LaunchpadTypes.LPX, LaunchpadTypes.LPPROMK3].includes(
     type
   );
+
+export const saveCustomMode = (mode: Uint8Array, name: string) => {
+  let data = [...LPX_MODE_HEADER, ...mode, 0xF7];
+  saveAs(new Blob([new Uint8Array(data)]), `${name}.syx`)
+}

@@ -8,7 +8,7 @@ import RouteContainer from "../components/RouteContainer";
 import Button from "../components/Button";
 
 import { useStore } from "../hooks";
-import { canHaveCustomMode } from "../utils";
+import { canHaveCustomMode, saveCustomMode } from "../utils";
 import {
   LaunchpadTypes,
   CFY_MODE_UPLOAD_START,
@@ -98,6 +98,7 @@ const Modes = () => {
         }
 
         lpStore.launchpad.sendSysex(CFY_MODE_UPLOAD_END);
+        break;
       }
       default:
         break;
@@ -110,7 +111,7 @@ const Modes = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-  const downloadedMode = useRef<any | undefined>();
+  const downloadedMode = useRef<{size: number, data: Uint8Array} | undefined>();
   const handleCFYSysex = useCallback(
     ({ data }: InputEventSysex) => {
       if (!data.slice(0, 8).every((e, i) => e === MODE_WRITE_HEADER[i])) return;
@@ -127,14 +128,14 @@ const Modes = () => {
           chunk.length + downloadedMode.current.data.length <=
           downloadedMode.current.size
         ) {
-          downloadedMode.current.data = [
+          downloadedMode.current.data = new Uint8Array([
             ...downloadedMode.current.data,
             ...chunk,
-          ];
+          ]);
         }
       }
       if (downloadedMode.current.size === downloadedMode.current.data.length) {
-        runInAction(() => (modeStore.modeBinary = downloadedMode.current.data));
+        runInAction(() => (modeStore.modeBinary = downloadedMode.current!.data));
         downloadedMode.current = undefined;
       }
     },
@@ -160,7 +161,7 @@ const Modes = () => {
     <RouteContainer {...getRootProps()}>
       <div>
         <Button onClick={() => fileRef.current?.click()}>Import</Button>
-        <Button disabled={!modeStore.modeBinary}>Export</Button>
+        <Button disabled={!modeStore.modeBinary} onClick={() => saveCustomMode(modeStore.modeBinary!, modeStore.modeName!)}>Export</Button>
       </div>
       <input
         {...getInputProps()}
