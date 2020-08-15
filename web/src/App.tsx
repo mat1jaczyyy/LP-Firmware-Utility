@@ -13,6 +13,7 @@ import "./App.css";
 import Header from "./components/Header";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import Notice from "./components/Notice";
+import Modes from "./routes/Modes";
 
 const TransitionRoute = ({ component: Component, ...props }: any) => (
   <Route exact path={props.path}>
@@ -73,6 +74,7 @@ const App = () => {
               <>
                 <TransitionRoute path="/firmware" component={Firmware} />
                 <TransitionRoute path="/palette" component={Palette} />
+                <TransitionRoute path="/modes" component={Modes} />
               </>
             )}
           </CSSTransition>

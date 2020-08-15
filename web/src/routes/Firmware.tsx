@@ -15,6 +15,7 @@ import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
 import { flattenObject, deviceIsBLForFW } from "../utils";
+import RouteContainer from "../components/RouteContainer";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -189,7 +190,7 @@ const Firmware = () => {
   }, [paletteStore.dirty, uiStore.selectedFirmware]);
 
   return useObserver(() => (
-    <div className="w-full space-y-2 flex flex-col justify-center items-center top-0 bottom-0 absolute">
+    <RouteContainer>
       <select
         style={{
           width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
@@ -287,7 +288,7 @@ const Firmware = () => {
           </a>
         </p>
       )}
-    </div>
+    </RouteContainer>
   ));
 };
 

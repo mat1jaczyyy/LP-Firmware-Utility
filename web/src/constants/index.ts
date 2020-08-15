@@ -239,4 +239,17 @@ export const CFW_PALETTE_UPLOAD_END = [
   0x7d,
 ];
 
+export const CFY_MODE_UPLOAD_START = (index: number) => [
+  0x43,
+  0x55,
+  0x53,
+  0x54,
+  0x4f,
+  0x4d,
+  0x7b,
+  index,
+];
+
+export const CFY_MODE_UPLOAD_WRITE = [67, 85, 83, 84, 79, 77, 61];
+export const CFY_MODE_UPLOAD_END = [0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x7d];
 export default { lpOptions, lpModels };

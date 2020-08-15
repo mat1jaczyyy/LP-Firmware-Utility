@@ -24,7 +24,7 @@ button {
   background: #252525;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background-color: #313131;
 }
 

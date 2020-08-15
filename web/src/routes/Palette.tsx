@@ -17,6 +17,7 @@ import {
   isCustomFW,
 } from "../utils";
 import Button from "../components/Button";
+import RouteContainer from "../components/RouteContainer";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
@@ -162,7 +163,7 @@ const Palette = () => {
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
-    <div className="w-full flex flex-col items-center justify-center space-y-2 top-0 bottom-0 absolute">
+    <RouteContainer>
       <PaletteGrid
         selectedColor={selectedColor}
         onColorClicked={(index) => setSelectedColor(index)}
@@ -210,7 +211,7 @@ const Palette = () => {
             )}
         </div>
       </div>
-    </div>
+    </RouteContainer>
   ));
 };
 
