@@ -52,9 +52,6 @@ const Modes = () => {
   );
 
   const uploadMode = useCallback(() => {
-    runInAction(() => {
-      lpStore.launchpad!.type = LaunchpadTypes.LPX
-    })
     switch (lpStore.launchpad?.type) {
       case LaunchpadTypes.LPX: {
         lpStore.launchpad.sendSysex([
