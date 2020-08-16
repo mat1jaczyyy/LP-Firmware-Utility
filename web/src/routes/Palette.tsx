@@ -128,17 +128,12 @@ const Palette = () => {
   const downloadedPalette = useRef<any>({});
   const handleCFWSysex = useCallback(
     ({ data }: InputEventSysex) => {
-      console.log(data.join(" "))
-      if (
-        !data.slice(0, 7).every((b, i) => b === CFY_PALETTE_DOWNLOAD_HEADER[i])
-      )
-        return;
-
-      if (data[7] === 0) downloadedPalette.current = {};
-      downloadedPalette.current[data[7]] = [data[8], data[9], data[10]];
-      if (data[7] === 127) {
+      if (data[7] === 123) downloadedPalette.current = {};
+      else if (data[7] === 35)
+        downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
+      else if (data[7] === 125) {
         runInAction(() => {
-          paletteStore.palette = downloadedPalette.current;
+          paletteStore.palette = observable(downloadedPalette.current);
           paletteStore.dirty = true;
         });
       }
