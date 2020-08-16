@@ -37,6 +37,7 @@ export default class LaunchpadStore extends BaseStore {
 
   @action.bound
   setLaunchpad(lp?: Launchpad) {
+    this.launchpad?.input.removeListener();
     this.launchpad = lp;
   }
 

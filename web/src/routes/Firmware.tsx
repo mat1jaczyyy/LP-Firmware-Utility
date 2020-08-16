@@ -179,7 +179,13 @@ const Firmware = () => {
     [uiStore.konamiSuccess, uploadFirmware]
   );
 
-  const { getInputProps, getRootProps } = useDropzone({ onDrop });
+  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+    onDrop,
+  });
+  
+  let containerProps = uiStore.konamiSuccess
+    ? { ...getRootProps(), lightBg }
+    : {};
 
   useEffect(() => {
     let selectedFw = uiStore.selectedFirmware;
@@ -198,7 +204,7 @@ const Firmware = () => {
   }, [paletteStore.dirty, uiStore.selectedFirmware]);
 
   return useObserver(() => (
-    <RouteContainer {...getRootProps()}>
+    <RouteContainer {...containerProps}>
       <select
         style={{
           width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,

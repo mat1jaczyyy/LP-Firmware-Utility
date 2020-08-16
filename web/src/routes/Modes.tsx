@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useObserver } from "mobx-react-lite";
 import { useDropzone } from "react-dropzone";
 import clsx from "clsx";
-import { InputEventSysex } from "webmidi";
 
 import RouteContainer from "../components/RouteContainer";
 import Button from "../components/Button";
@@ -18,10 +17,9 @@ import {
   LPMINIMK3_MODE_HEADER,
   LPPROMK3_MODE_HEADER,
 } from "../constants";
-import { runInAction } from "mobx";
+import Launchpad from "../components/Launchpad";
 
-const MODE_WRITE_SIZE = 300;
-const MODE_WRITE_HEADER = [240, 67, 85, 83, 84, 79, 77, 35];
+const MODE_WRITE_SIZE = 256;
 
 const ModeSlots = (type?: LaunchpadTypes) => {
   switch (type) {
@@ -58,7 +56,6 @@ const Modes = () => {
           ...LPX_MODE_HEADER,
           ...modeStore.modeBinary!,
         ]);
-        console.log([0xf0, ...LPX_MODE_HEADER, ...modeStore.modeBinary!, 0xf7].join(" "));
         break;
       }
       case LaunchpadTypes.LPMINIMK3: {
@@ -106,43 +103,9 @@ const Modes = () => {
     importMode,
   ]);
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
-
-  const downloadedMode = useRef<{size: number, data: Uint8Array} | undefined>();
-  const handleCFYSysex = useCallback(
-    ({ data }: InputEventSysex) => {
-      if (!data.slice(0, 8).every((e, i) => e === MODE_WRITE_HEADER[i])) return;
-      if (downloadedMode.current === undefined) {
-        let size = data[8] * 128 + data[9];
-        let chunk = data.slice(10, -1);
-        downloadedMode.current = {
-          size,
-          data: chunk,
-        };
-      } else {
-        let chunk = data.slice(8, -1);
-        if (
-          chunk.length + downloadedMode.current.data.length <=
-          downloadedMode.current.size
-        ) {
-          downloadedMode.current.data = new Uint8Array([
-            ...downloadedMode.current.data,
-            ...chunk,
-          ]);
-        }
-      }
-      if (downloadedMode.current.size === downloadedMode.current.data.length) {
-        runInAction(() => (modeStore.modeBinary = downloadedMode.current!.data));
-        downloadedMode.current = undefined;
-      }
-    },
-    [modeStore.modeBinary]
-  );
-
-  useEffect(() => {
-    if (lpStore.launchpad?.type === LaunchpadTypes.CFY)
-      lpStore.launchpad.input.addListener("sysex", "all", handleCFYSysex);
-  }, [handleCFYSysex, lpStore.launchpad]);
+  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+    onDrop,
+  });
 
   useEffect(() => {
     if (modeError === undefined) return;
@@ -155,10 +118,17 @@ const Modes = () => {
   }, [lpStore.launchpad, index]);
 
   return useObserver(() => (
-    <RouteContainer {...getRootProps()}>
+    <RouteContainer {...{ ...getRootProps(), lightBg }}>
       <div>
         <Button onClick={() => fileRef.current?.click()}>Import</Button>
-        <Button disabled={!modeStore.modeBinary} onClick={() => saveCustomMode(modeStore.modeBinary!, modeStore.modeName!)}>Export</Button>
+        <Button
+          disabled={!modeStore.modeBinary}
+          onClick={() =>
+            saveCustomMode(modeStore.modeBinary!, modeStore.modeName!)
+          }
+        >
+          Export
+        </Button>
       </div>
       <input
         {...getInputProps()}
@@ -174,6 +144,7 @@ const Modes = () => {
             ? `Loaded Mode: ${modeStore.modeName}`
             : "No mode loaded!")}
       </p>
+      <Launchpad size={300} colors={modeStore.modeColors} />
       <div className="flex items-center justify-center text-xl">
         <p>Index:</p>
         <select

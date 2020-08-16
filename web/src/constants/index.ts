@@ -27,10 +27,6 @@ export const FirmwareTypes = {
 
 export type FirmwareTypes = typeof FirmwareTypes[keyof typeof FirmwareTypes];
 
-interface Map {
-  [key: string]: any;
-}
-
 export const lpModels: FirmwareTypes[] = [
   FirmwareTypes.LPX,
   FirmwareTypes.LPMINIMK3,
@@ -212,8 +208,14 @@ export const novationPalette: { [index: number]: number[] } = (() => {
 })();
 
 export const CFY_PALETTE_DOWNLOAD_HEADER = [
-  0xF0, 0x52, 0x45, 0x54, 0x49, 0x4E, 0x41
-]
+  0xf0,
+  0x52,
+  0x45,
+  0x54,
+  0x49,
+  0x4e,
+  0x41,
+];
 export const CFW_PALETTE_UPLOAD_START = [
   0x52,
   0x45,
@@ -253,8 +255,9 @@ export const CFY_MODE_UPLOAD_START = (index: number) => [
   index,
 ];
 
-export const CFY_MODE_UPLOAD_WRITE = [67, 85, 83, 84, 79, 77, 61];
+export const CFY_MODE_UPLOAD_WRITE = [0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x3d];
 export const CFY_MODE_UPLOAD_END = [0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x7d];
+export const CFY_MODE_WRITE_HEADER = [240, 67, 85, 83, 84, 79, 77];
 
 export const LPX_MODE_HEADER = [0x00, 0x20, 0x29, 0x02, 0x0c, 0x05, 0x01, 0x7f];
 export const LPMINIMK3_MODE_HEADER = [

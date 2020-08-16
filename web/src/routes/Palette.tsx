@@ -19,10 +19,6 @@ import {
 } from "../utils";
 import Button from "../components/Button";
 import RouteContainer from "../components/RouteContainer";
-import {
-  CFW_PALETTE_UPLOAD_WRITE,
-  CFY_PALETTE_DOWNLOAD_HEADER,
-} from "../constants";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
@@ -145,7 +141,9 @@ const Palette = () => {
     importPalette,
   ]);
 
-  const { getInputProps, getRootProps } = useDropzone({ onDrop });
+  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+    onDrop,
+  });
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -160,7 +158,6 @@ const Palette = () => {
 
   useEffect(() => {
     let lp = launchpadStore.launchpad;
-    console.log(lp)
     if (lp && isCustomFW(lp.type))
       lp.input.addListener("sysex", "all", handleCFWSysex);
 
@@ -178,7 +175,7 @@ const Palette = () => {
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
-    <RouteContainer {...getRootProps()}>
+    <RouteContainer {...{ ...getRootProps(), lightBg }}>
       <div>
         <PaletteGrid
           selectedColor={selectedColor}

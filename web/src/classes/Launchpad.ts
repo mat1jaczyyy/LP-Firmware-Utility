@@ -174,7 +174,7 @@ export default class Launchpad {
       throw new Error(
         "Uploading palettes requires a Launchpad Pro running the Custom Firmware"
       );
-
+      
     this.sendSysex(CFW_PALETTE_UPLOAD_START);
     this.sendSysex([
       ...CFW_PALETTE_UPLOAD_WRITE,

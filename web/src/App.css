@@ -28,6 +28,10 @@ button:hover:not(:disabled) {
   background-color: #313131;
 }
 
+.light-bg {
+  background: #1c1c1c;
+}
+
 .tooltip {
   opacity: 1 !important;
 }
