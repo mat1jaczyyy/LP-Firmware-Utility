@@ -211,6 +211,9 @@ export const novationPalette: { [index: number]: number[] } = (() => {
   return obj;
 })();
 
+export const CFY_PALETTE_DOWNLOAD_HEADER = [
+  0xF0, 0x52, 0x45, 0x54, 0x49, 0x4E, 0x41
+]
 export const CFW_PALETTE_UPLOAD_START = [
   0x52,
   0x45,

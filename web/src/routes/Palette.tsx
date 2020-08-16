@@ -12,20 +12,24 @@ import { useStore } from "../hooks";
 
 import {
   hexToRgb,
-  hexToHsv,
+  rgbToHsv,
   parseRetinaPalette,
   createRetinaPalette,
   isCustomFW,
 } from "../utils";
 import Button from "../components/Button";
 import RouteContainer from "../components/RouteContainer";
+import {
+  CFW_PALETTE_UPLOAD_WRITE,
+  CFY_PALETTE_DOWNLOAD_HEADER,
+} from "../constants";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const uiStore = useStore(({ ui }) => ui);
 
-  const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
+  const [hsv, setHsv] = useState(rgbToHsv(paletteStore.palette[0]));
   const [paletteError, setPaletteError] = useState<any>();
 
   const [selectedColor, setSelectedColor] = useState(0);
@@ -124,12 +128,17 @@ const Palette = () => {
   const downloadedPalette = useRef<any>({});
   const handleCFWSysex = useCallback(
     ({ data }: InputEventSysex) => {
-      if (data[7] === 123) downloadedPalette.current = {};
-      else if (data[7] === 35)
-        downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
-      else if (data[7] === 125) {
+      console.log(data.join(" "))
+      if (
+        !data.slice(0, 7).every((b, i) => b === CFY_PALETTE_DOWNLOAD_HEADER[i])
+      )
+        return;
+
+      if (data[7] === 0) downloadedPalette.current = {};
+      downloadedPalette.current[data[7]] = [data[8], data[9], data[10]];
+      if (data[7] === 127) {
         runInAction(() => {
-          paletteStore.palette = observable(downloadedPalette.current);
+          paletteStore.palette = downloadedPalette.current;
           paletteStore.dirty = true;
         });
       }
@@ -155,26 +164,20 @@ const Palette = () => {
   }, [paletteError]);
 
   useEffect(() => {
-    if (launchpadStore.launchpad && isCustomFW(launchpadStore.launchpad.type))
-      launchpadStore.launchpad.input.addListener(
-        "sysex",
-        "all",
-        handleCFWSysex
-      );
+    let lp = launchpadStore.launchpad;
+    console.log(lp)
+    if (lp && isCustomFW(lp.type))
+      lp.input.addListener("sysex", "all", handleCFWSysex);
 
     return () => {
-      launchpadStore.launchpad?.input.removeListener(
-        "sysex",
-        "all",
-        handleCFWSysex
-      );
+      lp?.input.removeListener("sysex", "all", handleCFWSysex);
     };
   }, [launchpadStore.launchpad, handleCFWSysex]);
 
   const selectedRef = useRef(0);
   useEffect(() => {
     autorun(() => {
-      setHsv(hexToHsv(paletteStore.palette[selectedColor]));
+      setHsv(rgbToHsv(paletteStore.palette[selectedColor]));
       selectedRef.current = selectedColor;
     });
   }, [paletteStore.palette, selectedColor]);
