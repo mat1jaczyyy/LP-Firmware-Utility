@@ -152,7 +152,7 @@ export const squashFullHex = (full: string) => {
     .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
 };
 
-export const hexToHsv = ([r, g, b]: number[]) => {
+export const rgbToHsv = ([r, g, b]: number[]) => {
   r /= 63;
   g /= 63;
   b /= 63;
