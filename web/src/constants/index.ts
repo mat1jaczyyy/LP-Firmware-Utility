@@ -280,4 +280,27 @@ export const LPPROMK3_MODE_HEADER = [
   0x01,
   0x7f,
 ];
+
+export const LPX_MODE_DOWNLOAD = (index: number) => [
+  0xf0,
+  0x00,
+  0x20,
+  0x29,
+  0x0c,
+  0x05,
+  0x01,
+  index + 4,
+  0xf7,
+];
+export const LPMINIMK3_MODE_DOWNLOAD = (index: number) => [
+  0xf0,
+  0x00,
+  0x20,
+  0x29,
+  0x0d,
+  0x05,
+  0x01,
+  index + 4,
+  0xf7,
+];
 export default { lpOptions, lpModels };

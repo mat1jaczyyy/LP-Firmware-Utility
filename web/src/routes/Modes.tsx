@@ -16,8 +16,11 @@ import {
   LPX_MODE_HEADER,
   LPMINIMK3_MODE_HEADER,
   LPPROMK3_MODE_HEADER,
+  LPX_MODE_DOWNLOAD,
+  LPMINIMK3_MODE_DOWNLOAD,
 } from "../constants";
 import Launchpad from "../components/Launchpad";
+import { InputEventSysex } from "webmidi";
 
 const MODE_WRITE_SIZE = 256;
 
@@ -25,6 +28,8 @@ const ModeSlots = (type?: LaunchpadTypes) => {
   switch (type) {
     case LaunchpadTypes.CFY:
       return 8;
+    case LaunchpadTypes.LPMINIMK3:
+      return 3;
     default:
       return 4;
   }
@@ -42,9 +47,11 @@ const Modes = () => {
   const importMode = useCallback(
     (file?: File) => {
       if (!file) return;
-      modeStore.loadMode(file).catch((e) => {
-        setModeError("Invalid mode file!");
-      });
+      file.arrayBuffer().then((arr) =>
+        modeStore.loadMode(new Uint8Array(arr)).catch((e) => {
+          setModeError("Invalid mode file!");
+        })
+      );
     },
     [modeStore]
   );
@@ -98,6 +105,30 @@ const Modes = () => {
         break;
     }
   }, [index, lpStore.launchpad, modeStore.modeBinary]);
+
+  const downloadXMode = useCallback(() => {
+    switch (lpStore.launchpad?.type) {
+      case LaunchpadTypes.LPX: {
+        lpStore.launchpad.sendSysex(LPX_MODE_DOWNLOAD(index));
+        break;
+      }
+      case LaunchpadTypes.LPMINIMK3: {
+        lpStore.launchpad.sendSysex(LPMINIMK3_MODE_DOWNLOAD(index));
+        break;
+      }
+    }
+
+    let listener = (e: InputEventSysex) => {
+      modeStore
+        .loadMode(e.data)
+        .then(() =>
+          lpStore.launchpad?.input.removeListener("sysex", "all", listener)
+        )
+        .catch(() => {});
+    };
+
+    lpStore.launchpad?.input.addListener("sysex", "all", listener);
+  }, []);
 
   const onDrop = useCallback(([file]: File[]) => importMode(file), [
     importMode,
@@ -162,16 +193,22 @@ const Modes = () => {
           )}
         </select>
       </div>
-      <Button
-        disabled={
-          !modeStore.modeName ||
-          !lpStore.launchpad ||
-          !canHaveCustomMode(lpStore.launchpad.type)
-        }
-        onClick={uploadMode}
-      >
-        Upload
-      </Button>
+      <div className="flex flex-row space-x-2">
+        {lpStore.launchpad &&
+          ![LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3].includes(
+            lpStore.launchpad.type
+          ) && <Button onClick={downloadXMode}>Download</Button>}
+        <Button
+          disabled={
+            !modeStore.modeName ||
+            !lpStore.launchpad ||
+            !canHaveCustomMode(lpStore.launchpad.type)
+          }
+          onClick={uploadMode}
+        >
+          Upload
+        </Button>
+      </div>
     </RouteContainer>
   ));
 };

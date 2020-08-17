@@ -30,9 +30,7 @@ export class ModeStore extends BaseStore {
   }
 
   @action
-  async loadMode(file: File) {
-    const buffer = await file.arrayBuffer();
-    const bin = new Uint8Array(buffer);
+  async loadMode(bin: Uint8Array) {
 
     let webLength = 0;
     let dataLength = 0;
