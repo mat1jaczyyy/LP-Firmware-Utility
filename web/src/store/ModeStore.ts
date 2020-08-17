@@ -1,11 +1,5 @@
 import BaseStore from "./BaseStore";
-import {
-  action,
-  runInAction,
-  computed,
-  observable,
-  reaction,
-} from "mobx";
+import { action, runInAction, computed, observable, reaction } from "mobx";
 import {
   novationPalette,
   LaunchpadTypes,
@@ -31,26 +25,15 @@ export class ModeStore extends BaseStore {
 
   @action
   loadMode(bin: Uint8Array) {
-    let webLength = 0;
     let dataLength = 0;
     let status = "START";
+
     for (let i = 0; i < bin.length - 1; i++) {
       switch (status) {
         case "START": {
-          if (bin[i] === 0 && bin[i + 1] === 0) {
-            status = "WEB";
-            i++;
-          }
-          break;
-        }
-        case "WEB": {
           if (bin[i] === 0x7f) {
-            if (webLength % 3 === 0) {
-              status = "DATA";
-              i += 3;
-            } else throw new Error("WEB");
-          } else {
-            webLength++;
+            status = "DATA";
+            i += 3;
           }
           break;
         }
@@ -72,12 +55,12 @@ export class ModeStore extends BaseStore {
       }
     }
 
-    if (status !== "VALID") throw new Error();
-
-    let i = bin.findIndex((j) => j === 0x7f)!;
+    if (status !== "VALID") {
+      throw new Error(status);
+    }
 
     runInAction(() => {
-      this.modeBinary = bin.slice(i + 1, -1);
+      this.modeBinary = bin.slice(8, -1);
     });
   }
 
@@ -90,7 +73,7 @@ export class ModeStore extends BaseStore {
 
   @action.bound
   handleModeUpload({ data }: InputEventSysex) {
-    console.log(data);
+    // console.log(data);
     if (!data.slice(0, 7).every((e, i) => e === CFY_MODE_WRITE_HEADER[i]))
       return;
     if (this.downloadedMode === undefined) {
@@ -124,13 +107,17 @@ export class ModeStore extends BaseStore {
     let bin = this.modeBinary;
 
     if (!bin) return undefined;
+    // console.log(bin);
     let name = "";
     let i = 0;
     let readingName = true;
     while (readingName) {
-      if (bin[i] === 0 && bin[i + 1] === 0) readingName = false;
-      else name += String.fromCharCode(bin[i++]);
+      if (bin[i] === 0 && bin[i + 1] === 0) {
+        readingName = false;
+        // console.log(bin[i]);
+      } else name += String.fromCharCode(bin[i++]);
     }
+    // console.log(name);
     return name;
   }
 
