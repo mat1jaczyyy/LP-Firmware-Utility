@@ -27,8 +27,9 @@ export class ModeStore extends BaseStore {
   loadMode(bin: Uint8Array) {
     let dataLength = 0;
     let status = "START";
+    console.log(bin.join(" "));
 
-    for (let i = 0; i < bin.length - 1; i++) {
+    for (let i = 9; i < bin.length; i++) {
       switch (status) {
         case "START": {
           if (bin[i] === 0x7f) {
@@ -38,15 +39,13 @@ export class ModeStore extends BaseStore {
           break;
         }
         case "DATA": {
-          if (bin[i + 1] === 0xf7) {
-            dataLength++;
+          if (bin[i] === 0xf7) {
             status = "END";
             if (dataLength % 8 === 0) {
               status = "VALID";
             } else throw new Error("DATA");
-          } else {
-            dataLength++;
           }
+          dataLength++;
           break;
         }
         case "END":
@@ -56,11 +55,11 @@ export class ModeStore extends BaseStore {
     }
 
     if (status !== "VALID") {
-      throw new Error(status);
+      throw new Error("VALID " + status);
     }
 
     runInAction(() => {
-      this.modeBinary = bin.slice(8, -1);
+      this.modeBinary = bin.slice(9, -1);
     });
   }
 

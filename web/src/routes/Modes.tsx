@@ -22,26 +22,6 @@ import {
 import Launchpad from "../components/Launchpad";
 import { InputEventSysex } from "webmidi";
 
-const bruh =
-  "240 0 32 41 2 12 5 1 6 70 97 99 116 111 114 121 32 67 117 115 116 111 109 " +
-  "32 77 111 100 101 32 51 0 0 127 0 0 0 82 127 1 65 0 0 0 0 83 127 1 66 0 0 " +
-  "0 0 84 127 1 67 0 0 0 0 85 127 1 96 0 0 0 0 86 127 1 97 0 0 0 0 87 127 1 " +
-  "98 0 0 0 0 88 127 1 99 0 0 0 0 72 127 0 0 0 127 0 0 73 127 0 0 0 127 0 0 " +
-  "74 127 0 0 0 127 0 0 75 127 0 0 0 127 0 0 76 127 0 0 0 127 0 0 77 127 0 0 " +
-  "0 127 0 0 78 127 0 0 0 127 0 0 62 127 0 0 0 127 0 0 63 127 0 0 0 127 0 0 " +
-  "64 127 0 0 0 127 0 0 65 127 0 0 0 127 0 0 66 127 0 0 0 127 0 0 67 127 0 0 " +
-  "0 127 0 0 68 127 0 0 0 127 0 0 52 127 0 0 0 127 0 0 53 127 0 0 0 127 0 0 " +
-  "54 127 0 0 0 127 0 0 55 127 0 0 0 127 0 0 56 127 0 0 0 127 0 0 57 127 0 0 " +
-  "0 127 0 0 58 127 0 0 0 127 0 0 42 127 0 0 0 127 0 0 43 127 0 0 0 127 0 0 " +
-  "44 127 0 0 0 127 0 0 45 127 0 0 0 127 0 0 46 127 0 0 0 127 0 0 47 127 0 0 " +
-  "0 127 0 0 48 127 0 0 0 127 0 0 32 127 0 0 0 127 0 0 33 127 0 0 0 127 0 0 " +
-  "34 127 0 0 0 127 0 0 35 127 0 0 0 127 0 0 36 127 0 0 0 127 0 0 37 127 0 0 " +
-  "0 127 0 0 38 127 0 0 0 127 0 0 22 127 0 0 0 127 0 0 23 127 0 0 0 127 0 0 " +
-  "24 127 0 0 0 127 0 0 25 127 0 0 0 127 0 0 26 127 0 0 0 127 0 0 27 127 0 0 " +
-  "0 127 0 0 28 127 0 0 0 127 0 0 12 127 0 0 0 127 0 0 13 127 0 0 0 127 0 0 " +
-  "14 127 0 0 0 127 0 0 15 127 0 0 0 127 0 0 16 127 0 0 0 127 0 0 17 127 0 0 " +
-  "0 127 0 0 18 127 0 0 0 127 0 0 0 0 0 0 0 0 0 0 247";
-
 const MODE_WRITE_SIZE = 256;
 
 const ModeSlots = (type?: LaunchpadTypes) => {
@@ -129,26 +109,24 @@ const Modes = () => {
   }, [index, lpStore.launchpad, modeStore.modeBinary]);
 
   const downloadXMode = useCallback(() => {
-    let arr = new Uint8Array(bruh.split(" ").map(s => parseInt(s)))
-        modeStore.loadMode(arr);
-    // let listener = (e: InputEventSysex) => {
-    //   console.log(e);
-    //   try {
-    //     modeStore.loadMode(e.data);
-    //     lpStore.launchpad?.input.removeListener("sysex", "all", listener);
-    //   } catch {}
-    // };
-    // lpStore.launchpad?.input.addListener("sysex", "all", listener);
-    // switch (lpStore.launchpad?.type) {
-    //   case LaunchpadTypes.LPX: {
-    //     lpStore.launchpad.sendSysex(LPX_MODE_DOWNLOAD(index));
-    //     break;
-    //   }
-    //   case LaunchpadTypes.LPMINIMK3: {
-    //     lpStore.launchpad.sendSysex(LPMINIMK3_MODE_DOWNLOAD(index));
-    //     break;
-    //   }
-    // }
+    let listener = (e: InputEventSysex) => {
+      console.log(e);
+      try {
+        modeStore.loadMode(e.data);
+        lpStore.launchpad?.input.removeListener("sysex", "all", listener);
+      } catch {}
+    };
+    lpStore.launchpad?.input.addListener("sysex", "all", listener);
+    switch (lpStore.launchpad?.type) {
+      case LaunchpadTypes.LPX: {
+        lpStore.launchpad.sendSysex(LPX_MODE_DOWNLOAD(index));
+        break;
+      }
+      case LaunchpadTypes.LPMINIMK3: {
+        lpStore.launchpad.sendSysex(LPMINIMK3_MODE_DOWNLOAD(index));
+        break;
+      }
+    }
   }, [index, lpStore.launchpad, modeStore]);
 
   const onDrop = useCallback(([file]: File[]) => importMode(file), [
