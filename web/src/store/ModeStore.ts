@@ -30,8 +30,7 @@ export class ModeStore extends BaseStore {
   }
 
   @action
-  async loadMode(bin: Uint8Array) {
-
+  loadMode(bin: Uint8Array) {
     let webLength = 0;
     let dataLength = 0;
     let status = "START";
@@ -73,7 +72,7 @@ export class ModeStore extends BaseStore {
       }
     }
 
-    if (status !== "VALID") throw new Error("VALID");
+    if (status !== "VALID") throw new Error();
 
     let i = bin.findIndex((j) => j === 0x7f)!;
 

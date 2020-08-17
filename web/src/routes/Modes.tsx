@@ -47,11 +47,13 @@ const Modes = () => {
   const importMode = useCallback(
     (file?: File) => {
       if (!file) return;
-      file.arrayBuffer().then((arr) =>
-        modeStore.loadMode(new Uint8Array(arr)).catch((e) => {
+      file.arrayBuffer().then((arr) => {
+        try {
+          modeStore.loadMode(new Uint8Array(arr));
+        } catch {
           setModeError("Invalid mode file!");
-        })
-      );
+        }
+      });
     },
     [modeStore]
   );
@@ -109,12 +111,10 @@ const Modes = () => {
   const downloadXMode = useCallback(() => {
     let listener = (e: InputEventSysex) => {
       console.log(e);
-      modeStore
-        .loadMode(e.data)
-        .then(() =>
-          lpStore.launchpad?.input.removeListener("sysex", "all", listener)
-        )
-        .catch(() => {});
+      try {
+        modeStore.loadMode(e.data);
+        lpStore.launchpad?.input.removeListener("sysex", "all", listener);
+      } catch {}
     };
 
     lpStore.launchpad?.input.addListener("sysex", "all", listener);
