@@ -107,6 +107,17 @@ const Modes = () => {
   }, [index, lpStore.launchpad, modeStore.modeBinary]);
 
   const downloadXMode = useCallback(() => {
+    let listener = (e: InputEventSysex) => {
+      console.log(e)
+      modeStore
+        .loadMode(e.data)
+        .then(() =>
+          lpStore.launchpad?.input.removeListener("sysex", "all", listener)
+        )
+        .catch(() => {});
+    };
+
+    lpStore.launchpad?.input.addListener("sysex", "all", listener);
     switch (lpStore.launchpad?.type) {
       case LaunchpadTypes.LPX: {
         lpStore.launchpad.sendSysex(LPX_MODE_DOWNLOAD(index));
@@ -118,16 +129,6 @@ const Modes = () => {
       }
     }
 
-    let listener = (e: InputEventSysex) => {
-      modeStore
-        .loadMode(e.data)
-        .then(() =>
-          lpStore.launchpad?.input.removeListener("sysex", "all", listener)
-        )
-        .catch(() => {});
-    };
-
-    lpStore.launchpad?.input.addListener("sysex", "all", listener);
   }, []);
 
   const onDrop = useCallback(([file]: File[]) => importMode(file), [
