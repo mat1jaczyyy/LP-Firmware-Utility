@@ -108,7 +108,7 @@ const Modes = () => {
 
   const downloadXMode = useCallback(() => {
     let listener = (e: InputEventSysex) => {
-      console.log(e)
+      console.log(e);
       modeStore
         .loadMode(e.data)
         .then(() =>
@@ -128,8 +128,7 @@ const Modes = () => {
         break;
       }
     }
-
-  }, []);
+  }, [index, lpStore.launchpad, modeStore]);
 
   const onDrop = useCallback(([file]: File[]) => importMode(file), [
     importMode,
