@@ -195,7 +195,7 @@ const Modes = () => {
       </div>
       <div className="flex flex-row space-x-2">
         {lpStore.launchpad &&
-          ![LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3].includes(
+          [LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3].includes(
             lpStore.launchpad.type
           ) && <Button onClick={downloadXMode}>Download</Button>}
         <Button
