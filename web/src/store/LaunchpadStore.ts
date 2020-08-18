@@ -1,47 +1,65 @@
-import { observable, action, computed, IObservableArray } from "mobx";
+import { observable, action, reaction } from "mobx";
 import WebMidi from "webmidi";
 
 import BaseStore from "./BaseStore";
 import Launchpad from "../classes/Launchpad";
 import { RootStore } from ".";
-import { LaunchpadType } from "../constants";
-import { portsMatch, portNeutralize } from "../utils";
+import { LaunchpadTypes, FlashableFirmwares } from "../constants";
+import { portsMatch, portNeutralize, deviceIsBLForFW } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
-  readonly launchpads: IObservableArray<Launchpad> = observable([]);
+  @observable launchpad?: Launchpad = undefined;
+
   @observable available?: boolean = undefined;
 
   private lastScan?: Date = undefined;
 
   constructor(rootStore: RootStore) {
     super(rootStore);
-    WebMidi.enable((e) => {
-      if (e) {
-        this.available = false;
-        return
-      } 
-      this.available = true;
+    WebMidi.enable(this.midiInit, true);
 
-      let listener = () =>
-        this.scan().then((lps) => {
-          if (lps !== undefined) this.launchpads.replace(lps);
-        });
-      listener();
-
-      WebMidi.addListener("connected", listener);
-      WebMidi.addListener("disconnected", listener);
-    }, true);
+    reaction(
+      () => this.launchpad,
+      (lp) => {
+        
+        if (lp?.type === LaunchpadTypes.CFW)
+          setTimeout(
+            () =>
+              this.rootStore.notice.show({
+                text:
+                  "The Launchpad Pro currently connected is running an old version of the Custom Firmware. It is highly recommended that you update it.",
+                dismissable: true,
+              }),
+            500
+          );
+      }
+    );
   }
 
-  @computed
-  get cfwPresent() {
-    return this.launchpads.some((lp) => lp.type === LaunchpadType.CFW);
+  @action.bound
+  midiInit(e?: Error) {
+    if (e) {
+      this.available = false;
+      return;
+    }
+    this.available = true;
+
+    let listener = () => this.scan().then((lp) => this.setLaunchpad(lp));
+
+    listener();
+
+    WebMidi.addListener("connected", listener);
+    WebMidi.addListener("disconnected", listener);
   }
 
-  @action
-  scan = async () => {
-    const launchpads: Launchpad[] = [];
+  @action.bound
+  setLaunchpad(lp?: Launchpad) {
+    this.launchpad?.input.removeListener();
+    this.launchpad = lp;
+  }
 
+  @action.bound
+  async scan() {
     let currentTimestamp = new Date();
 
     if (this.lastScan === undefined || this.lastScan < currentTimestamp)
@@ -61,39 +79,38 @@ export default class LaunchpadStore extends BaseStore {
           // When new launchpads are connected, give them some time to boot before sending version query
           await new Promise((res) => setTimeout(() => res(), 50));
 
-          if ((await launchpad.getType()) !== LaunchpadType.UNUSED)
-            launchpads.push(launchpad);
+          if ((await launchpad.getType()) !== LaunchpadTypes.BLANK) {
+            this.setLaunchpad(launchpad);
+            return launchpad;
+          }
         }
       }
     }
     if (this.lastScan > currentTimestamp) return;
-    return launchpads;
-  };
+  }
 
   @action
-  queueFirmwareFlash = (buffer: Uint8Array, targetLp: string) => {
-    let resolveAttempt: (val?: any) => void;
+  queueFirmwareFlash = (buffer: Uint8Array, targetLp: FlashableFirmwares) => {
+    let cancelFlash: () => void;
+    let dispose: Function;
 
-    let flashPromise = new Promise(async (resolve) => {
-      const attemptFlash = async () => {
-        const lps = await this.scan();
-        if (!lps || !lps.some((lp) => lp.type === targetLp)) return;
+    let flashPromise = () =>
+      new Promise(async (resolve) => {
+        cancelFlash = resolve;
 
-        resolveAttempt(async () =>
-          lps[lps.findIndex((lp) => lp.type === targetLp)].flashFirmware(buffer)
+        dispose = reaction(
+          () => this.launchpad,
+          () =>
+            this.launchpad?.type &&
+            deviceIsBLForFW(this.launchpad.type, targetLp) &&
+            resolve(async () => {
+              await this.launchpad!.flashFirmware(buffer);
+              dispose();
+            }),
+          { fireImmediately: true }
         );
-      };
+      });
 
-      attemptFlash();
-
-      WebMidi.addListener("connected", attemptFlash);
-
-      resolveAttempt = (val) => {
-        WebMidi.removeListener("connected", attemptFlash);
-        resolve(val);
-      };
-    });
-
-    return { cancelFlash: resolveAttempt!, flashPromise };
+    return { cancelFlash: cancelFlash!, flashPromise };
   };
 }

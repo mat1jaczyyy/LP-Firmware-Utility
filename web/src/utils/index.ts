@@ -1,6 +1,10 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
+import { LaunchpadTypes, FlashableFirmwares, LPX_MODE_HEADER } from "../constants";
+
+const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
+
 export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
@@ -24,24 +28,6 @@ export const downloadCFW = async () => {
   try {
     const response = await axios.get(
       "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx"
-    );
-
-    return new Uint8Array(
-      atob(response.data.content)
-        .split("")
-        .map((c) => c.charCodeAt(0))
-    );
-  } catch (e) {
-    throw new Error(
-      "An error occured while downloading the CFW. Please try again."
-    );
-  }
-};
-
-export const downloadCFY = async () => {
-  try {
-    const response = await axios.get(
-      "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx?ref=73d490a71a908c15e145f91de910a77f75f38a6a"
     );
 
     return new Uint8Array(
@@ -148,7 +134,7 @@ export const squashFullHex = (full: string) => {
     .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
 };
 
-export const hexToHsv = ([r, g, b]: number[]) => {
+export const rgbToHsv = ([r, g, b]: number[]) => {
   r /= 63;
   g /= 63;
   b /= 63;
@@ -192,16 +178,17 @@ export const hexToRgb = (hex: string) => [
 export const parseRetinaPalette = async (paletteFile: File) => {
   const fileText = await paletteFile.text();
 
+  if (!paletteRegex.test(fileText)) throw new Error();
+
   let colors: string[] = fileText.split(";");
 
   let newPalette: any = {};
 
-  colors.forEach((color) => {
+  for (let color in colors) {
     let [index, rgb] = color.split(",");
-    if (rgb === undefined) return;
     let rgbArr = rgb.split(" ").slice(1);
     newPalette[parseInt(index)] = rgbArr.map((v) => parseInt(v));
-  });
+  }
 
   return newPalette;
 };
@@ -228,3 +215,39 @@ export const paletteToArray = (palette: any) => {
 
   return array;
 };
+
+export const deviceIsBLForFW = (
+  device: LaunchpadTypes,
+  fw: FlashableFirmwares
+): boolean =>
+  (([
+    FlashableFirmwares.CFY,
+    FlashableFirmwares.LPPRO,
+  ] as FlashableFirmwares[]).includes(fw) &&
+    device === LaunchpadTypes.BL_LPPRO) ||
+  (fw === FlashableFirmwares.LPMINIMK3 && device === LaunchpadTypes.BL_LPMINIMK3) ||
+  (fw === FlashableFirmwares.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
+  (fw === FlashableFirmwares.LPPROMK3 && device === LaunchpadTypes.BL_LPPROMK3) ||
+  (fw === FlashableFirmwares.LPX && device === LaunchpadTypes.BL_LPX);
+
+export const isBL = (device: LaunchpadTypes): boolean =>
+  [
+    LaunchpadTypes.BL_LPMINIMK3,
+    LaunchpadTypes.BL_LPMK2,
+    LaunchpadTypes.BL_LPPRO,
+    LaunchpadTypes.BL_LPPROMK3,
+    LaunchpadTypes.BL_LPX,
+  ].includes(device);
+
+export const isCustomFW = (device: LaunchpadTypes): boolean =>
+  [LaunchpadTypes.CFY, LaunchpadTypes.CFW].includes(device);
+
+export const canHaveCustomMode = (type: LaunchpadTypes): boolean =>
+  [LaunchpadTypes.CFY, LaunchpadTypes.LPX, LaunchpadTypes.LPPROMK3].includes(
+    type
+  );
+
+export const saveCustomMode = (mode: Uint8Array, name: string) => {
+  let data = [...LPX_MODE_HEADER, ...mode, 0xF7];
+  saveAs(new Blob([new Uint8Array(data)]), `${name}.syx`)
+}

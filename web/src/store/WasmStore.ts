@@ -1,8 +1,8 @@
 import BaseStore from "./BaseStore";
-import { observable, action } from "mobx";
+import { observable, action, runInAction } from "mobx";
 import { RootStore } from ".";
-import { downloadCFW, paletteToArray, downloadCFY } from "../utils";
-import { lpModels, LaunchpadType } from "../constants";
+import { downloadCFW, paletteToArray } from "../utils";
+import { lpModels, FlashableFirmwares } from "../constants";
 
 declare let Module: any;
 declare let FS: any;
@@ -15,6 +15,11 @@ export default class WasmStore extends BaseStore {
   constructor(rootStore: RootStore) {
     super(rootStore);
 
+    this.init();
+  }
+
+  @action
+  init() {
     try {
       if (
         typeof WebAssembly === "object" &&
@@ -33,7 +38,7 @@ export default class WasmStore extends BaseStore {
               "array",
             ]);
             this._verify = Module.cwrap("verify_firmware", "number");
-            this.available = true;
+            runInAction(() => (this.available = true));
           };
           document.body.appendChild(fwgen);
         } else this.available = false;
@@ -45,13 +50,12 @@ export default class WasmStore extends BaseStore {
 
   @action
   patch = async (
-    selectedLp: string,
+    selectedLp: FlashableFirmwares,
     options: any,
     palette: { [index: number]: number[] }
   ) => {
     try {
-      if (selectedLp.includes("CFW")) return await downloadCFW();
-      else if (selectedLp.includes("CFY")) return await downloadCFY();
+      if (selectedLp === FlashableFirmwares.CFY) return await downloadCFW();
       this._patch!(
         lpModels.indexOf(selectedLp),
         Object.values({ "Custom Palette": false, ...options }),
@@ -71,7 +75,7 @@ export default class WasmStore extends BaseStore {
   };
 
   @action
-  verify = (firmware: Uint8Array): LaunchpadType => {
+  verify = (firmware: Uint8Array): FlashableFirmwares => {
     let selected = null;
 
     try {
@@ -87,6 +91,6 @@ export default class WasmStore extends BaseStore {
       throw new Error("The firmware file is invalid. Please try again.");
     }
 
-    return lpModels[selected] as LaunchpadType;
+    return lpModels[selected];
   };
 }

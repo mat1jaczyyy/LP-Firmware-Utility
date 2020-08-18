@@ -1,27 +1,32 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import { InputEventSysex } from "webmidi";
-import { observable } from "mobx";
+import { observable, runInAction, autorun } from "mobx";
 import { useObserver } from "mobx-react-lite";
+import { useDropzone } from "react-dropzone";
+import clsx from "clsx";
 
 import PaletteGrid from "../components/PaletteGrid";
 import ColorPicker from "../components/ColorPicker";
 
 import { useStore } from "../hooks";
 
-import { LaunchpadType } from "../constants";
 import {
   hexToRgb,
-  hexToHsv,
+  rgbToHsv,
   parseRetinaPalette,
   createRetinaPalette,
+  isCustomFW,
 } from "../utils";
+import Button from "../components/Button";
+import RouteContainer from "../components/RouteContainer";
 
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
+  const uiStore = useStore(({ ui }) => ui);
 
-  const [hsv, setHsv] = useState(hexToHsv(paletteStore.palette[0]));
+  const [hsv, setHsv] = useState(rgbToHsv(paletteStore.palette[0]));
+  const [paletteError, setPaletteError] = useState<any>();
 
   const [selectedColor, setSelectedColor] = useState(0);
   const [paletteIndex, setPaletteIndex] = useState(1);
@@ -73,17 +78,17 @@ const Palette = () => {
   const handleColorChanged = useCallback(
     (color) => {
       if (selectedColor !== undefined) {
-        paletteStore.palette[selectedColor] = hexToRgb(color);
-        paletteStore.dirty = true;
+        runInAction(() => {
+          paletteStore.palette[selectedColor] = hexToRgb(color);
+          paletteStore.dirty = true;
+        });
       }
     },
     [selectedColor, paletteStore.dirty, paletteStore.palette]
   );
 
   const handlePaletteUpload = useCallback(() => {
-    launchpadStore.launchpads.forEach((lp) => {
-      if (lp.type !== LaunchpadType.CFW) return;
-
+    if (launchpadStore.launchpad && isCustomFW(launchpadStore.launchpad.type)) {
       let convertedPalette = new Array<number>(512);
 
       Object.entries(paletteStore.palette).forEach(([index, color]) => {
@@ -94,17 +99,24 @@ const Palette = () => {
         convertedPalette[colorIndex + 3] = color[2];
       });
 
-      lp.uploadPalette(convertedPalette, paletteIndex - 1);
-    });
-  }, [launchpadStore.launchpads, paletteStore.palette, paletteIndex]);
+      launchpadStore.launchpad.uploadPalette(
+        convertedPalette,
+        paletteIndex - 1
+      );
+    }
+  }, [launchpadStore.launchpad, paletteStore.palette, paletteIndex]);
 
   const importPalette = useCallback(
     (file?: File) => {
       if (!file) return;
-      parseRetinaPalette(file).then((newPalette) => {
-        paletteStore.palette = observable(newPalette);
-        paletteStore.dirty = true;
-      });
+      parseRetinaPalette(file)
+        .then((newPalette) => {
+          runInAction(() => {
+            paletteStore.palette = observable(newPalette);
+            paletteStore.dirty = true;
+          });
+        })
+        .catch(() => setPaletteError("Invalid palette file!"));
     },
     [paletteStore.palette, paletteStore.dirty]
   );
@@ -116,12 +128,22 @@ const Palette = () => {
       else if (data[7] === 35)
         downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
       else if (data[7] === 125) {
-        paletteStore.palette = observable(downloadedPalette.current);
-        paletteStore.dirty = true;
+        runInAction(() => {
+          paletteStore.palette = observable(downloadedPalette.current);
+          paletteStore.dirty = true;
+        });
       }
     },
     [paletteStore.palette, paletteStore.dirty]
   );
+
+  const onDrop = useCallback(([file]: File[]) => importPalette(file), [
+    importPalette,
+  ]);
+
+  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+    onDrop,
+  });
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -129,94 +151,95 @@ const Palette = () => {
   }, [handleKeyDown]);
 
   useEffect(() => {
-    launchpadStore.launchpads.forEach(
-      (lp) =>
-        lp.type === LaunchpadType.CFW &&
-        lp.input.addListener("sysex", "all", handleCFWSysex)
-    );
+    if (paletteError === undefined) return;
+    let cancel = setTimeout(() => setPaletteError(undefined), 3000);
+    return () => clearTimeout(cancel);
+  }, [paletteError]);
+
+  useEffect(() => {
+    let lp = launchpadStore.launchpad;
+    if (lp && isCustomFW(lp.type))
+      lp.input.addListener("sysex", "all", handleCFWSysex);
+
     return () => {
-      launchpadStore.launchpads.forEach(
-        (lp) =>
-          lp.type === LaunchpadType.CFW &&
-          lp.input.removeListener("sysex", "all", handleCFWSysex)
-      );
+      lp?.input.removeListener("sysex", "all", handleCFWSysex);
     };
-  }, [launchpadStore.launchpads, handleCFWSysex]);
+  }, [launchpadStore.launchpad, handleCFWSysex]);
 
   const selectedRef = useRef(0);
   useEffect(() => {
-    if (selectedRef.current !== selectedColor) {
-      setHsv(hexToHsv(paletteStore.palette[selectedColor]));
+    autorun(() => {
+      setHsv(rgbToHsv(paletteStore.palette[selectedColor]));
       selectedRef.current = selectedColor;
-    }
+    });
   }, [paletteStore.palette, selectedColor]);
 
   return useObserver(() => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <PaletteGrid
-        selectedColor={selectedColor}
-        onColorClicked={(index) => setSelectedColor(index)}
-      />
-      <p style={{ margin: "5px 0 0" }}>Selected Velocity: {selectedColor}</p>
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-        <ColorPicker hsv={hsv} onColorChange={handleColorChanged} />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            marginLeft: 10,
-            padding: 5,
-            height: "100%",
-          }}
-        >
-          <button onClick={() => fileRef.current!.click()}>Import</button>
-          <input
-            style={{ display: "none" }}
-            onChange={(e) => importPalette(e.target.files?.[0])}
-            type="file"
-            ref={fileRef}
-          />
-          <button onClick={() => createRetinaPalette(paletteStore.palette)}>
-            Export
-          </button>
-
-          {launchpadStore.cfwPresent && (
-            <>
-              <button style={{ marginTop: 25 }} onClick={handlePaletteUpload}>
-                Upload
-              </button>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
-                <select
-                  onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
-                  value={paletteIndex}
-                  style={{ width: 50, height: 38 }}
-                >
-                  <option value={1}>1</option>
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                </select>
-              </div>
-            </>
-          )}
+    <RouteContainer {...{ ...getRootProps(), lightBg }}>
+      <div>
+        <PaletteGrid
+          selectedColor={selectedColor}
+          onColorClicked={(index) => setSelectedColor(index)}
+          width={450}
+        />
+        <div className="flex flex-row items-center py-1">
+          <div className="flex-1" />
+          <p className={clsx("text-xl", paletteError && "text-red-500")}>
+            {paletteError || `Selected Velocity: ${selectedColor}`}
+          </p>
+          <p
+            onClick={() => paletteStore.reset()}
+            className="flex-1 font-semibold cursor-pointer text-lg opacity-75 hover:opacity-100 duration-100 transition-opacity text-right"
+          >
+            {uiStore.konamiSuccess ? "RESTET" : "RESET"}
+          </p>
         </div>
       </div>
-      <Link to="/" style={{ color: "#888888", marginTop: 10 }}>
-        {"< Firmware Utility"}
-      </Link>
-    </div>
+      <div className="flex flex-row">
+        <ColorPicker
+          hsv={hsv}
+          onColorChange={handleColorChanged}
+          onTextFocusChanged={(focused: boolean) => {
+            if (focused) window.removeEventListener("keydown", handleKeyDown);
+            else window.addEventListener("keydown", handleKeyDown);
+          }}
+        />
+        <div className="flex flex-col ml-4 h-full justify-between ">
+          <div className="flex flex-col space-y-2">
+            <input
+              {...getInputProps()}
+              style={{ display: "none" }}
+              onChange={(e) => importPalette(e.target.files?.[0])}
+              type="file"
+              ref={fileRef}
+            />
+            <Button onClick={() => fileRef.current!.click()}>Import</Button>
+            <Button onClick={() => createRetinaPalette(paletteStore.palette)}>
+              Export
+            </Button>
+          </div>
+
+          {launchpadStore.launchpad &&
+            isCustomFW(launchpadStore.launchpad.type!) && (
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex items-center justify-center text-lg">
+                  <p style={{ margin: 0, marginRight: 5 }}>Index:</p>
+                  <select
+                    onChange={(e) => setPaletteIndex(parseInt(e.target.value))}
+                    value={paletteIndex}
+                    className="p-1 text-xl"
+                  >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                  </select>
+                </div>
+                <Button onClick={handlePaletteUpload}>Upload</Button>
+              </div>
+            )}
+        </div>
+      </div>
+    </RouteContainer>
   ));
 };
 

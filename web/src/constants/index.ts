@@ -1,64 +1,68 @@
-const LPX = "Launchpad X";
-const LPMINIMK3 = "Launchpad Mini MK3";
-const LPPROMK3 = "Launchpad Pro MK3";
-const LPMK2 = "Launchpad MK2";
-const LPPRO = "Launchpad Pro";
-const LPPROCFW = "Launchpad Pro (CFW)";
-const LPPROCFY = "Launchpad Pro (CFY - Beta)";
-
-export enum LaunchpadType {
-  BL_LPX = "Launchpad X",
-  BL_LPMINIMK3 = "Launchpad Mini MK3",
-  BL_LPPROMK3 = "Launchpad Pro MK3",
-  BL_LPMK2 = "Launchpad MK2",
-  BL_LPPRO = "Launchpad Pro",
-  CFW = "Launchpad Pro (CFW)",
-  CFY = "Launchpad Pro (CFY - Beta)",
-  UNUSED = "UNUSED",
+export enum LaunchpadTypes {
+  BL_LPX = "Launchpad X (BL)",
+  BL_LPMINIMK3 = "Launchpad Mini MK3 (BL)",
+  BL_LPPROMK3 = "Launchpad Pro MK3 (BL)",
+  BL_LPMK2 = "Launchpad MK2 (BL)",
+  BL_LPPRO = "Launchpad Pro (BL)",
+  LPX = "Launchpad X",
+  LPMINIMK3 = "Launchpad Mini MK3",
+  LPPROMK3 = "Launchpad Pro MK3",
+  LPMK2 = "Launchpad MK2",
+  LPPRO = "Launchpad Pro",
+  CFW = "Launchpad Pro (CFW - OLD)",
+  CFY = "Launchpad Pro (CFW)",
+  BLANK = "BLANK",
 }
 
-interface Map {
-  [key: string]: any;
-}
+export const FlashableFirmwares = {
+  LPX: LaunchpadTypes.LPX,
+  LPMINIMK3: LaunchpadTypes.LPMINIMK3,
+  LPPROMK3: LaunchpadTypes.LPPROMK3,
+  LPMK2: LaunchpadTypes.LPMK2,
+  LPPRO: LaunchpadTypes.LPPRO,
+  CFY: LaunchpadTypes.CFY,
+  CUSTOM_SYSEX: "Custom SysEx File",
+} as const;
 
-export const lpModels = [
-  LPX,
-  LPMINIMK3,
-  LPPROMK3,
-  LPMK2,
-  LPPRO,
-  LPPROCFW,
-  LPPROCFY
+export type FlashableFirmwares = typeof FlashableFirmwares[keyof typeof FlashableFirmwares];
+
+export const lpModels: FlashableFirmwares[] = [
+  FlashableFirmwares.LPX,
+  FlashableFirmwares.LPMINIMK3,
+  FlashableFirmwares.LPPROMK3,
+  FlashableFirmwares.LPMK2,
+  FlashableFirmwares.LPPRO,
+  FlashableFirmwares.CFY,
 ];
 
-export const lpOptions: Map = {
-  "Launchpad X": {},
-  "Launchpad Mini MK3": {},
-  "Launchpad Pro MK3": {},
-  "Launchpad MK2": {},
-  "Launchpad Pro": {},
-  "Launchpad Pro (CFW)": {},
-  "Launchpad Pro (CFY - Beta)": {},
+type FirmwareMap<T> = { [key in FlashableFirmwares]: T };
+
+export const lpOptions: FirmwareMap<Record<string, any>> = lpModels.reduce<
+  FirmwareMap<Record<string, any>>
+>((obj, e) => {
+  let newObj = { ...obj };
+  newObj[e] = {};
+  return newObj;
+}, {} as FirmwareMap<any>);
+
+export const svgs: { [key in FlashableFirmwares]: any } = {
+  [FlashableFirmwares.LPX]: "x",
+  [FlashableFirmwares.LPMINIMK3]: "x",
+  [FlashableFirmwares.LPPROMK3]: "promk3",
+  [FlashableFirmwares.LPMK2]: "mk2",
+  [FlashableFirmwares.LPPRO]: "pro",
+  [FlashableFirmwares.CFY]: "pro",
+  [FlashableFirmwares.CUSTOM_SYSEX]: "",
 };
 
-export const svgs: Map = {
-  "Launchpad X": "x",
-  "Launchpad Mini MK3": "x",
-  "Launchpad Pro MK3": "promk3",
-  "Launchpad MK2": "mk2",
-  "Launchpad Pro": "pro",
-  "Launchpad Pro (CFW)": "pro",
-  "Launchpad Pro (CFY - Beta)": "pro",
-};
-
-export const bltext: Map = {
-  "Launchpad X": "the Capture MIDI button",
-  "Launchpad Mini MK3": "the User button",
-  "Launchpad Pro MK3": "the Setup button",
-  "Launchpad MK2": "Session, User 1, User 2 and Mixer",
-  "Launchpad Pro": "the Setup button",
-  "Launchpad Pro (CFW)": "the Setup button",
-  "Launchpad Pro (CFY - Beta)": "the Setup button",
+export const bltext: { [key in FlashableFirmwares]: string } = {
+  [FlashableFirmwares.LPX]: "the Capture MIDI button",
+  [FlashableFirmwares.LPMINIMK3]: "the User button",
+  [FlashableFirmwares.LPPROMK3]: "the Setup button",
+  [FlashableFirmwares.LPMK2]: "Session, User 1, User 2 and Mixer",
+  [FlashableFirmwares.LPPRO]: "the Setup button",
+  [FlashableFirmwares.CFY]: "the Setup button",
+  [FlashableFirmwares.CUSTOM_SYSEX]: "",
 };
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];
@@ -199,6 +203,15 @@ export const novationPalette: { [index: number]: number[] } = (() => {
   return obj;
 })();
 
+export const CFY_PALETTE_DOWNLOAD_HEADER = [
+  0xf0,
+  0x52,
+  0x45,
+  0x54,
+  0x49,
+  0x4e,
+  0x41,
+];
 export const CFW_PALETTE_UPLOAD_START = [
   0x52,
   0x45,
@@ -227,4 +240,61 @@ export const CFW_PALETTE_UPLOAD_END = [
   0x7d,
 ];
 
+export const CFY_MODE_UPLOAD_START = (index: number) => [
+  0x43,
+  0x55,
+  0x53,
+  0x54,
+  0x4f,
+  0x4d,
+  0x7b,
+  index,
+];
+
+export const CFY_MODE_UPLOAD_WRITE = [0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x3d];
+export const CFY_MODE_UPLOAD_END = [0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x7d];
+export const CFY_MODE_WRITE_HEADER = [240, 67, 85, 83, 84, 79, 77];
+
+export const LPX_MODE_HEADER = [0x00, 0x20, 0x29, 0x02, 0x0c, 0x05, 0x01, 0x7f];
+export const LPMINIMK3_MODE_HEADER = [
+  0x00,
+  0x20,
+  0x29,
+  0x02,
+  0x0d,
+  0x05,
+  0x01,
+  0x7f,
+];
+export const LPPROMK3_MODE_HEADER = [
+  0x00,
+  0x20,
+  0x29,
+  0x02,
+  0x0e,
+  0x05,
+  0x01,
+  0x7f,
+];
+
+export const LPX_MODE_DOWNLOAD = (index: number) => [
+  0x00,
+  0x20,
+  0x29,
+  0x02,
+  0x0c,
+  0x05,
+  0x01,
+  index + 4,
+];
+export const LPMINIMK3_MODE_DOWNLOAD = (index: number) => [
+  0x00,
+  0x20,
+  0x29,
+  0x02,
+  0x0d,
+  0x05,
+  0x01,
+  index + 4,
+];
 export default { lpOptions, lpModels };

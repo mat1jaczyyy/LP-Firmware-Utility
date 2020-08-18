@@ -1,5 +1,5 @@
 import React, { HTMLAttributes, useState, useEffect, useCallback } from "react";
-import { hsvToHex, hexToHsv } from "../../utils";
+import { hsvToHex, rgbToHsv } from "../../utils";
 
 interface Props {
   onColorChanged: (hsv: number[]) => void;
@@ -9,6 +9,7 @@ interface Props {
 const Input = ({
   onColorChanged,
   hsv,
+  ...props
 }: Props & HTMLAttributes<HTMLInputElement>) => {
   const [text, setText] = useState("");
 
@@ -35,7 +36,7 @@ const Input = ({
 
       setText(text);
 
-      let hsv = hexToHsv([r, g, b]);
+      let hsv = rgbToHsv([r, g, b]);
 
       onColorChanged(hsv);
     },
@@ -61,6 +62,7 @@ const Input = ({
         if (text.length === 6) handleChange(e);
       }}
       value={`#${text.toUpperCase()}`}
+      {...props}
     />
   );
 };

@@ -3,11 +3,20 @@ import { Link } from "react-router-dom";
 import { saveAs } from "file-saver";
 import { useObserver } from "mobx-react-lite";
 
-import { lpModels, lpOptions, svgs, bltext, LaunchpadType } from "../constants";
-import MidiButton from "../components/MidiButton";
+import {
+  lpModels,
+  lpOptions,
+  svgs,
+  bltext,
+  LaunchpadTypes,
+  FlashableFirmwares,
+} from "../constants";
+import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
-import { flattenObject } from "../utils";
+import { flattenObject, deviceIsBLForFW } from "../utils";
+import RouteContainer from "../components/RouteContainer";
+import { useDropzone } from "react-dropzone";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -18,26 +27,30 @@ const Firmware = () => {
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const noticeStore = useStore(({ notice }) => notice);
 
-  const [optionList, setOptionList] = useState(lpOptions[uiStore.selectedLp]);
-  const [optionState, setOptionState]: any = useState({});
+  const [optionList, setOptionList] = useState<undefined | any>(
+    lpOptions[uiStore.selectedFirmware]
+  );
+
+  const [optionState, setOptionState] = useState<Record<string, boolean>>({});
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  const getOptions = useCallback(
+  const renderOptions = useCallback(
     (options: any, recursion = 0, parent?: string) =>
       Object.entries(options).map(([name, value]) => {
         let children: any;
-        if (value !== false) children = getOptions(value, recursion + 1, name);
+        if (value !== false)
+          children = renderOptions(value, recursion + 1, name);
 
         if (
-          name === "Custom Palette" &&
-          uiStore.selectedLp === LaunchpadType.CFW
+          name === "Apply Palette" &&
+          uiStore.selectedFirmware === LaunchpadTypes.CFY
         )
           return null;
 
         return (
           <div
-            className={recursion === 0 ? "mainOption" : undefined}
+            className={recursion === 0 ? "w-auto" : undefined}
             key={name}
             style={{ paddingLeft: recursion * 15, margin: "5px 0" }}
           >
@@ -67,12 +80,12 @@ const Firmware = () => {
           </div>
         );
       }),
-    [optionState, setOptionState, uiStore.selectedLp]
+    [optionState, setOptionState, uiStore.selectedFirmware]
   );
 
   const flashFirmware = useCallback(
     async (
-      selectedLp: LaunchpadType,
+      selectedLp: FlashableFirmwares,
       options: { [key: string]: any },
       palette: { [index: number]: number[] },
       rawFW?: Uint8Array
@@ -84,16 +97,16 @@ const Firmware = () => {
           firmware = await wasmStore.patch(selectedLp, options, palette);
 
         let targetLp =
-          (selectedLp === LaunchpadType.CFW || selectedLp === LaunchpadType.CFY)
-            ? LaunchpadType.BL_LPPRO
+          selectedLp === FlashableFirmwares.CFY
+            ? FlashableFirmwares.LPPRO
             : selectedLp;
 
-        let { cancelFlash, flashPromise } = launchpadStore.queueFirmwareFlash(
-          rawFW || firmware,
-          targetLp
-        );
+        let {
+          cancelFlash,
+          flashPromise: startFlash,
+        } = launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
 
-        flashPromise
+        startFlash()
           .then(async (continueFlashing: any) => {
             if (!continueFlashing) return;
             noticeStore.show({
@@ -105,7 +118,10 @@ const Firmware = () => {
           })
           .then(noticeStore.hide);
 
-        if (!launchpadStore.launchpads.some((lp) => lp.type === targetLp))
+        if (
+          !launchpadStore.launchpad ||
+          !deviceIsBLForFW(launchpadStore.launchpad.type, targetLp)
+        )
           noticeStore.show({
             text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
             dismissable: true,
@@ -124,7 +140,7 @@ const Firmware = () => {
   );
 
   const downloadFirmware = useCallback(
-    async (selectedLp: string, options: any, palette: any) => {
+    async (selectedLp: FlashableFirmwares, options: any, palette: any) => {
       try {
         const fw = await wasmStore.patch(selectedLp, options, palette);
 
@@ -158,30 +174,51 @@ const Firmware = () => {
     [flashFirmware, wasmStore, paletteStore.palette, noticeStore]
   );
 
+  const onDrop = useCallback(
+    ([file]: File[]) => uiStore.konamiSuccess && uploadFirmware(file),
+    [uiStore.konamiSuccess, uploadFirmware]
+  );
+
+  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+    onDrop,
+  });
+
+  let containerProps = uiStore.konamiSuccess
+    ? { ...getRootProps(), lightBg }
+    : {};
+
   useEffect(() => {
-    let selectedLp = uiStore.selectedLp;
+    let selectedFw = uiStore.selectedFirmware;
 
-    if (paletteStore.dirty && selectedLp !== LaunchpadType.BL_LPPROMK3)
-      lpOptions[selectedLp]["Custom Palette"] = true;
-    else delete lpOptions[selectedLp]["Custom Palette"];
+    if (
+      paletteStore.dirty &&
+      selectedFw !== FlashableFirmwares.LPPROMK3 &&
+      lpOptions[selectedFw] !== undefined
+    )
+      lpOptions[selectedFw]!["Apply Palette"] = true;
+    else if (selectedFw === FlashableFirmwares.LPPROMK3)
+      delete lpOptions[selectedFw]["Apply Palette"];
 
-    setOptionList(lpOptions[selectedLp]);
-    setOptionState(flattenObject(lpOptions[selectedLp]));
-  }, [paletteStore.dirty, uiStore.selectedLp]);
+    setOptionList(lpOptions[selectedFw]);
+    setOptionState(flattenObject(lpOptions[selectedFw]));
+  }, [paletteStore.dirty, uiStore.selectedFirmware]);
 
   return useObserver(() => (
-    <div className="inner">
+    <RouteContainer {...containerProps}>
       <select
-        className="launchpads"
+        style={{
+          width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
+        }}
+        className="py-2 px-4 text-2xl font-normal font-sans appearance-none custom-select"
         onChange={(e) =>
-          e.target.value === "Custom SysEx File"
+          e.target.value === FlashableFirmwares.CUSTOM_SYSEX
             ? fileRef.current?.click()
-            : (uiStore.selectedLp = e.target.value as LaunchpadType)
+            : uiStore.setSelectedFirmware(e.target.value as FlashableFirmwares)
         }
-        value={uiStore.selectedLp}
+        value={uiStore.selectedFirmware}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? ["Custom SysEx File"] : [])
+          .concat(uiStore.konamiSuccess ? [FlashableFirmwares.CUSTOM_SYSEX] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}
@@ -189,45 +226,46 @@ const Firmware = () => {
           ))}
       </select>
 
-      <div className="options">{getOptions(optionList)}</div>
+      <div className="w-auto">{renderOptions(optionList)}</div>
 
-      {uiStore.selectedLp === LaunchpadType.CFW &&
-        optionState["Custom Palette"] && (
-          <p style={{ margin: 0, textAlign: "center", opacity: 0.5 }}>
-            Upload custom palettes
-            <br />
-            to CFW using the
+      {uiStore.selectedFirmware === LaunchpadTypes.CFY &&
+        optionState["Apply Palette"] && (
+          <p className=" text-md text-center">
+            <span className="opacity-50">
+              Upload custom palettes to CFW <br /> in the{" "}
+            </span>
+            <Link to="/palette" className="opacity-75 text-white underline">
+              Palette section
+            </Link>
           </p>
         )}
 
-      {uiStore.selectedLp !== LaunchpadType.BL_LPPROMK3 && (
-        <Link
-          to="/palette"
-          style={{ color: "#FFF", opacity: 0.5, margin: 0, marginBottom: 10 }}
-        >
-          {"Palette Utility >"}
-        </Link>
-      )}
-
-      {optionState["Custom Palette"] &&
-        uiStore.selectedLp !== LaunchpadType.CFW && (
-          <>
-            <p style={{ margin: 0, transform: "translateY(10px)" }}>
-              Palette being applied:
-            </p>
-            <div style={{ transform: "scale(0.8)" }}>
-              <PaletteGrid />
-            </div>
-          </>
+      {paletteStore.dirty &&
+        !([
+          FlashableFirmwares.CFY,
+          FlashableFirmwares.LPPROMK3,
+        ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
+          <div className="flex flex-col items-center py-2 space-y-2">
+            <p className="text-lg">Current Palette:</p>
+            <PaletteGrid width={350} />
+          </div>
         )}
 
-      <MidiButton
+      <Button
         onClick={() =>
-          flashFirmware(uiStore.selectedLp, optionState, paletteStore.palette)
+          flashFirmware(
+            uiStore.selectedFirmware,
+            optionState,
+            paletteStore.palette
+          )
         }
-        action="flash firmware"
-      />
+        disabled={!launchpadStore.available}
+      >
+        Update
+      </Button>
+
       <input
+        {...getInputProps()}
         type="file"
         accept=".syx"
         style={{ display: "none" }}
@@ -235,40 +273,36 @@ const Firmware = () => {
         ref={fileRef}
       />
 
-      <div style={{ marginTop: -15 }} className="smol">
-        <span>...or</span>
-        <p
+      <p className="text-sm">
+        <span className="opacity-25">...or </span>
+        <span
           onClick={() =>
             downloadFirmware(
-              uiStore.selectedLp,
+              uiStore.selectedFirmware,
               optionState,
               paletteStore.palette
             )
           }
+          className="opacity-75 cursor-pointer underline"
         >
           download
-        </p>
-      </div>
+        </span>
+      </p>
 
       {isWindows && (
-        <div
-          className="smol"
-          style={{
-            marginTop: 20,
-          }}
-        >
-          Don't forget to install
+        <p className="pt-4">
+          <span className="opacity-50">Don't forget to install </span>
           <a
             href="https://github.com/mat1jaczyyy/apollo-studio/raw/master/Publish/novationusbmidi.exe"
             target="_blank"
             rel="noopener noreferrer"
+            className="opacity-75 underline"
           >
-            Novation's USB driver
+            Novation's USB driver!
           </a>
-          !
-        </div>
+        </p>
       )}
-    </div>
+    </RouteContainer>
   ));
 };
 

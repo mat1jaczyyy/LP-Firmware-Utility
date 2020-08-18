@@ -7,9 +7,9 @@ import Input from "./Input";
 import { hsvToHex, squashFullHex } from "../../utils";
 
 export const ColorPicker = ({
-  style,
   onColorChange,
   hsv: parentHsv,
+  onTextFocusChanged,
   ...props
 }: any) => {
   const [hsv, setHsv] = useState([1, 1, 1]);
@@ -25,7 +25,7 @@ export const ColorPicker = ({
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", ...style }}
+      className="flex flex-col"
       onMouseDown={() => {
         window.addEventListener("mouseup", function listener() {
           onColorChange(hsvToHex(colorRef.current || hsv));
@@ -60,7 +60,12 @@ export const ColorPicker = ({
           height: 40,
         }}
       >
-        <Input onColorChanged={(hsv: number[]) => setHsv(hsv)} hsv={hsv} />
+        <Input
+          onColorChanged={(hsv: number[]) => setHsv(hsv)}
+          hsv={hsv}
+          onBlur={() => onTextFocusChanged(false)}
+          onFocus={() => onTextFocusChanged(true)}
+        />
         <div
           style={{
             width: 40,
