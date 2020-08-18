@@ -9,35 +9,33 @@ export enum LaunchpadTypes {
   LPPROMK3 = "Launchpad Pro MK3",
   LPMK2 = "Launchpad MK2",
   LPPRO = "Launchpad Pro",
-  CFW = "Launchpad Pro (CFW)",
-  CFY = "Launchpad Pro (CFY - Beta)",
+  CFW = "Launchpad Pro (CFW - OLD)",
+  CFY = "Launchpad Pro (CFW)",
   BLANK = "BLANK",
 }
 
-export const FirmwareTypes = {
+export const FlashableFirmwares = {
   LPX: LaunchpadTypes.LPX,
   LPMINIMK3: LaunchpadTypes.LPMINIMK3,
   LPPROMK3: LaunchpadTypes.LPPROMK3,
   LPMK2: LaunchpadTypes.LPMK2,
   LPPRO: LaunchpadTypes.LPPRO,
-  CFW: LaunchpadTypes.CFW,
   CFY: LaunchpadTypes.CFY,
   CUSTOM_SYSEX: "Custom SysEx File",
 } as const;
 
-export type FirmwareTypes = typeof FirmwareTypes[keyof typeof FirmwareTypes];
+export type FlashableFirmwares = typeof FlashableFirmwares[keyof typeof FlashableFirmwares];
 
-export const lpModels: FirmwareTypes[] = [
-  FirmwareTypes.LPX,
-  FirmwareTypes.LPMINIMK3,
-  FirmwareTypes.LPPROMK3,
-  FirmwareTypes.LPMK2,
-  FirmwareTypes.LPPRO,
-  FirmwareTypes.CFW,
-  FirmwareTypes.CFY,
+export const lpModels: FlashableFirmwares[] = [
+  FlashableFirmwares.LPX,
+  FlashableFirmwares.LPMINIMK3,
+  FlashableFirmwares.LPPROMK3,
+  FlashableFirmwares.LPMK2,
+  FlashableFirmwares.LPPRO,
+  FlashableFirmwares.CFY,
 ];
 
-type FirmwareMap<T> = { [key in FirmwareTypes]: T };
+type FirmwareMap<T> = { [key in FlashableFirmwares]: T };
 
 export const lpOptions: FirmwareMap<Record<string, any>> = lpModels.reduce<
   FirmwareMap<Record<string, any>>
@@ -47,26 +45,24 @@ export const lpOptions: FirmwareMap<Record<string, any>> = lpModels.reduce<
   return newObj;
 }, {} as FirmwareMap<any>);
 
-export const svgs: { [key in FirmwareTypes]: any } = {
-  [FirmwareTypes.LPX]: "x",
-  [FirmwareTypes.LPMINIMK3]: "x",
-  [FirmwareTypes.LPPROMK3]: "promk3",
-  [FirmwareTypes.LPMK2]: "mk2",
-  [FirmwareTypes.LPPRO]: "pro",
-  [FirmwareTypes.CFW]: "pro",
-  [FirmwareTypes.CFY]: "pro",
-  [FirmwareTypes.CUSTOM_SYSEX]: "",
+export const svgs: { [key in FlashableFirmwares]: any } = {
+  [FlashableFirmwares.LPX]: "x",
+  [FlashableFirmwares.LPMINIMK3]: "x",
+  [FlashableFirmwares.LPPROMK3]: "promk3",
+  [FlashableFirmwares.LPMK2]: "mk2",
+  [FlashableFirmwares.LPPRO]: "pro",
+  [FlashableFirmwares.CFY]: "pro",
+  [FlashableFirmwares.CUSTOM_SYSEX]: "",
 };
 
-export const bltext: { [key in FirmwareTypes]: string } = {
-  [FirmwareTypes.LPX]: "the Capture MIDI button",
-  [FirmwareTypes.LPMINIMK3]: "the User button",
-  [FirmwareTypes.LPPROMK3]: "the Setup button",
-  [FirmwareTypes.LPMK2]: "Session, User 1, User 2 and Mixer",
-  [FirmwareTypes.LPPRO]: "the Setup button",
-  [FirmwareTypes.CFW]: "the Setup button",
-  [FirmwareTypes.CFY]: "the Setup button",
-  [FirmwareTypes.CUSTOM_SYSEX]: "",
+export const bltext: { [key in FlashableFirmwares]: string } = {
+  [FlashableFirmwares.LPX]: "the Capture MIDI button",
+  [FlashableFirmwares.LPMINIMK3]: "the User button",
+  [FlashableFirmwares.LPPROMK3]: "the Setup button",
+  [FlashableFirmwares.LPMK2]: "Session, User 1, User 2 and Mixer",
+  [FlashableFirmwares.LPPRO]: "the Setup button",
+  [FlashableFirmwares.CFY]: "the Setup button",
+  [FlashableFirmwares.CUSTOM_SYSEX]: "",
 };
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];
@@ -282,7 +278,6 @@ export const LPPROMK3_MODE_HEADER = [
 ];
 
 export const LPX_MODE_DOWNLOAD = (index: number) => [
-  
   0x00,
   0x20,
   0x29,
@@ -291,10 +286,8 @@ export const LPX_MODE_DOWNLOAD = (index: number) => [
   0x05,
   0x01,
   index + 4,
-  
 ];
 export const LPMINIMK3_MODE_DOWNLOAD = (index: number) => [
-  
   0x00,
   0x20,
   0x29,
@@ -303,6 +296,5 @@ export const LPMINIMK3_MODE_DOWNLOAD = (index: number) => [
   0x05,
   0x01,
   index + 4,
-  
 ];
 export default { lpOptions, lpModels };

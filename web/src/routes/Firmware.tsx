@@ -9,7 +9,7 @@ import {
   svgs,
   bltext,
   LaunchpadTypes,
-  FirmwareTypes,
+  FlashableFirmwares,
 } from "../constants";
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
@@ -44,7 +44,7 @@ const Firmware = () => {
 
         if (
           name === "Apply Palette" &&
-          uiStore.selectedFirmware === LaunchpadTypes.CFW
+          uiStore.selectedFirmware === LaunchpadTypes.CFY
         )
           return null;
 
@@ -85,7 +85,7 @@ const Firmware = () => {
 
   const flashFirmware = useCallback(
     async (
-      selectedLp: FirmwareTypes,
+      selectedLp: FlashableFirmwares,
       options: { [key: string]: any },
       palette: { [index: number]: number[] },
       rawFW?: Uint8Array
@@ -97,8 +97,8 @@ const Firmware = () => {
           firmware = await wasmStore.patch(selectedLp, options, palette);
 
         let targetLp =
-          selectedLp === FirmwareTypes.CFW || selectedLp === FirmwareTypes.CFY
-            ? FirmwareTypes.LPPRO
+          selectedLp === FlashableFirmwares.CFY
+            ? FlashableFirmwares.LPPRO
             : selectedLp;
 
         let {
@@ -140,7 +140,7 @@ const Firmware = () => {
   );
 
   const downloadFirmware = useCallback(
-    async (selectedLp: FirmwareTypes, options: any, palette: any) => {
+    async (selectedLp: FlashableFirmwares, options: any, palette: any) => {
       try {
         const fw = await wasmStore.patch(selectedLp, options, palette);
 
@@ -182,7 +182,7 @@ const Firmware = () => {
   const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
     onDrop,
   });
-  
+
   let containerProps = uiStore.konamiSuccess
     ? { ...getRootProps(), lightBg }
     : {};
@@ -192,11 +192,11 @@ const Firmware = () => {
 
     if (
       paletteStore.dirty &&
-      selectedFw !== FirmwareTypes.LPPROMK3 &&
+      selectedFw !== FlashableFirmwares.LPPROMK3 &&
       lpOptions[selectedFw] !== undefined
     )
       lpOptions[selectedFw]!["Apply Palette"] = true;
-    else if (selectedFw === FirmwareTypes.LPPROMK3)
+    else if (selectedFw === FlashableFirmwares.LPPROMK3)
       delete lpOptions[selectedFw]["Apply Palette"];
 
     setOptionList(lpOptions[selectedFw]);
@@ -209,16 +209,16 @@ const Firmware = () => {
         style={{
           width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
         }}
-        className="py-2 px-4 text-3xl font-normal font-sans appearance-none custom-select"
+        className="py-2 px-4 text-2xl font-normal font-sans appearance-none custom-select"
         onChange={(e) =>
-          e.target.value === FirmwareTypes.CUSTOM_SYSEX
+          e.target.value === FlashableFirmwares.CUSTOM_SYSEX
             ? fileRef.current?.click()
-            : uiStore.setSelectedFirmware(e.target.value as FirmwareTypes)
+            : uiStore.setSelectedFirmware(e.target.value as FlashableFirmwares)
         }
         value={uiStore.selectedFirmware}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? [FirmwareTypes.CUSTOM_SYSEX] : [])
+          .concat(uiStore.konamiSuccess ? [FlashableFirmwares.CUSTOM_SYSEX] : [])
           .map((model) => (
             <option value={model} key={model}>
               {model}
@@ -228,7 +228,7 @@ const Firmware = () => {
 
       <div className="w-auto">{renderOptions(optionList)}</div>
 
-      {uiStore.selectedFirmware === LaunchpadTypes.CFW &&
+      {uiStore.selectedFirmware === LaunchpadTypes.CFY &&
         optionState["Apply Palette"] && (
           <p className=" text-md text-center">
             <span className="opacity-50">
@@ -242,10 +242,9 @@ const Firmware = () => {
 
       {paletteStore.dirty &&
         !([
-          FirmwareTypes.CFW,
-          FirmwareTypes.CFY,
-          FirmwareTypes.LPPROMK3,
-        ] as FirmwareTypes[]).includes(uiStore.selectedFirmware) && (
+          FlashableFirmwares.CFY,
+          FlashableFirmwares.LPPROMK3,
+        ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
           <div className="flex flex-col items-center py-2 space-y-2">
             <p className="text-lg">Current Palette:</p>
             <PaletteGrid width={350} />

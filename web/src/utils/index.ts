@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { LaunchpadTypes, FirmwareTypes, LPX_MODE_HEADER } from "../constants";
+import { LaunchpadTypes, FlashableFirmwares, LPX_MODE_HEADER } from "../constants";
 
 const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
 
@@ -28,24 +28,6 @@ export const downloadCFW = async () => {
   try {
     const response = await axios.get(
       "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx"
-    );
-
-    return new Uint8Array(
-      atob(response.data.content)
-        .split("")
-        .map((c) => c.charCodeAt(0))
-    );
-  } catch (e) {
-    throw new Error(
-      "An error occured while downloading the CFW. Please try again."
-    );
-  }
-};
-
-export const downloadCFY = async () => {
-  try {
-    const response = await axios.get(
-      "https://api.github.com/repos/mat1jaczyyy/lpp-performance-cfw/contents/build/cfw.syx?ref=cfy"
     );
 
     return new Uint8Array(
@@ -236,18 +218,17 @@ export const paletteToArray = (palette: any) => {
 
 export const deviceIsBLForFW = (
   device: LaunchpadTypes,
-  fw: FirmwareTypes
+  fw: FlashableFirmwares
 ): boolean =>
   (([
-    FirmwareTypes.CFW,
-    FirmwareTypes.CFY,
-    FirmwareTypes.LPPRO,
-  ] as FirmwareTypes[]).includes(fw) &&
+    FlashableFirmwares.CFY,
+    FlashableFirmwares.LPPRO,
+  ] as FlashableFirmwares[]).includes(fw) &&
     device === LaunchpadTypes.BL_LPPRO) ||
-  (fw === FirmwareTypes.LPMINIMK3 && device === LaunchpadTypes.BL_LPMINIMK3) ||
-  (fw === FirmwareTypes.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
-  (fw === FirmwareTypes.LPPROMK3 && device === LaunchpadTypes.BL_LPPROMK3) ||
-  (fw === FirmwareTypes.LPX && device === LaunchpadTypes.BL_LPX);
+  (fw === FlashableFirmwares.LPMINIMK3 && device === LaunchpadTypes.BL_LPMINIMK3) ||
+  (fw === FlashableFirmwares.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
+  (fw === FlashableFirmwares.LPPROMK3 && device === LaunchpadTypes.BL_LPPROMK3) ||
+  (fw === FlashableFirmwares.LPX && device === LaunchpadTypes.BL_LPX);
 
 export const isBL = (device: LaunchpadTypes): boolean =>
   [

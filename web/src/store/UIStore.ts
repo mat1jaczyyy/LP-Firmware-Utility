@@ -1,10 +1,10 @@
 import { observable, action } from "mobx";
-import { konamiSequence, FirmwareTypes } from "../constants";
+import { konamiSequence, FlashableFirmwares } from "../constants";
 import BaseStore from "./BaseStore";
 import { RootStore } from ".";
 
 export default class UIStore extends BaseStore {
-  @observable selectedFirmware: FirmwareTypes = FirmwareTypes.LPX;
+  @observable selectedFirmware: FlashableFirmwares = FlashableFirmwares.LPX;
   @observable konamiSuccess = false;
   konamiInput: number[] = [];
 
@@ -26,7 +26,7 @@ export default class UIStore extends BaseStore {
   }
 
   @action
-  setSelectedFirmware(fw: FirmwareTypes): void {
+  setSelectedFirmware(fw: FlashableFirmwares): void {
     this.selectedFirmware = fw;
   }
 }

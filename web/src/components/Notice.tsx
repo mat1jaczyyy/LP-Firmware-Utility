@@ -1,8 +1,8 @@
 import React from "react";
-import CloseIcon from "@material-ui/icons/Close";
 import { useStore } from "../hooks";
 import { useObserver } from "mobx-react-lite";
 import clsx from "clsx";
+import Button from "./Button";
 
 const Notice = () => {
   const noticeStore = useStore(({ notice }) => notice);
@@ -10,33 +10,12 @@ const Notice = () => {
   const state = noticeStore.state;
 
   return useObserver(() => (
-    <div className="w-full h-full flex flex-col justify-center items-center text-center overflow-hidden text-3xl">
-      <span className="w-3/4">
-        <span>{state.text}</span>
-        {state.dismissable && (
-          <CloseIcon
-            className="opacity-75 cursor-pointer"
-            onClick={noticeStore.hide}
-          />
-        )}
-      </span>
-      <img
-        src={state.svg || ""}
-        style={{
-          margin: state.svg ? "50px 0" : 0,
-          visibility: state.svg ? "visible" : "hidden",
-        }}
-        alt=""
-      />
-      <span style={{ visibility: !!state.svg ? "visible" : "hidden" }}>
-        {state.bl}
-      </span>
-      <div
-        className={clsx(
-          "progress w-64 h-2 mt-4",
-          !state.showProgress && "hidden"
-        )}
-      />
+    <div className="w-full h-full container mx-auto flex flex-col justify-center items-center space-y-4 text-center overflow-hidden text-2xl lg:text-3xl">
+      <span>{state.text}</span>
+      {state.svg && <img src={state.svg} alt="Launchpad Illustration" />}
+      {state.bl && <span>{state.bl}</span>}
+      {state.showProgress && <div className={clsx("progress w-64 h-2 mt-4")} />}
+      {state.dismissable && <Button onClick={noticeStore.hide}>Close</Button>}
     </div>
   ));
 };
