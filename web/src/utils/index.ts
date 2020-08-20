@@ -184,7 +184,7 @@ export const parseRetinaPalette = async (paletteFile: File) => {
 
   let newPalette: any = {};
 
-  for (let color in colors) {
+  for (let color of colors) {
     let [index, rgb] = color.split(",");
     let rgbArr = rgb.split(" ").slice(1);
     newPalette[parseInt(index)] = rgbArr.map((v) => parseInt(v));
