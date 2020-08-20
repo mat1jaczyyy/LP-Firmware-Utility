@@ -1,7 +1,11 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { LaunchpadTypes, FlashableFirmwares, LPX_MODE_HEADER } from "../constants";
+import {
+  LaunchpadTypes,
+  FlashableFirmwares,
+  LPX_MODE_HEADER,
+} from "../constants";
 
 const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
 
@@ -225,9 +229,11 @@ export const deviceIsBLForFW = (
     FlashableFirmwares.LPPRO,
   ] as FlashableFirmwares[]).includes(fw) &&
     device === LaunchpadTypes.BL_LPPRO) ||
-  (fw === FlashableFirmwares.LPMINIMK3 && device === LaunchpadTypes.BL_LPMINIMK3) ||
+  (fw === FlashableFirmwares.LPMINIMK3 &&
+    device === LaunchpadTypes.BL_LPMINIMK3) ||
   (fw === FlashableFirmwares.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
-  (fw === FlashableFirmwares.LPPROMK3 && device === LaunchpadTypes.BL_LPPROMK3) ||
+  (fw === FlashableFirmwares.LPPROMK3 &&
+    device === LaunchpadTypes.BL_LPPROMK3) ||
   (fw === FlashableFirmwares.LPX && device === LaunchpadTypes.BL_LPX);
 
 export const isBL = (device: LaunchpadTypes): boolean =>
@@ -248,6 +254,6 @@ export const canHaveCustomMode = (type: LaunchpadTypes): boolean =>
   );
 
 export const saveCustomMode = (mode: Uint8Array, name: string) => {
-  let data = [...LPX_MODE_HEADER, ...mode, 0xF7];
-  saveAs(new Blob([new Uint8Array(data)]), `${name}.syx`)
-}
+  let data = [0xf0, ...LPX_MODE_HEADER, ...mode, 0xf7];
+  saveAs(new Blob([new Uint8Array(data)]), `${name}.syx`);
+};
