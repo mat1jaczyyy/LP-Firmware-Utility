@@ -249,7 +249,7 @@ export const isCustomFW = (device: LaunchpadTypes): boolean =>
   [LaunchpadTypes.CFY, LaunchpadTypes.CFW].includes(device);
 
 export const canHaveCustomMode = (type: LaunchpadTypes): boolean =>
-  [LaunchpadTypes.CFY, LaunchpadTypes.LPX, LaunchpadTypes.LPPROMK3].includes(
+  [LaunchpadTypes.CFY, LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3, LaunchpadTypes.LPPROMK3].includes(
     type
   );
 
