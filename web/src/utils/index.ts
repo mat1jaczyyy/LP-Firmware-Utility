@@ -180,7 +180,7 @@ export const parseRetinaPalette = async (paletteFile: File) => {
 
   if (!paletteRegex.test(fileText)) throw new Error();
 
-  let colors: string[] = fileText.split(";");
+  let colors: string[] = fileText.split(";").slice(0, 128);
 
   let newPalette: any = {};
 
