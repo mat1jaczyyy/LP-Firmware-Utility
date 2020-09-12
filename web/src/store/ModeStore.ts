@@ -1,10 +1,5 @@
 import BaseStore from "./BaseStore";
-import {
-  action,
-  computed,
-  observable,
-  reaction,
-} from "mobx";
+import { action, computed, observable, reaction } from "mobx";
 import {
   novationPalette,
   LaunchpadTypes,
@@ -34,7 +29,7 @@ export class ModeStore extends BaseStore {
         if (this.modeBinary !== undefined) {
           let i = 0;
           while (true) {
-              i++;
+            i++;
             if (i === this.modeBinary.length) {
               break;
             } else if (this.modeBinary[i] === 0x7f) {
@@ -95,7 +90,6 @@ export class ModeStore extends BaseStore {
 
   @action.bound
   handleModeUpload({ data }: InputEventSysex) {
-    // console.log(data);
     if (!data.slice(0, 7).every((e, i) => e === CFY_MODE_WRITE_HEADER[i]))
       return;
     if (this.downloadedMode === undefined) {
@@ -129,17 +123,16 @@ export class ModeStore extends BaseStore {
     let bin = this.modeBinary;
 
     if (!bin) return undefined;
-    // console.log(bin);
+    
     let name = "";
     let i = 0;
     let readingName = true;
     while (readingName) {
       if (bin[i] === 0 && bin[i + 1] === 0) {
         readingName = false;
-        // console.log(bin[i]);
       } else name += String.fromCharCode(bin[i++]);
     }
-    // console.log(name);
+    
     return name;
   }
 
@@ -159,10 +152,12 @@ export class ModeStore extends BaseStore {
     }
     for (let l of mappings) {
       if (l[2]) {
-        // Regular pad
-        let x = (l[0] % 10) - 1;
-        let y = Math.floor(l[0] / 10) - 1;
-        colors[x + y * 8] = novationPalette[l[7]];
+        if (!this.allowLEDFeedback) {
+          // Regular pad
+          let x = (l[0] % 10) - 1;
+          let y = Math.floor(l[0] / 10) - 1;
+          colors[x + y * 8] = novationPalette[l[7]];
+        }
       } else if (l[0] < 8) {
         let pos = l[0];
         let color = novationPalette[l[7]];
