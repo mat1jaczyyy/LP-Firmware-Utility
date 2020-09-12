@@ -175,6 +175,14 @@ const Modes = () => {
             : "No mode loaded!")}
       </p>
       <Launchpad size={300} colors={modeStore.modeColors} />
+      <div className="flex items-center justify-center text-xl space-x-2">
+        <input
+          type="checkbox"
+          checked={modeStore.allowLEDFeedback}
+          onChange={(e) => (modeStore.allowLEDFeedback = e.target.checked)}
+        />
+        <p>Allow External LED Feedback</p>
+      </div>
       <div className="flex items-center justify-center text-xl">
         <p>Index:</p>
         <select

@@ -1,5 +1,10 @@
 import BaseStore from "./BaseStore";
-import { action, runInAction, computed, observable, reaction } from "mobx";
+import {
+  action,
+  computed,
+  observable,
+  reaction,
+} from "mobx";
 import {
   novationPalette,
   LaunchpadTypes,
@@ -10,6 +15,7 @@ import { InputEventSysex } from "webmidi";
 
 export class ModeStore extends BaseStore {
   @observable modeBinary?: Uint8Array = undefined;
+  @observable allowLEDFeedback = false;
 
   constructor(root: RootStore) {
     super(root);
@@ -21,18 +27,36 @@ export class ModeStore extends BaseStore {
           lp.input.addListener("sysex", "all", this.handleModeUpload);
       }
     );
+
+    reaction(
+      () => this.allowLEDFeedback,
+      (allow) => {
+        if (this.modeBinary !== undefined) {
+          let i = 0;
+          while (true) {
+              i++;
+            if (i === this.modeBinary.length) {
+              break;
+            } else if (this.modeBinary[i] === 0x7f) {
+              this.modeBinary[i + 2] = allow ? 1 : 0;
+              break;
+            }
+          }
+        }
+      }
+    );
   }
 
   @action
   loadMode(bin: Uint8Array) {
     let dataLength = 0;
     let status = "START";
-    console.log(bin.join(" "));
-
+    let ledFeedbackByteIndex = 0;
     for (let i = 9; i < bin.length; i++) {
       switch (status) {
         case "START": {
           if (bin[i] === 0x7f) {
+            ledFeedbackByteIndex = i + 2;
             status = "DATA";
             i += 3;
           }
@@ -58,9 +82,8 @@ export class ModeStore extends BaseStore {
       throw new Error("VALID " + status);
     }
 
-    runInAction(() => {
-      this.modeBinary = bin.slice(9, -1);
-    });
+    this.allowLEDFeedback = bin[ledFeedbackByteIndex] === 1;
+    this.modeBinary = bin.slice(9, -1);
   }
 
   @action

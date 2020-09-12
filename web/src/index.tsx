@@ -9,8 +9,6 @@ import "./assets/main.css";
 import App from "./App";
 import { StoreContext, store } from "./store";
 
-configure({ enforceActions: "always" });
-
 ReactDOM.render(
   <StoreContext.Provider value={store}>
     <BrowserRouter>
