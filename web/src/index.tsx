@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { configure } from "mobx";
 import 'mobx-react-lite/batchingForReactDom'
 import { BrowserRouter } from "react-router-dom";
 
