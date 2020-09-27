@@ -1,0 +1,11 @@
+# Ignore files without an extension
+*
+!/**/
+!*.*
+
+# ...except for Makefile
+!Makefile
+
+# Oh also ignore compiled stuffs
+*.asm
+*.bin
