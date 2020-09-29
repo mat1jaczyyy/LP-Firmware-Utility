@@ -2,8 +2,15 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 
-#define LED_BUFFER ((u32*)0x20000314)
-#define REFRESH_BUFFER ((u32*)0x20006980)
+#ifdef LPX
+    #define LED_BUFFER ((u32*)0x20000314)
+    #define REFRESH_BUFFER ((u32*)0x20006980)
+#else
+    #ifdef LPMINIMK3
+        #define LED_BUFFER ((u32*)0x20000304)
+        #define REFRESH_BUFFER ((u32*)0x20006754)
+    #endif
+#endif
 
 #define draw(p) { \
     u8 f = (9 - p / 10) * 10 + p % 10; \
@@ -12,7 +19,6 @@ typedef unsigned int u32;
 }
 
 u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
-    //__asm__("push { r1, r2, r3 }");
     u32 ret;
 
 	if ((ret = (d[0] == 0xF0 && d[1] == 0x5F))) {
@@ -58,6 +64,5 @@ u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
         }
     }
 
-    //__asm__("pop { r1, r2, r3 }");
     return ret;
 }
