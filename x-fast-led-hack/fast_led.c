@@ -2,23 +2,36 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 
-#ifdef LPX
-    #define LED_BUFFER ((u32*)0x20000314)
-    #define REFRESH_BUFFER ((u32*)0x20006980)
+#ifdef LPMK2
+    typedef void (*rgb_function)(u32 pitch, u8 r, u8 g, u8 b, u8 kind);
+
+    #define draw(p) { \
+        rgb_led(p, r, g, b, 0); \
+    }
+
 #else
-    #ifdef LPMINIMK3
-        #define LED_BUFFER ((u32*)0x20000304)
-        #define REFRESH_BUFFER ((u32*)0x20006754)
+    #ifdef LPX
+        #define LED_BUFFER ((u32*)0x20000314)
+        #define REFRESH_BUFFER ((u32*)0x20006980)
+    #else
+        #ifdef LPMINIMK3
+            #define LED_BUFFER ((u32*)0x20000304)
+            #define REFRESH_BUFFER ((u32*)0x20006754)
+        #endif
     #endif
+
+    #define draw(p) { \
+        u8 f = (9 - p / 10) * 10 + p % 10; \
+        LED_BUFFER[f] = c; \
+        REFRESH_BUFFER[f] = REFRESH_BUFFER[f] & 0xF8; \
+    }
 #endif
 
-#define draw(p) { \
-    u8 f = (9 - p / 10) * 10 + p % 10; \
-    LED_BUFFER[f] = c; \
-    REFRESH_BUFFER[f] = REFRESH_BUFFER[f] & 0xF8; \
-}
-
 u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
+    #ifdef LPMK2
+        const rgb_function rgb_led = (rgb_function)0x08004D88;
+    #endif
+
     u32 ret;
 
 	if ((ret = (d[0] == 0xF0 && d[1] == 0x5F))) {
@@ -36,7 +49,9 @@ u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
             g &= 0x3F;
             b &= 0x3F;
 
-            u32 c = (r << 18) | (g << 10) | (b << 2);
+            #ifndef LPMK2
+                u32 c = (r << 18) | (g << 10) | (b << 2);
+            #endif
 
             for (u8 j = 0; j < n; j++) {
                 u8 x = *i++;

@@ -12,3 +12,4 @@ endef
 all:
 	$(call compile,LPX)
 	$(call compile,LPMINIMK3)
+	$(call compile,LPMK2)
