@@ -1,11 +1,11 @@
 typedef unsigned char u8;
-typedef unsigned short u16;
 typedef unsigned int u32;
 
 #ifdef LPMK2
     #define draw(p) { \
         u8 f = ((u8*)0x08006CB1)[p - 11]; \
         ((void (*)(u32, u8, u8, u8, u8))0x08004D89)(f, r, g, b, 0); \
+        /* ^ this is 0x08004D88 normally but ARM says lowest bit has to be 1 */ \
     }
 
 #else
@@ -28,7 +28,7 @@ typedef unsigned int u32;
 
 u32 fast_led(
     #ifdef LPMK2
-        u8* d, u32 unk, u32 unk2, u32 unk3
+        u8* d
     #else
         u32 unk, u8* d, u32 l, u32 unk2
     #endif
@@ -67,16 +67,16 @@ u32 fast_led(
                     for (u8 k = 11; k <= 99; k++)
                         draw(k)
 
-                else if (x <= 99) // TODO Ignore excludedIndexes if sent
+                else if (11 <= x && x <= 99)
                     draw(x)
                 
-                else if (x <= 109) {
+                else if (101 <= x && x <= 109) {
                     x = (x - 100) * 10 + 1;
 
                     for (u8 k = x; k < x + 8; k++)
                         draw(k)
 
-                } else if (x <= 119) {
+                } else if (111 <= x && x <= 119) {
                     x -= 100;
 
                     for (u8 k = x; k < 90; k += 10)
