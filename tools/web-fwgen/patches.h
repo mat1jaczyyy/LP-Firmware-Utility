@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void patch(const byte family, const byte target, const byte index, bool* args, byte* palette);
+void patch(const byte family, const byte target, const byte index, bool* args, byte* palette, char* version);
 
 #endif

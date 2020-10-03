@@ -175,20 +175,21 @@ struct fast_led_map {
     const map_element<byte*> fast_led;
     const map_element<byte> version;
     const map_element<uint> sysex_injection;
+    const char* version_string;
 };
 
 const std::vector<fast_led_map> fast_led_maps = {
     {
         {0x0, lpx_fast_led_patch.data(), lpx_fast_led_patch.size()},
-        {0x1FD, 0x32}, {0xD076, 0xBD23F003}
+        {0x1FD, 0x32}, {0xD076, 0xBD23F003}, "352"
     },
     {
         {0x0, lpminimk3_fast_led_patch.data(), lpminimk3_fast_led_patch.size()},
-        {0x1FD, 0x38}, {0xCC1E, 0xBC43F003}
+        {0x1FD, 0x38}, {0xCC1E, 0xBC43F003}, "408"
     },
     {
         {0x0, lpmk2_fast_led_patch.data(), lpmk2_fast_led_patch.size()},
-        {0x130, 0x72}, {0x27EE, 0xBB07F002}
+        {0x130, 0x72}, {0x27EE, 0xBB07F002}, "172"
     },
 };
 
@@ -198,7 +199,7 @@ const std::vector<byte> fast_led_products {
     LPMK2_PRODUCT_ID
 };
 
-void patch(const byte family, const byte target, const byte index, bool* args, byte* palette) {
+void patch(const byte family, const byte target, const byte index, bool* args, byte* palette, char* version) {
     if (target == LPPROMK3_PRODUCT_ID) return;
 
     // Patch palette
@@ -213,5 +214,6 @@ void patch(const byte family, const byte target, const byte index, bool* args, b
         fast_led_maps[i].fast_led.patch(&input, input.size);
         fast_led_maps[i].version.patch(&input);
         fast_led_maps[i].sysex_injection.patch(&input);
+        strcpy(version, fast_led_maps[i].version_string);
     }
 }
