@@ -3,10 +3,9 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 
 #ifdef LPMK2
-    typedef void (*rgb_function)(u32 pitch, u8 r, u8 g, u8 b, u8 kind);
-
     #define draw(p) { \
-        rgb_led(p, r, g, b, 0); \
+        u8 f = ((u8*)0x08006CB1)[p - 11]; \
+        ((void (*)(u32, u8, u8, u8, u8))0x08004D89)(f, r, g, b, 0); \
     }
 
 #else
@@ -27,15 +26,23 @@ typedef unsigned int u32;
     }
 #endif
 
-u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
+u32 fast_led(
     #ifdef LPMK2
-        const rgb_function rgb_led = (rgb_function)0x08004D88;
+        u8* d, u32 unk, u32 unk2, u32 unk3
+    #else
+        u32 unk, u8* d, u32 l, u32 unk2
     #endif
-
+) {
     u32 ret;
 
 	if ((ret = (d[0] == 0xF0 && d[1] == 0x5F))) {
-        u8* end = d + l - 1;
+        u8* end;
+
+        #ifdef LPMK2
+            for (end = d + 2; *end != 0xF7; end++);
+        #else
+            end = d + l - 1;
+        #endif
 
         for (u8* i = d + 2; i < end;) {
             u8 r = *i++;
@@ -57,10 +64,10 @@ u32 fast_led(u32 unk, u8* d, u32 l, u32 unk2) {
                 u8 x = *i++;
 
                 if (x == 0)
-                    for (u8 k = 0; k <= 99; k++)
+                    for (u8 k = 11; k <= 99; k++)
                         draw(k)
 
-                else if (x <= 99)
+                else if (x <= 99) // TODO Ignore excludedIndexes if sent
                     draw(x)
                 
                 else if (x <= 109) {
