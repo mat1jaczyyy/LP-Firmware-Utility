@@ -7,7 +7,7 @@
 const std::vector<char*> firmware_files = {
     (char*)"firmware/LPX-351.bin",
     (char*)"firmware/LPMiniMK3-407.bin",
-    (char*)"firmware/LPProMK3-461.bin",
+    (char*)"firmware/LPProMK3-464.bin",
     (char*)"firmware/LPMK2-171.bin",
     (char*)"firmware/LPPro-182.bin"
 };
@@ -15,7 +15,7 @@ const std::vector<char*> firmware_files = {
 const std::vector<char*> firmware_versions = {
     (char*)"351",
     (char*)"407",
-    (char*)"461",
+    (char*)"464",
     (char*)"171",
     (char*)"182"
 };
