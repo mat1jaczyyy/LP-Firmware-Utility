@@ -20,8 +20,6 @@ import RouteContainer from "../components/RouteContainer";
 import { PatchOptions } from "../store/UIStore";
 import { toJS } from "mobx";
 import ReactTooltip from "react-tooltip";
-import { Launch } from "@material-ui/icons";
-import Launchpad from "../components/Launchpad";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 

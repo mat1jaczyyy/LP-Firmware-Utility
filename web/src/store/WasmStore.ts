@@ -5,7 +5,6 @@ import { downloadCFW, paletteToArray } from "../utils";
 import {
   lpModels,
   FlashableFirmwares,
-  lpOptions,
   PatchTypes,
   Patches,
 } from "../constants";
