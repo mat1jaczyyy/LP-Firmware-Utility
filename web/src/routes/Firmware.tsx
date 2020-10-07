@@ -19,6 +19,9 @@ import { deviceIsBLForFW } from "../utils";
 import RouteContainer from "../components/RouteContainer";
 import { PatchOptions } from "../store/UIStore";
 import { toJS } from "mobx";
+import ReactTooltip from "react-tooltip";
+import { Launch } from "@material-ui/icons";
+import Launchpad from "../components/Launchpad";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -172,28 +175,53 @@ const Firmware = () => {
             uiStore.selectedFirmware === FlashableFirmwares.CFY) &&
             type === PatchTypes.Palette ? null : (
             <div className={"w-auto"} key={type}>
-              <input
-                type="checkbox"
-                checked={value}
-                style={{ marginRight: 5 }}
-                onChange={() =>
-                  (uiStore.options[optionType] = !uiStore.options[optionType])
-                }
-              />
-              <span
-                onClick={() =>
-                  (uiStore.options[optionType] = !uiStore.options[optionType])
+              <div
+                data-tip={
+                  type === PatchTypes.ApolloFastLED
+                    ? `In Apollo Studio 1.8.1 or newer, applying this mod to your firmware will allow for significantly faster light effects.\n This mod doesn't otherwise change the behavior of your Launchpad when using it with other software.`
+                    : undefined
                 }
               >
-                {type}
-              </span>
+                <input
+                  type="checkbox"
+                  checked={value}
+                  style={{ marginRight: 5 }}
+                  onChange={() =>
+                    (uiStore.options[optionType] = !uiStore.options[optionType])
+                  }
+                />
+                <span
+                  onClick={() =>
+                    (uiStore.options[optionType] = !uiStore.options[optionType])
+                  }
+                >
+                  {type}
+                </span>
+              </div>
+              <ReactTooltip
+                className="tooltip max-w-md text-center"
+                effect="solid"
+                place="top"
+              />
             </div>
           );
         })}
       </div>
 
+      {([
+        FlashableFirmwares.CFY,
+        FlashableFirmwares.LPPRO,
+      ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
+        <p className="opacity-50 text-base text-center">
+          Looking for Apollo Studio Fast LED Mod?
+          <br />
+          It's built into CFW by default!
+          <br />
+        </p>
+      )}
+
       {uiStore.selectedFirmware === LaunchpadTypes.CFY && paletteStore.dirty && (
-        <p className=" text-md text-center">
+        <p className="text-base text-center">
           <span className="opacity-50">
             Upload custom palettes to CFW <br /> in the{" "}
           </span>
