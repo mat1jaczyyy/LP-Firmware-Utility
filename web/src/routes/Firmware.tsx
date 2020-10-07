@@ -1,22 +1,27 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import { useObserver } from "mobx-react-lite";
 
 import {
   lpModels,
-  lpOptions,
   svgs,
   bltext,
   LaunchpadTypes,
   FlashableFirmwares,
+  PatchTypes,
 } from "../constants";
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
 import { useStore } from "../hooks";
-import { flattenObject, deviceIsBLForFW } from "../utils";
+import { deviceIsBLForFW } from "../utils";
 import RouteContainer from "../components/RouteContainer";
-import { useDropzone } from "react-dropzone";
+import { PatchOptions } from "../store/UIStore";
+import { toJS } from "mobx";
+import ReactTooltip from "react-tooltip";
+import { Launch } from "@material-ui/icons";
+import Launchpad from "../components/Launchpad";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -27,61 +32,7 @@ const Firmware = () => {
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const noticeStore = useStore(({ notice }) => notice);
 
-  const [optionList, setOptionList] = useState<undefined | any>(
-    lpOptions[uiStore.selectedFirmware]
-  );
-
-  const [optionState, setOptionState] = useState<Record<string, boolean>>({});
-
   const fileRef = useRef<HTMLInputElement | null>(null);
-
-  const renderOptions = useCallback(
-    (options: any, recursion = 0, parent?: string) =>
-      Object.entries(options).map(([name, value]) => {
-        let children: any;
-        if (value !== false)
-          children = renderOptions(value, recursion + 1, name);
-
-        if (
-          name === "Apply Palette" &&
-          uiStore.selectedFirmware === LaunchpadTypes.CFY
-        )
-          return null;
-
-        return (
-          <div
-            className={recursion === 0 ? "w-auto" : undefined}
-            key={name}
-            style={{ paddingLeft: recursion * 15, margin: "5px 0" }}
-          >
-            <input
-              type="checkbox"
-              disabled={!!parent && !optionState[parent]}
-              checked={optionState[name]}
-              style={{ marginRight: 5 }}
-              onChange={() =>
-                setOptionState((s: any) => ({
-                  ...s,
-                  [name]: !s[name],
-                }))
-              }
-            />
-            <span
-              onClick={() =>
-                setOptionState((s: any) => ({
-                  ...s,
-                  [name]: !s[name],
-                }))
-              }
-            >
-              {name}
-            </span>
-            {children}
-          </div>
-        );
-      }),
-    [optionState, setOptionState, uiStore.selectedFirmware]
-  );
 
   const flashFirmware = useCallback(
     async (
@@ -140,7 +91,11 @@ const Firmware = () => {
   );
 
   const downloadFirmware = useCallback(
-    async (selectedLp: FlashableFirmwares, options: any, palette: any) => {
+    async (
+      selectedLp: FlashableFirmwares,
+      options: PatchOptions,
+      palette: any
+    ) => {
       try {
         const fw = await wasmStore.patch(selectedLp, options, palette);
 
@@ -187,22 +142,6 @@ const Firmware = () => {
     ? { ...getRootProps(), lightBg }
     : {};
 
-  useEffect(() => {
-    let selectedFw = uiStore.selectedFirmware;
-
-    if (
-      paletteStore.dirty &&
-      selectedFw !== FlashableFirmwares.LPPROMK3 &&
-      lpOptions[selectedFw] !== undefined
-    )
-      lpOptions[selectedFw]!["Apply Palette"] = true;
-    else if (selectedFw === FlashableFirmwares.LPPROMK3)
-      delete lpOptions[selectedFw]["Apply Palette"];
-
-    setOptionList(lpOptions[selectedFw]);
-    setOptionState(flattenObject(lpOptions[selectedFw]));
-  }, [paletteStore.dirty, uiStore.selectedFirmware]);
-
   return useObserver(() => (
     <RouteContainer {...containerProps}>
       <select
@@ -218,7 +157,9 @@ const Firmware = () => {
         value={uiStore.selectedFirmware}
       >
         {lpModels
-          .concat(uiStore.konamiSuccess ? [FlashableFirmwares.CUSTOM_SYSEX] : [])
+          .concat(
+            uiStore.konamiSuccess ? [FlashableFirmwares.CUSTOM_SYSEX] : []
+          )
           .map((model) => (
             <option value={model} key={model}>
               {model}
@@ -226,19 +167,69 @@ const Firmware = () => {
           ))}
       </select>
 
-      <div className="w-auto">{renderOptions(optionList)}</div>
+      <div className="w-auto space-y-1">
+        {Object.entries(uiStore.options).map(([type, value]) => {
+          let optionType = type as PatchTypes;
 
-      {uiStore.selectedFirmware === LaunchpadTypes.CFY &&
-        optionState["Apply Palette"] && (
-          <p className=" text-md text-center">
-            <span className="opacity-50">
-              Upload custom palettes to CFW <br /> in the{" "}
-            </span>
-            <Link to="/palette" className="opacity-75 text-white underline">
-              Palette section
-            </Link>
-          </p>
-        )}
+          return (!paletteStore.dirty ||
+            uiStore.selectedFirmware === FlashableFirmwares.CFY) &&
+            type === PatchTypes.Palette ? null : (
+            <div className={"w-auto"} key={type}>
+              <div
+                data-tip={
+                  type === PatchTypes.ApolloFastLED
+                    ? `In Apollo Studio 1.8.1 or newer, applying this mod to your firmware will allow for significantly faster light effects.\n This mod doesn't otherwise change the behavior of your Launchpad when using it with other software.`
+                    : undefined
+                }
+              >
+                <input
+                  type="checkbox"
+                  checked={value}
+                  style={{ marginRight: 5 }}
+                  onChange={() =>
+                    (uiStore.options[optionType] = !uiStore.options[optionType])
+                  }
+                />
+                <span
+                  onClick={() =>
+                    (uiStore.options[optionType] = !uiStore.options[optionType])
+                  }
+                >
+                  {type}
+                </span>
+              </div>
+              <ReactTooltip
+                className="tooltip max-w-md text-center"
+                effect="solid"
+                place="top"
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {([
+        FlashableFirmwares.CFY,
+        FlashableFirmwares.LPPRO,
+      ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
+        <p className="opacity-50 text-base text-center">
+          Looking for Apollo Studio Fast LED Mod?
+          <br />
+          It's built into CFW by default!
+          <br />
+        </p>
+      )}
+
+      {uiStore.selectedFirmware === LaunchpadTypes.CFY && paletteStore.dirty && (
+        <p className="text-base text-center">
+          <span className="opacity-50">
+            Upload custom palettes to CFW <br /> in the{" "}
+          </span>
+          <Link to="/palette" className="opacity-75 text-white underline">
+            Palette section
+          </Link>
+        </p>
+      )}
 
       {paletteStore.dirty &&
         !([
@@ -255,7 +246,7 @@ const Firmware = () => {
         onClick={() =>
           flashFirmware(
             uiStore.selectedFirmware,
-            optionState,
+            toJS(uiStore.options),
             paletteStore.palette
           )
         }
@@ -279,7 +270,7 @@ const Firmware = () => {
           onClick={() =>
             downloadFirmware(
               uiStore.selectedFirmware,
-              optionState,
+              toJS(uiStore.options),
               paletteStore.palette
             )
           }

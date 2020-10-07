@@ -35,17 +35,32 @@ export const lpModels: FlashableFirmwares[] = [
   FlashableFirmwares.CFY,
 ];
 
-type FirmwareMap<T> = { [key in FlashableFirmwares]: T };
+export enum PatchTypes {
+  Palette = "Custom Palette",
+  ApolloFastLED = "Apollo Studio Fast LED Mod",
+}
 
-export const lpOptions: FirmwareMap<Record<string, any>> = lpModels.reduce<
-  FirmwareMap<Record<string, any>>
->((obj, e) => {
-  let newObj = { ...obj };
-  newObj[e] = {};
-  return newObj;
-}, {} as FirmwareMap<any>);
+export const Patches = {
+  [PatchTypes.Palette]: 0,
+  [PatchTypes.ApolloFastLED]: 1,
+} as const;
 
-export const svgs: { [key in FlashableFirmwares]: any } = {
+type FirmwareMap<T = any> = { [key in FlashableFirmwares]: T };
+
+export const lpOptions: FirmwareMap<PatchTypes[]> = {
+  [FlashableFirmwares.LPX]: [PatchTypes.Palette, PatchTypes.ApolloFastLED],
+  [FlashableFirmwares.LPMINIMK3]: [
+    PatchTypes.Palette,
+    PatchTypes.ApolloFastLED,
+  ],
+  [FlashableFirmwares.LPPROMK3]: [],
+  [FlashableFirmwares.LPMK2]: [PatchTypes.Palette, PatchTypes.ApolloFastLED],
+  [FlashableFirmwares.LPPRO]: [PatchTypes.Palette],
+  [FlashableFirmwares.CFY]: [PatchTypes.Palette],
+  [FlashableFirmwares.CUSTOM_SYSEX]: [],
+};
+
+export const svgs: FirmwareMap<string> = {
   [FlashableFirmwares.LPX]: "x",
   [FlashableFirmwares.LPMINIMK3]: "x",
   [FlashableFirmwares.LPPROMK3]: "promk3",
@@ -55,7 +70,7 @@ export const svgs: { [key in FlashableFirmwares]: any } = {
   [FlashableFirmwares.CUSTOM_SYSEX]: "",
 };
 
-export const bltext: { [key in FlashableFirmwares]: string } = {
+export const bltext: FirmwareMap<string> = {
   [FlashableFirmwares.LPX]: "the Capture MIDI button",
   [FlashableFirmwares.LPMINIMK3]: "the User button",
   [FlashableFirmwares.LPPROMK3]: "the Setup button",

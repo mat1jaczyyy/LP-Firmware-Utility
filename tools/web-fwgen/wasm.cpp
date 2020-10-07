@@ -4,20 +4,20 @@
 #include "common.h"
 #include "patches.h"
 
-const std::vector<char*> firmware_files = {
-    (char*)"firmware/LPX-351.bin",
-    (char*)"firmware/LPMiniMK3-407.bin",
-    (char*)"firmware/LPProMK3-464.bin",
-    (char*)"firmware/LPMK2-171.bin",
-    (char*)"firmware/LPPro-182.bin"
+const std::vector<const char*> firmware_files = {
+    "firmware/LPX-351.bin",
+    "firmware/LPMiniMK3-407.bin",
+    "firmware/LPProMK3-464.bin",
+    "firmware/LPMK2-171.bin",
+    "firmware/LPPro-182.bin"
 };
 
-const std::vector<char*> firmware_versions = {
-    (char*)"351",
-    (char*)"407",
-    (char*)"464",
-    (char*)"171",
-    (char*)"182"
+const std::vector<const char*> firmware_versions = {
+    "351",
+    "407",
+    "464",
+    "171",
+    "182"
 };
 
 extern byte lp_target_family, lp_target;
@@ -34,14 +34,14 @@ wasm void patch_firmware(int target, bool* args, byte* palette) {
 
     lp_target_family = families[target >= products_lpx.size()];
     lp_target = products_all[target];
-    version = firmware_versions[target];
-    input_file = firmware_files[target];
+    version = strdup(firmware_versions[target]);
+    input_file = strdup(firmware_files[target]);
     
-    remove(output_file = (char*)"firmware/output.syx");
+    remove(output_file = strdup("firmware/output.syx"));
 
 	read_input();
 
-    patch(lp_target_family, lp_target, target, args, palette);
+    patch(lp_target_family, lp_target, target, args, palette, version);
     
     convert_bintosyx();
 
@@ -49,6 +49,10 @@ wasm void patch_firmware(int target, bool* args, byte* palette) {
 
     free(input.data);
     free(output.data);
+
+    free(input_file);
+    free(output_file);
+    free(version);
 }
 
 wasm byte verify_firmware() {
