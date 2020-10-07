@@ -209,7 +209,8 @@ void patch(const byte family, const byte target, const byte index, bool* args, b
     }
 
     // Apollo Studio fast LED patch
-    int i = vector_indexof(&fast_led_products, products_all[target]);
+    int i = vector_indexof(&fast_led_products, target);
+    
     if (args[1] && i != -1) {
         fast_led_maps[i].fast_led.patch(&input, input.size);
         fast_led_maps[i].version.patch(&input);

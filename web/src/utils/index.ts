@@ -13,7 +13,7 @@ export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
     let children: any = {};
-    if (value !== true) {
+    if (typeof value === 'object') {
       children = flattenObject({ [name]: value }, recursion + 1);
     } else {
       children[name] = value;

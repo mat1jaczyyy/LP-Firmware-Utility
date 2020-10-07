@@ -2,7 +2,14 @@ import BaseStore from "./BaseStore";
 import { observable, action, runInAction } from "mobx";
 import { RootStore } from ".";
 import { downloadCFW, paletteToArray } from "../utils";
-import { lpModels, FlashableFirmwares } from "../constants";
+import {
+  lpModels,
+  FlashableFirmwares,
+  lpOptions,
+  PatchTypes,
+  Patches,
+} from "../constants";
+import { PatchOptions } from "./UIStore";
 
 declare let Module: any;
 declare let FS: any;
@@ -51,14 +58,18 @@ export default class WasmStore extends BaseStore {
   @action
   patch = async (
     selectedLp: FlashableFirmwares,
-    options: any,
+    options: PatchOptions,
     palette: { [index: number]: number[] }
   ) => {
+    let optionsArray = Object.keys(Patches).map(() => false);
+    (Object.entries(options) as [PatchTypes, boolean][]).forEach(
+      ([option, value]) => value && (optionsArray[Patches[option]] = true)
+    );
     try {
       if (selectedLp === FlashableFirmwares.CFY) return await downloadCFW();
       this._patch!(
         lpModels.indexOf(selectedLp),
-        Object.values({ "Custom Palette": false, ...options }),
+        optionsArray,
         paletteToArray(palette)
       );
     } catch (e) {
