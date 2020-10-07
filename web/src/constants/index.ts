@@ -37,7 +37,7 @@ export const lpModels: FlashableFirmwares[] = [
 
 export enum PatchTypes {
   Palette = "Custom Palette",
-  ApolloFastLED = "Apollo Fast LED Mod",
+  ApolloFastLED = "Apollo Studio Fast LED Mod",
 }
 
 export const Patches = {
