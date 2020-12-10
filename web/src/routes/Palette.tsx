@@ -20,6 +20,8 @@ import {
 import Button from "../components/Button";
 import RouteContainer from "../components/RouteContainer";
 
+import { CFY_PALETTE_DOWNLOAD_HEADER } from "../constants";
+
 const Palette = () => {
   const paletteStore = useStore(({ palette }) => palette);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
@@ -121,18 +123,16 @@ const Palette = () => {
     [paletteStore.palette, paletteStore.dirty]
   );
 
-  const downloadedPalette = useRef<any>({});
   const handleCFWSysex = useCallback(
     ({ data }: InputEventSysex) => {
-      if (data[7] === 123) downloadedPalette.current = {};
-      else if (data[7] === 35)
-        downloadedPalette.current[data[8]] = [data[9], data[10], data[11]];
-      else if (data[7] === 125) {
-        runInAction(() => {
-          paletteStore.palette = observable(downloadedPalette.current);
-          paletteStore.dirty = true;
-        });
+      for (let i = 0; i < CFY_PALETTE_DOWNLOAD_HEADER.length; i++) {
+        if (data[i] !== CFY_PALETTE_DOWNLOAD_HEADER[i]) return;
       }
+      
+      runInAction(() => {
+        paletteStore.palette[data[7]] = [data[8], data[9], data[10]];
+        paletteStore.dirty = true;
+      });
     },
     [paletteStore.palette, paletteStore.dirty]
   );
