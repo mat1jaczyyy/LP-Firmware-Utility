@@ -1,19 +1,19 @@
 import { createContext } from "react";
 
+import LaunchpadStore from "./LaunchpadStore";
 import UIStore from "./UIStore";
 import PaletteStore from "./PaletteStore";
-import WasmStore from "./WasmStore";
-import LaunchpadStore from "./LaunchpadStore";
-import NoticeStore from "./NoticeStore";
 import { ModeStore } from "./ModeStore";
+import WasmStore from "./WasmStore";
+import NoticeStore from "./NoticeStore";
 
 export class RootStore {
   ui = new UIStore(this);
-  palette = new PaletteStore(this);
-  wasm = new WasmStore(this);
   launchpads = new LaunchpadStore(this);
-  notice = new NoticeStore(this);
+  palette = new PaletteStore(this);
   modes = new ModeStore(this);
+  wasm = new WasmStore(this);
+  notice = new NoticeStore(this);
 }
 
 export const store = new RootStore();

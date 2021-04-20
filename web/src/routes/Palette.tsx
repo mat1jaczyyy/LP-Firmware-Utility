@@ -128,7 +128,7 @@ const Palette = () => {
       for (let i = 0; i < CFY_PALETTE_DOWNLOAD_HEADER.length; i++) {
         if (data[i] !== CFY_PALETTE_DOWNLOAD_HEADER[i]) return;
       }
-      
+
       runInAction(() => {
         paletteStore.palette[data[7]] = [data[8], data[9], data[10]];
         paletteStore.dirty = true;
@@ -232,6 +232,7 @@ const Palette = () => {
                     <option value={1}>1</option>
                     <option value={2}>2</option>
                     <option value={3}>3</option>
+                    <option value={4}>4</option>
                   </select>
                 </div>
                 <Button onClick={handlePaletteUpload}>Upload</Button>
