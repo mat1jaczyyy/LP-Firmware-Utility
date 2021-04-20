@@ -76,7 +76,7 @@ const Firmware = () => {
             dismissable: true,
             svg: `./svg/${svgs[selectedLp]}.svg`,
             bl: `You can enter the bootloader by holding ${bltext[selectedLp]} while turning your Launchpad on.`,
-            callback: cancelFlash,
+            callback: cancelFlash as () => void,
           });
       } catch (e) {
         noticeStore.show({
