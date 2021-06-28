@@ -47,7 +47,7 @@ const App = () => {
         else if (wasmStore.available === true) noticeStore.hide();
         else
           noticeStore.show({
-            text: "Please use a browser that supports WebAssembly (eg. Chrome)",
+            text: "Please use a browser that supports WebAssembly (eg. Chrome or Edge)",
           });
       }),
     [noticeStore, wasmStore.available]
