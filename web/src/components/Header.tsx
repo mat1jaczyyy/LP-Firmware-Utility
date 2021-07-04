@@ -28,7 +28,7 @@ const Header = ({ disabled }: any) => {
       </div>
       <div className="flex-1 flex flex-row items-center justify-end px-4">
         <span className="flex flex-row items-center text-xl">
-          {lpStore.available ? lpStore.launchpad?.type || "No Launchpad Detected" : "WebMIDI Unsupported (Use Chrome)"}
+          {lpStore.available ? lpStore.launchpad?.type || "No Launchpad Detected" : "WebMIDI Unsupported (Use Chrome or Edge)"}
           <div
             className={clsx(
               "w-4 h-4 ml-4 rounded-full border border-black",
