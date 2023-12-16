@@ -36,7 +36,7 @@
   },
   "scripts": {
     "start": "npm run watch:css && react-scripts --openssl-legacy-provider start",
-    "build": "npm run build:css && BUILD_PATH='D:\\Code\\VPS\\srv\\fw\\' react-scripts --openssl-legacy-provider build",
+    "build": "npm run build:css && react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:css": "postcss src/assets/tailwind.css -o src/assets/main.css",
