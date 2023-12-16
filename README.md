@@ -1,7 +1,5 @@
 # Launchpad Firmware Utility
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/903cec3c-f36f-46c4-ad26-462392ebffbd/deploy-status)](https://app.netlify.com/sites/lp-firmware-utility/deploys)
-
 ### Novation Launchpad firmware updating and patching on the web
 
 ### https://fw.mat1jaczyyy.com
