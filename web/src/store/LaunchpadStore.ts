@@ -21,7 +21,6 @@ export default class LaunchpadStore extends BaseStore {
     reaction(
       () => this.launchpad,
       (lp) => {
-        
         if (lp?.type === LaunchpadTypes.CFW)
           setTimeout(
             () =>
@@ -54,6 +53,7 @@ export default class LaunchpadStore extends BaseStore {
 
   @action.bound
   setLaunchpad(lp?: Launchpad) {
+    console.log("removing");
     this.launchpad?.input.removeListener();
     this.launchpad = lp;
   }
@@ -77,7 +77,7 @@ export default class LaunchpadStore extends BaseStore {
           );
 
           // When new launchpads are connected, give them some time to boot before sending version query
-          await new Promise((res) => setTimeout(() => res(), 50));
+          await new Promise<void>((res) => setTimeout(() => res(), 50));
 
           if ((await launchpad.getType()) !== LaunchpadTypes.BLANK) {
             this.setLaunchpad(launchpad);
@@ -91,7 +91,7 @@ export default class LaunchpadStore extends BaseStore {
 
   @action
   queueFirmwareFlash = (buffer: Uint8Array, targetLp: FlashableFirmwares) => {
-    let cancelFlash: () => void;
+    let cancelFlash: (_: any) => void;
     let dispose: Function;
 
     let flashPromise = () =>

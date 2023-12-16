@@ -113,6 +113,7 @@ const Modes = () => {
       console.log(e);
       try {
         modeStore.loadMode(e.data);
+        console.log("removing")
         lpStore.launchpad?.input.removeListener("sysex", "all", listener);
       } catch {}
     };

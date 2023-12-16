@@ -22,6 +22,7 @@ export default class Launchpad {
   getType() {
     return new Promise(async (resolve) => {
       const listenerTimer = setTimeout(() => {
+        console.log("removing");
         this.input.removeListener("sysex", "all");
         this.type = LaunchpadTypes.BLANK;
         resolve(LaunchpadTypes.BLANK);
@@ -30,6 +31,7 @@ export default class Launchpad {
       this.input.addListener("sysex", "all", async (e: InputEventSysex) => {
         clearTimeout(listenerTimer);
 
+        console.log("removing");
         this.input.removeListener("sysex", "all");
 
         resolve(await this.identify(e));
@@ -132,6 +134,7 @@ export default class Launchpad {
             e.data.slice(13, 16).reduce((s, el) => s + el, "")
           );
 
+          console.log("removing");
           this.input.removeListener("sysex", "all");
 
           if (versionNum < 171) res(LaunchpadTypes.LPMK2);
@@ -156,7 +159,7 @@ export default class Launchpad {
     });
 
     for (let message of messages) {
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           this.output.sendSysex([], message);
           resolve();
@@ -174,18 +177,10 @@ export default class Launchpad {
       throw new Error(
         "Uploading palettes requires a Launchpad Pro running the Custom Firmware"
       );
-      
+
     this.sendSysex(CFW_PALETTE_UPLOAD_START);
-    this.sendSysex([
-      ...CFW_PALETTE_UPLOAD_WRITE,
-      paletteIndex,
-      ...palette.slice(0, 256),
-    ]);
-    this.sendSysex([
-      ...CFW_PALETTE_UPLOAD_WRITE,
-      paletteIndex,
-      ...palette.slice(256, 512),
-    ]);
-    this.sendSysex(CFW_PALETTE_UPLOAD_END);
+    this.sendSysex([...CFW_PALETTE_UPLOAD_WRITE, ...palette.slice(0, 256)]);
+    this.sendSysex([...CFW_PALETTE_UPLOAD_WRITE, ...palette.slice(256, 512)]);
+    this.sendSysex([...CFW_PALETTE_UPLOAD_END, paletteIndex]);
   }
 }
