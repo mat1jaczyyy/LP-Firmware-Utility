@@ -5,7 +5,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <string>
+#include <cstring>
 #include <vector>
 
 typedef unsigned char byte;
