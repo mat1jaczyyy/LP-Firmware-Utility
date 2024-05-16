@@ -38,6 +38,7 @@ export const firmwares: Record<Firmware, FirmwareConfig> = {
     svg: "x",
     blText: "the Capture MIDI button",
     customModes: true,
+    customPalette: true,
   },
   LPMINIMK3: {
     display: "Launchpad Mini MK3",
@@ -45,35 +46,44 @@ export const firmwares: Record<Firmware, FirmwareConfig> = {
     svg: "x",
     blText: "the User button",
     customModes: true,
+    customPalette: true,
   },
   LPPROMK3: {
     display: "Launchpad Pro MK3",
     svg: "promk3",
     blText: "the Setup button",
+    customPalette: true,
   },
   LPMK2: {
     display: "Launchpad MK2",
     fastLED: true,
     svg: "mk2",
     blText: "Session, User 1, User 2 and Mixer",
+    customPalette: true,
   },
   LPPRO: {
     display: "Launchpad Pro",
     fastLED: "builtin",
     svg: "pro",
     blText: "the Setup button",
+    customPalette: true,
   },
-  CFW: { display: "Launchpad Pro (CFW - OLD)" },
+  CFW: {
+    display: "Launchpad Pro (CFW - OLD)",
+    customPalette: true,
+  },
   CFY: {
     display: "Launchpad Pro (CFW)",
     fastLED: "builtin",
     svg: "pro",
     blText: "the Setup button",
+    customPalette: true,
   },
   MF64: {
     display: "MIDI Fighter 64",
     novationIdSpoof: true,
     apolloSupport: "cfw",
+    customPalette: true,
   },
   CMF64: {
     display: "MIDI Fighter 64 (CFW)",

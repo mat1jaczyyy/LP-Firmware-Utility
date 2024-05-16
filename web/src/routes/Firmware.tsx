@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { Fragment, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
@@ -19,6 +19,7 @@ import RouteContainer from "../components/RouteContainer";
 import { PatchOptions } from "../store/UIStore";
 import { toJS } from "mobx";
 import ReactTooltip from "react-tooltip";
+import { patchMF64 } from "../store/mf64";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -28,7 +29,6 @@ export default function () {
   const uiStore = useStore(({ ui }) => ui);
   const paletteStore = useStore(({ palette }) => palette);
   const wasmStore = useStore(({ wasm }) => wasm);
-  const ihexStore = useStore(({ ihex }) => ihex);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const noticeStore = useStore(({ notice }) => notice);
 
@@ -93,16 +93,13 @@ export default function () {
     palette: any,
   ) => {
     try {
-      const isMF64 = selectedLp.endsWith("64");
+      const isMF64 = selectedLp.endsWith("MF64");
 
       const fw = isMF64
-        ? await ihexStore.patch(selectedLp, options, palette)
+        ? await patchMF64(selectedLp as any, options, palette)
         : await wasmStore.patch(selectedLp, options, palette);
 
-      saveAs(
-        new Blob([fw.buffer]),
-        isMF64 ? "output.hex" : "output.syx",
-      );
+      saveAs(new Blob([fw.buffer]), isMF64 ? "output.hex" : "output.syx");
     } catch (e: any) {
       noticeStore.show({
         text: e.toString(),
@@ -168,6 +165,29 @@ export default function () {
       </select>
 
       <div className="w-auto space-y-1">
+        {firmwareConfig.customPalette && paletteStore.dirty && (
+          <div className={"w-auto"}>
+            <div>
+              <input
+                type="checkbox"
+                checked={uiStore.options["Custom Palette"]}
+                style={{ marginRight: 5 }}
+                onChange={() =>
+                  (uiStore.options["Custom Palette"] =
+                    !uiStore.options["Custom Palette"])
+                }
+              />
+              <span
+                onClick={() =>
+                  (uiStore.options["Custom Palette"] =
+                    !uiStore.options["Custom Palette"])
+                }
+              >
+                Custom Palette
+              </span>
+            </div>
+          </div>
+        )}
         {firmwareConfig.fastLED === true && (
           <div className={"w-auto"}>
             <div data-tip="In Apollo Studio 1.8.1 or newer, applying this mod to your firmware will allow for significantly faster light effects.\n This mod doesn't otherwise change the behavior of your Launchpad when using it with other software.">
@@ -278,18 +298,20 @@ export default function () {
           >
             Download
           </Button>
-          <p className="text-sm max-w-lg text-center">
-            <span className="opacity-25">
-              Install the firmware using the official{" "}
-            </span>
-            <a
-              href="https://store.djtechtools.com/pages/midi-fighter-utility"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="opacity-75 cursor-pointer underline"
-            >
-              Midi Fighter Utility
-            </a>
+          <div className="text-sm max-w-lg text-center">
+            <p className="my-1">
+              <span className="opacity-25">
+                Install the firmware using the official{" "}
+              </span>
+              <a
+                href="https://store.djtechtools.com/pages/midi-fighter-utility"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-75 cursor-pointer underline"
+              >
+                Midi Fighter Utility
+              </a>
+            </p>
             <div className="whitespace-pre-wrap text-center">
               <span className="opacity-25">
                 Connect your Midi Fighter 64, and then navigate to
@@ -297,12 +319,12 @@ export default function () {
               <br />
               {["Tools", "Midifighter", "Load Custom Firmware", "For a 64"].map(
                 (str, i) => (
-                  <>
+                  <Fragment key={i}>
                     {i !== 0 && <span className="mx-1 opacity-50">{"->"}</span>}
                     <span className="bg-black px-1 py-0.5 rounded opacity-75">
                       {str}
                     </span>
-                  </>
+                  </Fragment>
                 ),
               )}
               <br />
@@ -310,7 +332,7 @@ export default function () {
                 and select the downloaded firmware file.
               </span>
             </div>
-          </p>
+          </div>
         </>
       ) : (
         <>
