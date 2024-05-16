@@ -6,6 +6,8 @@ export interface FirmwareConfig {
   blText?: string;
   customModes?: boolean;
   novationIdSpoof?: boolean;
+  downloadOnly?: boolean;
+  apolloSupport?: "builtin" | "cfw";
 }
 
 export type Firmware =
@@ -68,8 +70,15 @@ export const firmwares: Record<Firmware, FirmwareConfig> = {
     svg: "pro",
     blText: "the Setup button",
   },
-  MF64: { display: "MIDI Fighter 64", novationIdSpoof: true },
-  CMF64: { display: "MIDI Fighter 64 (CFW)", customPalette: true },
+  MF64: {
+    display: "MIDI Fighter 64",
+    novationIdSpoof: true,
+    apolloSupport: "cfw",
+  },
+  CMF64: {
+    display: "MIDI Fighter 64 (CFW)",
+    customPalette: true,
+  },
 };
 
 export type FlashableFirmware =
@@ -115,11 +124,13 @@ export const lpModels: Firmware[] = [
 export enum PatchTypes {
   Palette = "Custom Palette",
   ApolloFastLED = "Apollo Studio Fast LED Mod",
+  NovationIDSpoof = "Novation ID Spoof",
 }
 
 export const Patches = {
   [PatchTypes.Palette]: 0,
   [PatchTypes.ApolloFastLED]: 1,
+  [PatchTypes.NovationIDSpoof]: 2,
 } as const;
 
 export const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39];

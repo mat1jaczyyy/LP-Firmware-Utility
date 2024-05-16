@@ -35,103 +35,95 @@ export default function () {
 
   const firmwareConfig: FirmwareConfig = firmwares[uiStore.selectedFirmware];
 
-  const flashFirmware = useCallback(
-    async (
-      selectedLp: FlashableFirmware,
-      options: PatchOptions,
-      palette: { [index: number]: number[] },
-      rawFW?: Uint8Array
-    ) => {
-      try {
-        const firmwareConfig = firmwares[selectedLp];
+  const flashFirmware = async (
+    selectedLp: FlashableFirmware,
+    options: PatchOptions,
+    palette: { [index: number]: number[] },
+    rawFW?: Uint8Array,
+  ) => {
+    try {
+      const firmwareConfig = firmwares[selectedLp];
 
-        let firmware: Uint8Array = new Uint8Array();
+      let firmware: Uint8Array = new Uint8Array();
 
-        if (!rawFW)
-          firmware = await wasmStore.patch(selectedLp, options, palette);
+      if (!rawFW)
+        firmware = await wasmStore.patch(selectedLp, options, palette);
 
-        let targetLp = selectedLp === "CFY" ? "LPPRO" : selectedLp;
+      let targetLp = selectedLp === "CFY" ? "LPPRO" : selectedLp;
 
-        let { cancelFlash, flashPromise: startFlash } =
-          launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
+      let { cancelFlash, flashPromise: startFlash } =
+        launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
 
-        startFlash()
-          .then(async (continueFlashing: any) => {
-            if (!continueFlashing) return;
-            noticeStore.show({
-              text: "Updating...",
-              dismissable: false,
-              showProgress: true,
-            });
-            return await continueFlashing();
-          })
-          .then(noticeStore.hide);
-
-        if (
-          !launchpadStore.launchpad ||
-          !launchpadStore.launchpad.type ||
-          !deviceIsBLForFW(launchpadStore.launchpad.type, targetLp)
-        )
+      startFlash()
+        .then(async (continueFlashing: any) => {
+          if (!continueFlashing) return;
           noticeStore.show({
-            text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
-            dismissable: true,
-            svg: `./svg/${firmwareConfig.svg}.svg`,
-            bl: `You can enter the bootloader by holding ${firmwareConfig.blText} while turning your Launchpad on.`,
-            callback: cancelFlash as () => void,
+            text: "Updating...",
+            dismissable: false,
+            showProgress: true,
           });
-      } catch (e: any) {
+          return await continueFlashing();
+        })
+        .then(noticeStore.hide);
+
+      if (
+        !launchpadStore.launchpad ||
+        !launchpadStore.launchpad.type ||
+        !deviceIsBLForFW(launchpadStore.launchpad.type, targetLp)
+      )
         noticeStore.show({
-          text: e.toString(),
+          text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
           dismissable: true,
+          svg: `./svg/${firmwareConfig.svg}.svg`,
+          bl: `You can enter the bootloader by holding ${firmwareConfig.blText} while turning your Launchpad on.`,
+          callback: cancelFlash as () => void,
         });
-      }
-    },
-    [wasmStore, launchpadStore, noticeStore]
-  );
+    } catch (e: any) {
+      noticeStore.show({
+        text: e.toString(),
+        dismissable: true,
+      });
+    }
+  };
 
-  const downloadFirmware = useCallback(
-    async (
-      selectedLp: FlashableFirmware,
-      options: PatchOptions,
-      palette: any
-    ) => {
-      try {
-        const fw = await wasmStore.patch(selectedLp, options, palette);
+  const downloadFirmware = async (
+    selectedLp: FlashableFirmware,
+    options: PatchOptions,
+    palette: any,
+  ) => {
+    try {
+      const fw = await wasmStore.patch(selectedLp, options, palette);
 
-        saveAs(new Blob([fw.buffer]), "output.syx");
-      } catch (e: any) {
-        noticeStore.show({
-          text: e.toString(),
-          dismissable: true,
-        });
-      }
-    },
-    [wasmStore, noticeStore]
-  );
+      saveAs(
+        new Blob([fw.buffer]),
+        selectedLp.endsWith("64") ? "output.hex" : "output.syx",
+      );
+    } catch (e: any) {
+      noticeStore.show({
+        text: e.toString(),
+        dismissable: true,
+      });
+    }
+  };
 
-  const uploadFirmware = useCallback(
-    async (file?: File) => {
-      if (!file) return;
-      let firmware = new Uint8Array(await file.arrayBuffer());
+  const uploadFirmware = async (file?: File) => {
+    if (!file) return;
+    let firmware = new Uint8Array(await file.arrayBuffer());
 
-      try {
-        const targetLp = wasmStore.verify(firmware);
+    try {
+      const targetLp = wasmStore.verify(firmware);
 
-        flashFirmware(targetLp, {}, paletteStore.palette, firmware);
-      } catch (e: any) {
-        noticeStore.show({
-          text: e.toString(),
-          dismissable: true,
-        });
-      }
-    },
-    [flashFirmware, wasmStore, paletteStore.palette, noticeStore]
-  );
+      flashFirmware(targetLp, {}, paletteStore.palette, firmware);
+    } catch (e: any) {
+      noticeStore.show({
+        text: e.toString(),
+        dismissable: true,
+      });
+    }
+  };
 
-  const onDrop = useCallback(
-    ([file]: File[]) => uiStore.konamiSuccess && uploadFirmware(file),
-    [uiStore.konamiSuccess, uploadFirmware]
-  );
+  const onDrop = ([file]: File[]) =>
+    uiStore.konamiSuccess && uploadFirmware(file);
 
   const {
     getInputProps,
@@ -199,11 +191,48 @@ export default function () {
             />
           </div>
         )}
+        {firmwareConfig.novationIdSpoof === true && (
+          <div className={"w-auto"}>
+            <div data-tip="Applying this mod to your firmware will allow for using your Midi Fighter 64 with multiple applications at once on Windows, provided you have installed the Novation USB driver. This mod doesn't otherwise change the behavior of your Midi Fighter 64 when using it with other operating systems.">
+              <input
+                type="checkbox"
+                checked={uiStore.options["Novation ID Spoof"]}
+                style={{ marginRight: 5 }}
+                onChange={() =>
+                  (uiStore.options["Novation ID Spoof"] =
+                    !uiStore.options["Novation ID Spoof"])
+                }
+              />
+              <span
+                onClick={() =>
+                  (uiStore.options["Novation ID Spoof"] =
+                    !uiStore.options["Novation ID Spoof"])
+                }
+              >
+                Spoof Novation VID for USB driver
+              </span>
+            </div>
+            <ReactTooltip
+              className="tooltip max-w-md text-center"
+              effect="solid"
+              place="top"
+            />
+          </div>
+        )}
       </div>
 
-      {(["CFY", "LPPRO"] as Firmware[]).includes(uiStore.selectedFirmware) && (
+      {firmwareConfig.fastLED === "builtin" && (
         <p className="opacity-50 text-base text-center">
           Looking for Apollo Studio Fast LED Mod?
+          <br />
+          It's built into CFW by default!
+          <br />
+        </p>
+      )}
+
+      {firmwareConfig.apolloSupport === "cfw" && (
+        <p className="opacity-50 text-base text-center">
+          Looking for Apollo Studio support?
           <br />
           It's built into CFW by default!
           <br />
@@ -223,7 +252,7 @@ export default function () {
 
       {paletteStore.dirty &&
         !(["CFY", "LPPROMK3"] as Firmware[]).includes(
-          uiStore.selectedFirmware
+          uiStore.selectedFirmware,
         ) && (
           <div className="flex flex-col items-center py-2 space-y-2">
             <p className="text-lg">Current Palette:</p>
@@ -231,18 +260,84 @@ export default function () {
           </div>
         )}
 
-      <Button
-        onClick={() =>
-          flashFirmware(
-            uiStore.selectedFirmware,
-            toJS(uiStore.options),
-            paletteStore.palette
-          )
-        }
-        disabled={!launchpadStore.available}
-      >
-        Update
-      </Button>
+      {["MF64", "CMF64"].includes(uiStore.selectedFirmware) ? (
+        <>
+          <Button
+            onClick={() =>
+              downloadFirmware(
+                uiStore.selectedFirmware,
+                toJS(uiStore.options),
+                paletteStore.palette,
+              )
+            }
+          >
+            Download
+          </Button>
+          <p className="text-sm max-w-lg text-center">
+            <span className="opacity-25">
+              Install the firmware using the official{" "}
+            </span>
+            <a
+              href="https://store.djtechtools.com/pages/midi-fighter-utility"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-75 cursor-pointer underline"
+            >
+              Midi Fighter Utility
+            </a>
+            <div className="whitespace-pre-wrap text-center">
+              <span className="opacity-25">
+                Connect your Midi Fighter 64, and then navigate to
+              </span>
+              <br />
+              {["Tools", "Midifighter", "Load Custom Firmware", "For a 64"].map(
+                (str, i) => (
+                  <>
+                    {i !== 0 && <span className="mx-1 opacity-50">{"->"}</span>}
+                    <span className="bg-black px-1 py-0.5 rounded opacity-75">
+                      {str}
+                    </span>
+                  </>
+                ),
+              )}
+              <br />
+              <span className="opacity-25">
+                and select the downloaded firmware file.
+              </span>
+            </div>
+          </p>
+        </>
+      ) : (
+        <>
+          <Button
+            onClick={() =>
+              flashFirmware(
+                uiStore.selectedFirmware,
+                toJS(uiStore.options),
+                paletteStore.palette,
+              )
+            }
+            disabled={!launchpadStore.available}
+          >
+            Update
+          </Button>
+          <p className="text-sm">
+            <span className="opacity-25">...or </span>
+            <span
+              onClick={() =>
+                downloadFirmware(
+                  uiStore.selectedFirmware,
+                  toJS(uiStore.options),
+                  paletteStore.palette,
+                )
+              }
+              className="opacity-75 cursor-pointer underline"
+            >
+              download
+            </span>
+          </p>
+        </>
+      )}
 
       <input
         {...getInputProps()}
@@ -252,22 +347,6 @@ export default function () {
         onChange={(e) => uploadFirmware(e.target.files?.[0])}
         ref={fileRef}
       />
-
-      <p className="text-sm">
-        <span className="opacity-25">...or </span>
-        <span
-          onClick={() =>
-            downloadFirmware(
-              uiStore.selectedFirmware,
-              toJS(uiStore.options),
-              paletteStore.palette
-            )
-          }
-          className="opacity-75 cursor-pointer underline"
-        >
-          download
-        </span>
-      </p>
 
       {isWindows && (
         <p className="pt-4">

@@ -14,6 +14,7 @@ export default class UIStore extends BaseStore {
   @observable options: PatchOptions = {
     "Custom Palette": false,
     "Apollo Studio Fast LED Mod": false,
+    "Novation ID Spoof": false,
   };
 
   constructor(root: RootStore) {
