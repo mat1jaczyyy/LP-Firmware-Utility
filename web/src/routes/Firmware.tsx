@@ -28,6 +28,7 @@ export default function () {
   const uiStore = useStore(({ ui }) => ui);
   const paletteStore = useStore(({ palette }) => palette);
   const wasmStore = useStore(({ wasm }) => wasm);
+  const ihexStore = useStore(({ ihex }) => ihex);
   const launchpadStore = useStore(({ launchpads }) => launchpads);
   const noticeStore = useStore(({ notice }) => notice);
 
@@ -92,11 +93,15 @@ export default function () {
     palette: any,
   ) => {
     try {
-      const fw = await wasmStore.patch(selectedLp, options, palette);
+      const isMF64 = selectedLp.endsWith("64");
+
+      const fw = isMF64
+        ? await ihexStore.patch(selectedLp, options, palette)
+        : await wasmStore.patch(selectedLp, options, palette);
 
       saveAs(
         new Blob([fw.buffer]),
-        selectedLp.endsWith("64") ? "output.hex" : "output.syx",
+        isMF64 ? "output.hex" : "output.syx",
       );
     } catch (e: any) {
       noticeStore.show({
