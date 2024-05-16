@@ -5,12 +5,11 @@ import { saveAs } from "file-saver";
 import { useObserver } from "mobx-react-lite";
 
 import {
+  FirmwareConfig,
+  firmwares,
+  FlashableFirmware,
+  Firmware,
   lpModels,
-  svgs,
-  bltext,
-  LaunchpadTypes,
-  FlashableFirmwares,
-  PatchTypes,
 } from "../constants";
 import Button from "../components/Button";
 import PaletteGrid from "../components/PaletteGrid";
@@ -23,7 +22,9 @@ import ReactTooltip from "react-tooltip";
 
 const isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
-const Firmware = () => {
+const CUSTOM_SYSTEX = "Custom SysEx File";
+
+export default function () {
   const uiStore = useStore(({ ui }) => ui);
   const paletteStore = useStore(({ palette }) => palette);
   const wasmStore = useStore(({ wasm }) => wasm);
@@ -32,28 +33,27 @@ const Firmware = () => {
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  const firmwareConfig: FirmwareConfig = firmwares[uiStore.selectedFirmware];
+
   const flashFirmware = useCallback(
     async (
-      selectedLp: FlashableFirmwares,
-      options: { [key: string]: any },
+      selectedLp: FlashableFirmware,
+      options: PatchOptions,
       palette: { [index: number]: number[] },
       rawFW?: Uint8Array
     ) => {
       try {
+        const firmwareConfig = firmwares[selectedLp];
+
         let firmware: Uint8Array = new Uint8Array();
 
         if (!rawFW)
           firmware = await wasmStore.patch(selectedLp, options, palette);
 
-        let targetLp =
-          selectedLp === FlashableFirmwares.CFY
-            ? FlashableFirmwares.LPPRO
-            : selectedLp;
+        let targetLp = selectedLp === "CFY" ? "LPPRO" : selectedLp;
 
-        let {
-          cancelFlash,
-          flashPromise: startFlash,
-        } = launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
+        let { cancelFlash, flashPromise: startFlash } =
+          launchpadStore.queueFirmwareFlash(rawFW || firmware, targetLp);
 
         startFlash()
           .then(async (continueFlashing: any) => {
@@ -69,16 +69,17 @@ const Firmware = () => {
 
         if (
           !launchpadStore.launchpad ||
+          !launchpadStore.launchpad.type ||
           !deviceIsBLForFW(launchpadStore.launchpad.type, targetLp)
         )
           noticeStore.show({
             text: `Please connect a ${targetLp} in bootloader mode to continue flashing.`,
             dismissable: true,
-            svg: `./svg/${svgs[selectedLp]}.svg`,
-            bl: `You can enter the bootloader by holding ${bltext[selectedLp]} while turning your Launchpad on.`,
+            svg: `./svg/${firmwareConfig.svg}.svg`,
+            bl: `You can enter the bootloader by holding ${firmwareConfig.blText} while turning your Launchpad on.`,
             callback: cancelFlash as () => void,
           });
-      } catch (e) {
+      } catch (e: any) {
         noticeStore.show({
           text: e.toString(),
           dismissable: true,
@@ -90,7 +91,7 @@ const Firmware = () => {
 
   const downloadFirmware = useCallback(
     async (
-      selectedLp: FlashableFirmwares,
+      selectedLp: FlashableFirmware,
       options: PatchOptions,
       palette: any
     ) => {
@@ -98,7 +99,7 @@ const Firmware = () => {
         const fw = await wasmStore.patch(selectedLp, options, palette);
 
         saveAs(new Blob([fw.buffer]), "output.syx");
-      } catch (e) {
+      } catch (e: any) {
         noticeStore.show({
           text: e.toString(),
           dismissable: true,
@@ -117,7 +118,7 @@ const Firmware = () => {
         const targetLp = wasmStore.verify(firmware);
 
         flashFirmware(targetLp, {}, paletteStore.palette, firmware);
-      } catch (e) {
+      } catch (e: any) {
         noticeStore.show({
           text: e.toString(),
           dismissable: true,
@@ -132,7 +133,11 @@ const Firmware = () => {
     [uiStore.konamiSuccess, uploadFirmware]
   );
 
-  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+  const {
+    getInputProps,
+    getRootProps,
+    isDragActive: lightBg,
+  } = useDropzone({
     onDrop,
   });
 
@@ -144,72 +149,59 @@ const Firmware = () => {
     <RouteContainer {...containerProps}>
       <select
         style={{
-          width: `${uiStore.selectedFirmware.length * 0.55 + 2.5}em`,
+          width: `${firmwareConfig.display.length * 0.55 + 2.5}em`,
         }}
         className="py-2 px-4 text-2xl font-normal font-sans appearance-none custom-select"
         onChange={(e) =>
-          e.target.value === FlashableFirmwares.CUSTOM_SYSEX
+          e.target.value === CUSTOM_SYSTEX
             ? fileRef.current?.click()
-            : uiStore.setSelectedFirmware(e.target.value as FlashableFirmwares)
+            : uiStore.setSelectedFirmware(e.target.value as FlashableFirmware)
         }
         value={uiStore.selectedFirmware}
       >
         {lpModels
-          .concat(
-            uiStore.konamiSuccess ? [FlashableFirmwares.CUSTOM_SYSEX] : []
-          )
+          .concat(uiStore.konamiSuccess ? [CUSTOM_SYSTEX as any] : [])
           .map((model) => (
             <option value={model} key={model}>
-              {model}
+              {model === (CUSTOM_SYSTEX as any)
+                ? model
+                : firmwares[model].display}
             </option>
           ))}
       </select>
 
       <div className="w-auto space-y-1">
-        {Object.entries(uiStore.options).map(([type, value]) => {
-          let optionType = type as PatchTypes;
-
-          return (!paletteStore.dirty ||
-            uiStore.selectedFirmware === FlashableFirmwares.CFY) &&
-            type === PatchTypes.Palette ? null : (
-            <div className={"w-auto"} key={type}>
-              <div
-                data-tip={
-                  type === PatchTypes.ApolloFastLED
-                    ? `In Apollo Studio 1.8.1 or newer, applying this mod to your firmware will allow for significantly faster light effects.\n This mod doesn't otherwise change the behavior of your Launchpad when using it with other software.`
-                    : undefined
+        {firmwareConfig.fastLED === true && (
+          <div className={"w-auto"}>
+            <div data-tip="In Apollo Studio 1.8.1 or newer, applying this mod to your firmware will allow for significantly faster light effects.\n This mod doesn't otherwise change the behavior of your Launchpad when using it with other software.">
+              <input
+                type="checkbox"
+                checked={uiStore.options["Apollo Studio Fast LED Mod"]}
+                style={{ marginRight: 5 }}
+                onChange={() =>
+                  (uiStore.options["Apollo Studio Fast LED Mod"] =
+                    !uiStore.options["Apollo Studio Fast LED Mod"])
+                }
+              />
+              <span
+                onClick={() =>
+                  (uiStore.options["Apollo Studio Fast LED Mod"] =
+                    !uiStore.options["Apollo Studio Fast LED Mod"])
                 }
               >
-                <input
-                  type="checkbox"
-                  checked={value}
-                  style={{ marginRight: 5 }}
-                  onChange={() =>
-                    (uiStore.options[optionType] = !uiStore.options[optionType])
-                  }
-                />
-                <span
-                  onClick={() =>
-                    (uiStore.options[optionType] = !uiStore.options[optionType])
-                  }
-                >
-                  {type}
-                </span>
-              </div>
-              <ReactTooltip
-                className="tooltip max-w-md text-center"
-                effect="solid"
-                place="top"
-              />
+                Apollo Studio Fast LED Mod
+              </span>
             </div>
-          );
-        })}
+            <ReactTooltip
+              className="tooltip max-w-md text-center"
+              effect="solid"
+              place="top"
+            />
+          </div>
+        )}
       </div>
 
-      {([
-        FlashableFirmwares.CFY,
-        FlashableFirmwares.LPPRO,
-      ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
+      {(["CFY", "LPPRO"] as Firmware[]).includes(uiStore.selectedFirmware) && (
         <p className="opacity-50 text-base text-center">
           Looking for Apollo Studio Fast LED Mod?
           <br />
@@ -218,7 +210,7 @@ const Firmware = () => {
         </p>
       )}
 
-      {uiStore.selectedFirmware === LaunchpadTypes.CFY && paletteStore.dirty && (
+      {uiStore.selectedFirmware === "CFY" && paletteStore.dirty && (
         <p className="text-base text-center">
           <span className="opacity-50">
             Upload custom palettes to CFW <br /> in the{" "}
@@ -230,10 +222,9 @@ const Firmware = () => {
       )}
 
       {paletteStore.dirty &&
-        !([
-          FlashableFirmwares.CFY,
-          FlashableFirmwares.LPPROMK3,
-        ] as FlashableFirmwares[]).includes(uiStore.selectedFirmware) && (
+        !(["CFY", "LPPROMK3"] as Firmware[]).includes(
+          uiStore.selectedFirmware
+        ) && (
           <div className="flex flex-col items-center py-2 space-y-2">
             <p className="text-lg">Current Palette:</p>
             <PaletteGrid width={350} />
@@ -293,6 +284,4 @@ const Firmware = () => {
       )}
     </RouteContainer>
   ));
-};
-
-export default Firmware;
+}

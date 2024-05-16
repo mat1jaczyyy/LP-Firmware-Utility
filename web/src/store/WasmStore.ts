@@ -2,12 +2,7 @@ import BaseStore from "./BaseStore";
 import { observable, action, runInAction } from "mobx";
 import { RootStore } from ".";
 import { downloadCFW, paletteToArray } from "../utils";
-import {
-  lpModels,
-  FlashableFirmwares,
-  PatchTypes,
-  Patches,
-} from "../constants";
+import { FlashableFirmware, PatchTypes, Patches } from "../constants";
 import { PatchOptions } from "./UIStore";
 
 declare let Module: any;
@@ -56,22 +51,23 @@ export default class WasmStore extends BaseStore {
 
   @action
   patch = async (
-    selectedLp: FlashableFirmwares,
+    selectedLp: FlashableFirmware,
     options: PatchOptions,
     palette: { [index: number]: number[] }
   ) => {
     let optionsArray = Object.keys(Patches).map(() => false);
+
     (Object.entries(options) as [PatchTypes, boolean][]).forEach(
       ([option, value]) => value && (optionsArray[Patches[option]] = true)
     );
     try {
-      if (selectedLp === FlashableFirmwares.CFY) return await downloadCFW();
+      if (selectedLp === "CFY") return await downloadCFW();
       this._patch!(
-        lpModels.indexOf(selectedLp),
+        firmwareTypes.indexOf(selectedLp),
         optionsArray,
         paletteToArray(palette)
       );
-    } catch (e) {
+    } catch (e: any) {
       console.log(
         "Firmware patching failed with status code " +
           e.status +
@@ -85,13 +81,13 @@ export default class WasmStore extends BaseStore {
   };
 
   @action
-  verify = (firmware: Uint8Array): FlashableFirmwares => {
+  verify = (firmware: Uint8Array): FlashableFirmware => {
     let selected = null;
 
     try {
       FS.writeFile("firmware/input.syx", firmware);
       selected = this._verify!();
-    } catch (e) {
+    } catch (e: any) {
       console.log(
         "Firmware verification failed with status code " +
           e.status +
@@ -101,6 +97,15 @@ export default class WasmStore extends BaseStore {
       throw new Error("The firmware file is invalid. Please try again.");
     }
 
-    return lpModels[selected];
+    return firmwareTypes[selected];
   };
 }
+
+const firmwareTypes: FlashableFirmware[] = [
+  "LPX",
+  "LPMINIMK3",
+  "LPPROMK3",
+  "LPMK2",
+  "LPPRO",
+  "CFY",
+];

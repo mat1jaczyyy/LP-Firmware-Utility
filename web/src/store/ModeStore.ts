@@ -1,10 +1,6 @@
 import BaseStore from "./BaseStore";
 import { action, computed, observable, reaction } from "mobx";
-import {
-  novationPalette,
-  LaunchpadTypes,
-  CFY_MODE_WRITE_HEADER,
-} from "../constants";
+import { novationPalette, CFY_MODE_WRITE_HEADER, Firmware } from "../constants";
 import { RootStore } from ".";
 import { InputEventSysex } from "webmidi";
 
@@ -18,7 +14,7 @@ export class ModeStore extends BaseStore {
     reaction(
       () => root.launchpads.launchpad,
       (lp) => {
-        if (lp?.type === LaunchpadTypes.CFY)
+        if (lp?.type === "CFY")
           lp.input.addListener("sysex", "all", this.handleModeUpload);
       }
     );
@@ -123,7 +119,7 @@ export class ModeStore extends BaseStore {
     let bin = this.modeBinary;
 
     if (!bin) return undefined;
-    
+
     let name = "";
     let i = 0;
     let readingName = true;
@@ -132,7 +128,7 @@ export class ModeStore extends BaseStore {
         readingName = false;
       } else name += String.fromCharCode(bin[i++]);
     }
-    
+
     return name;
   }
 

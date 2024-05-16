@@ -2,18 +2,22 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import {
-  LaunchpadTypes,
-  FlashableFirmwares,
+  FlashableFirmware,
   LPX_MODE_HEADER,
+  Firmware,
+  blFirmwares,
+  firmwares,
+  customModeFirmwares,
 } from "../constants";
 
-const paletteRegex = /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
+const paletteRegex =
+  /([0-9]|[1-8][0-9]|9[0-9]|1[01][0-9]|12[0-7]),( ([0-9]|[1-5][0-9]|6[0-3])){3};/gm;
 
 export const flattenObject = (options: any, recursion = 0) => {
   let flattened: any = {};
   Object.entries(options).forEach(([name, value]) => {
     let children: any = {};
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       children = flattenObject({ [name]: value }, recursion + 1);
     } else {
       children[name] = value;
@@ -221,37 +225,24 @@ export const paletteToArray = (palette: any) => {
 };
 
 export const deviceIsBLForFW = (
-  device: LaunchpadTypes,
-  fw: FlashableFirmwares
+  device: Firmware,
+  fw: FlashableFirmware
 ): boolean =>
-  (([
-    FlashableFirmwares.CFY,
-    FlashableFirmwares.LPPRO,
-  ] as FlashableFirmwares[]).includes(fw) &&
-    device === LaunchpadTypes.BL_LPPRO) ||
-  (fw === FlashableFirmwares.LPMINIMK3 &&
-    device === LaunchpadTypes.BL_LPMINIMK3) ||
-  (fw === FlashableFirmwares.LPMK2 && device === LaunchpadTypes.BL_LPMK2) ||
-  (fw === FlashableFirmwares.LPPROMK3 &&
-    device === LaunchpadTypes.BL_LPPROMK3) ||
-  (fw === FlashableFirmwares.LPX && device === LaunchpadTypes.BL_LPX);
+  ((["CFY", "LPPRO"] as FlashableFirmware[]).includes(fw) &&
+    device === "BL_LPPRO") ||
+  (fw === "LPMINIMK3" && device === "BL_LPMINIMK3") ||
+  (fw === "LPMK2" && device === "BL_LPMK2") ||
+  (fw === "LPPROMK3" && device === "BL_LPPROMK3") ||
+  (fw === "LPX" && device === "BL_LPX");
 
-export const isBL = (device: LaunchpadTypes): boolean =>
-  [
-    LaunchpadTypes.BL_LPMINIMK3,
-    LaunchpadTypes.BL_LPMK2,
-    LaunchpadTypes.BL_LPPRO,
-    LaunchpadTypes.BL_LPPROMK3,
-    LaunchpadTypes.BL_LPX,
-  ].includes(device);
+export const isBL = (device: Firmware): boolean =>
+  blFirmwares.has(firmwares[device]);
 
-export const isCustomFW = (device: LaunchpadTypes): boolean =>
-  [LaunchpadTypes.CFY, LaunchpadTypes.CFW].includes(device);
+export const isCustomFW = (device: Firmware | null): boolean =>
+  device === "CFY" || device === "CFW";
 
-export const canHaveCustomMode = (type: LaunchpadTypes): boolean =>
-  [LaunchpadTypes.CFY, LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3, LaunchpadTypes.LPPROMK3].includes(
-    type
-  );
+export const canHaveCustomMode = (type: Firmware): boolean =>
+  customModeFirmwares.has(firmwares[type]);
 
 export const saveCustomMode = (mode: Uint8Array, name: string) => {
   let data = [0xf0, ...LPX_MODE_HEADER, ...mode, 0xf7];

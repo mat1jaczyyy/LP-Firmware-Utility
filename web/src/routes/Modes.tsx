@@ -9,7 +9,7 @@ import Button from "../components/Button";
 import { useStore } from "../hooks";
 import { canHaveCustomMode, saveCustomMode } from "../utils";
 import {
-  LaunchpadTypes,
+  Firmware,
   CFY_MODE_UPLOAD_START,
   CFY_MODE_UPLOAD_WRITE,
   CFY_MODE_UPLOAD_END,
@@ -18,17 +18,19 @@ import {
   LPPROMK3_MODE_HEADER,
   LPX_MODE_DOWNLOAD,
   LPMINIMK3_MODE_DOWNLOAD,
+  firmwares,
+  FirmwareConfig,
 } from "../constants";
 import Launchpad from "../components/Launchpad";
 import { InputEventSysex } from "webmidi";
 
 const MODE_WRITE_SIZE = 256;
 
-const ModeSlots = (type?: LaunchpadTypes) => {
+const ModeSlots = (type?: Firmware | null) => {
   switch (type) {
-    case LaunchpadTypes.CFY:
+    case "CFY":
       return 8;
-    case LaunchpadTypes.LPMINIMK3:
+    case "LPMINIMK3":
       return 3;
     default:
       return 4;
@@ -60,28 +62,28 @@ const Modes = () => {
 
   const uploadMode = useCallback(() => {
     switch (lpStore.launchpad?.type) {
-      case LaunchpadTypes.LPX: {
+      case "LPX": {
         lpStore.launchpad.sendSysex([
           ...LPX_MODE_HEADER,
           ...modeStore.modeBinary!,
         ]);
         break;
       }
-      case LaunchpadTypes.LPMINIMK3: {
+      case "LPMINIMK3": {
         lpStore.launchpad.sendSysex([
           ...LPMINIMK3_MODE_HEADER,
           ...modeStore.modeBinary!,
         ]);
         break;
       }
-      case LaunchpadTypes.LPPROMK3: {
+      case "LPPROMK3": {
         lpStore.launchpad.sendSysex([
           ...LPPROMK3_MODE_HEADER,
           ...modeStore.modeBinary!,
         ]);
         break;
       }
-      case LaunchpadTypes.CFY: {
+      case "CFY": {
         lpStore.launchpad.sendSysex(CFY_MODE_UPLOAD_START(index));
 
         let data = modeStore.modeBinary!;
@@ -113,28 +115,33 @@ const Modes = () => {
       console.log(e);
       try {
         modeStore.loadMode(e.data);
-        console.log("removing")
+        console.log("removing");
         lpStore.launchpad?.input.removeListener("sysex", "all", listener);
       } catch {}
     };
     lpStore.launchpad?.input.addListener("sysex", "all", listener);
     switch (lpStore.launchpad?.type) {
-      case LaunchpadTypes.LPX: {
+      case "LPX": {
         lpStore.launchpad.sendSysex(LPX_MODE_DOWNLOAD(index));
         break;
       }
-      case LaunchpadTypes.LPMINIMK3: {
+      case "LPMINIMK3": {
         lpStore.launchpad.sendSysex(LPMINIMK3_MODE_DOWNLOAD(index));
         break;
       }
     }
   }, [index, lpStore.launchpad, modeStore]);
 
-  const onDrop = useCallback(([file]: File[]) => importMode(file), [
-    importMode,
-  ]);
+  const onDrop = useCallback(
+    ([file]: File[]) => importMode(file),
+    [importMode]
+  );
 
-  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+  const {
+    getInputProps,
+    getRootProps,
+    isDragActive: lightBg,
+  } = useDropzone({
     onDrop,
   });
 
@@ -147,6 +154,10 @@ const Modes = () => {
   useEffect(() => {
     if (index >= ModeSlots(lpStore.launchpad?.type)) setIndex(3);
   }, [lpStore.launchpad, index]);
+
+  const lpFirmwareConfig: FirmwareConfig | null = lpStore.launchpad?.type
+    ? firmwares[lpStore.launchpad.type]
+    : null;
 
   return useObserver(() => (
     <RouteContainer {...{ ...getRootProps(), lightBg }}>
@@ -202,14 +213,14 @@ const Modes = () => {
         </select>
       </div>
       <div className="flex flex-row space-x-2">
-        {lpStore.launchpad &&
-          [LaunchpadTypes.LPX, LaunchpadTypes.LPMINIMK3].includes(
-            lpStore.launchpad.type
-          ) && <Button onClick={downloadXMode}>Download</Button>}
+        {lpFirmwareConfig?.customModes && (
+          <Button onClick={downloadXMode}>Download</Button>
+        )}
         <Button
           disabled={
             !modeStore.modeBinary ||
             !lpStore.launchpad ||
+            lpStore.launchpad.type === null ||
             !canHaveCustomMode(lpStore.launchpad.type)
           }
           onClick={uploadMode}
