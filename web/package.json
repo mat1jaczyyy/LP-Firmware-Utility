@@ -12,6 +12,7 @@
     "@types/react-redux": "^7.1.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/webmidi": "^2.0.4",
+    "@vitejs/plugin-react": "^4.2.1",
     "axios": "^0.21.1",
     "clsx": "^1.1.1",
     "cra-template-typescript": "1.0.3",
@@ -32,25 +33,19 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.8.3",
+    "vite": "^5.2.11",
     "webmidi": "^2.5.1"
   },
   "scripts": {
-    "start": "npm run watch:css && react-scripts --openssl-legacy-provider start",
-    "build": "npm run build:css && react-scripts --openssl-legacy-provider build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build:css": "postcss src/assets/tailwind.css -o src/assets/main.css",
-    "watch:css": "postcss src/assets/tailwind.css -o src/assets/main.css"
+    "start": "vite dev",
+    "dev": "vite dev",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
+    "production": [">0.2%", "not dead", "not op_mini all"],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",

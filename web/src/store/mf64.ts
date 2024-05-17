@@ -1,18 +1,14 @@
 import { PatchOptions } from "./UIStore";
 
-import mf64BaseHex from "../assets/mf64-base.hex";
-
 const BaseFirmwareSources = {
-  MF64: () => Promise.resolve({ text: () => mf64BaseHex }),
+  MF64: () => import("../assets/mf64-base.hex?raw").then((m) => m.default),
   CMF64: () =>
     fetch(
       "https://raw.githubusercontent.com/mat1jaczyyy/mf64-performance-cfw/master/midi_fighter_64/midifighter64.hex",
-    ),
+    ).then((r) => r.text()),
 };
 
-function ihexToBinary(
-  ihex: string,
-): Uint8Array {
+function ihexToBinary(ihex: string): Uint8Array {
   const lines = ihex.split("\n");
   const bytes = [];
 
@@ -36,9 +32,7 @@ function ihexToBinary(
   return new Uint8Array(bytes);
 }
 
-function binaryToIhex(
-  bin: Uint8Array,
-): string {
+function binaryToIhex(bin: Uint8Array): string {
   let ihex = "";
 
   for (let i = 0; i < bin.length; i += 16) {
@@ -52,7 +46,17 @@ function binaryToIhex(
       data += chunk[j].toString(16).padStart(2, "0");
     }
 
-    const checksum = ~((len + (addr >> 8) + (addr & 0xff) + type + chunk.reduce((a, b) => a + b, 0)) & 0xff) + 1 & 0xff;
+    const checksum =
+      (~(
+        (len +
+          (addr >> 8) +
+          (addr & 0xff) +
+          type +
+          chunk.reduce((a, b) => a + b, 0)) &
+        0xff
+      ) +
+        1) &
+      0xff;
 
     ihex += `:${len.toString(16).padStart(2, "0")}${addr.toString(16).padStart(4, "0")}${type.toString(16).padStart(2, "0")}${data}${checksum.toString(16).padStart(2, "0")}\n`;
   }
@@ -63,19 +67,16 @@ function binaryToIhex(
 }
 
 export async function patchMF64(
-  selectedLp: "MF64" | "CMF64",
+  selectedFw: "MF64" | "CMF64",
   options: PatchOptions,
   palette: { [index: number]: number[] },
 ) {
-  const res = await BaseFirmwareSources[selectedLp]();
-  const hex = await res.text();
+  const hex = await BaseFirmwareSources[selectedFw]();
 
   const bin = ihexToBinary(hex);
 
   if (options["Custom Palette"]) {
-    const base = selectedLp === "MF64"
-      ? 0x454E
-      : 0x3510;
+    const base = selectedFw === "MF64" ? 0x454e : 0x3510;
 
     for (const [index, colors] of Object.entries(palette)) {
       const offset = base + parseInt(index) * 3;
@@ -86,13 +87,13 @@ export async function patchMF64(
   }
 
   if (options["Novation ID Spoof"]) {
-    bin[0x02B2] = 0x35; // VID LSB
-    bin[0x02B3] = 0x12; // VID MSB
-    bin[0x02B4] = 0x51; // PID LSB
-    bin[0x02B5] = 0x00; // PID MSB
+    bin[0x02b2] = 0x35; // VID LSB
+    bin[0x02b3] = 0x12; // VID MSB
+    bin[0x02b4] = 0x51; // PID LSB
+    bin[0x02b5] = 0x00; // PID MSB
   }
 
   const patched = binaryToIhex(bin);
 
-  return Uint8Array.from([...patched].map(c => c.charCodeAt(0)));
+  return Uint8Array.from([...patched].map((c) => c.charCodeAt(0)));
 }
