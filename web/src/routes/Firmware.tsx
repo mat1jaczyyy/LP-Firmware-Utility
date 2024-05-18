@@ -99,7 +99,7 @@ export default function () {
         ? await patchMF64(selectedLp as any, options, palette)
         : await wasmStore.patch(selectedLp, options, palette);
 
-      saveAs(new Blob([fw.buffer]), isMF64 ? "output.hex" : "output.syx");
+      saveAs(new Blob([fw.buffer]), isMF64 ? "mf64.hex" : "output.syx");
     } catch (e: any) {
       noticeStore.show({
         text: e.toString(),
