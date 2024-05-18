@@ -86,7 +86,7 @@ export async function patchMF64(
     }
   }
 
-  if (options["Novation ID Spoof"]) {
+  if (selectedFw === "MF64" && options["Novation ID Spoof"]) {
     bin[0x02b2] = 0x35; // VID LSB
     bin[0x02b3] = 0x12; // VID MSB
     bin[0x02b4] = 0x51; // PID LSB
