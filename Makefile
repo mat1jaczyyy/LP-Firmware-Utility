@@ -10,7 +10,7 @@ GPP_FLAGS = -std=c++11 -O2 -I common
 ifeq ($(OS),Windows_NT)
 
 EMSDK_ENV = "%USERPROFILE%/emsdk/emsdk_env.bat"
-	
+
 define rmdir
 	if exist "$(1)" rd /s /q "$(1)"
 endef
@@ -28,7 +28,7 @@ EMSDK_ENV = . ~/emsdk/emsdk_env.sh
 define rmdir
 	rm -rf "$(1)"
 endef
-	
+
 MKDIR = mkdir -p
 
 define tools
@@ -67,4 +67,4 @@ wasm-debug: clean_wasm
 	$(call wasm,-g4 -s ASSERTIONS=1)
 
 web: wasm
-	cd web && yarn && yarn build
+	cd web && pnpm install && pnpm build

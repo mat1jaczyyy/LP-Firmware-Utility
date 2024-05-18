@@ -137,11 +137,16 @@ const Palette = () => {
     [paletteStore.palette, paletteStore.dirty]
   );
 
-  const onDrop = useCallback(([file]: File[]) => importPalette(file), [
-    importPalette,
-  ]);
+  const onDrop = useCallback(
+    ([file]: File[]) => importPalette(file),
+    [importPalette]
+  );
 
-  const { getInputProps, getRootProps, isDragActive: lightBg } = useDropzone({
+  const {
+    getInputProps,
+    getRootProps,
+    isDragActive: lightBg,
+  } = useDropzone({
     onDrop,
   });
 

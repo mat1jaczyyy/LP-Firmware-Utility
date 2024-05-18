@@ -1,10 +1,5 @@
-import { observable, action, autorun } from "mobx";
-import {
-  konamiSequence,
-  FlashableFirmwares,
-  lpOptions,
-  PatchTypes,
-} from "../constants";
+import { observable, action } from "mobx";
+import { konamiSequence, PatchTypes, FlashableFirmware } from "../constants";
 import BaseStore from "./BaseStore";
 import { RootStore } from ".";
 
@@ -13,25 +8,19 @@ export type PatchOptions = {
 };
 
 export default class UIStore extends BaseStore {
-  @observable selectedFirmware: FlashableFirmwares = FlashableFirmwares.LPX;
+  @observable selectedFirmware: FlashableFirmware = "LPX";
   @observable konamiSuccess = false;
   konamiInput: number[] = [];
-  @observable options: PatchOptions = {};
+  @observable options: PatchOptions = {
+    "Custom Palette": false,
+    "Apollo Studio Fast LED Mod": false,
+    "Novation ID Spoof": false,
+  };
 
   constructor(root: RootStore) {
     super(root);
 
     window.addEventListener("keydown", this.konamiListener);
-
-    autorun(() => {
-      this.options = lpOptions[this.selectedFirmware].reduce(
-        (o, type) => ({
-          ...o,
-          [type]: false,
-        }),
-        {}
-      );
-    });
   }
 
   @action.bound
@@ -46,7 +35,7 @@ export default class UIStore extends BaseStore {
   }
 
   @action
-  setSelectedFirmware(fw: FlashableFirmwares): void {
+  setSelectedFirmware(fw: FlashableFirmware): void {
     this.selectedFirmware = fw;
   }
 }

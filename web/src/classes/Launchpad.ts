@@ -1,6 +1,6 @@
 import { Input, Output, InputEventSysex } from "webmidi";
 import {
-  LaunchpadTypes,
+  Firmware,
   CFW_PALETTE_UPLOAD_WRITE,
   CFW_PALETTE_UPLOAD_END,
   CFW_PALETTE_UPLOAD_START,
@@ -11,7 +11,7 @@ export default class Launchpad {
   name: string;
   input: Input;
   output: Output;
-  type: LaunchpadTypes = LaunchpadTypes.BLANK;
+  type: Firmware | null = null;
 
   constructor(name: string, input: Input, output: Output) {
     this.name = name;
@@ -20,12 +20,12 @@ export default class Launchpad {
   }
 
   getType() {
-    return new Promise(async (resolve) => {
+    return new Promise<this["type"]>(async (resolve) => {
       const listenerTimer = setTimeout(() => {
         console.log("removing");
         this.input.removeListener("sysex", "all");
-        this.type = LaunchpadTypes.BLANK;
-        resolve(LaunchpadTypes.BLANK);
+        this.type = null;
+        resolve(null);
       }, 1000);
 
       this.input.addListener("sysex", "all", async (e: InputEventSysex) => {
@@ -41,30 +41,30 @@ export default class Launchpad {
     });
   }
 
-  async identify(e: InputEventSysex): Promise<LaunchpadTypes> {
+  async identify(e: InputEventSysex): Promise<Firmware | null> {
     if (e.data.length === 17) {
       const msg = e.data.slice(1, e.data.length - 1);
 
       if (msg[4] === 0x00 && msg[5] === 0x20 && msg[6] === 0x29) {
-        let type: LaunchpadTypes = LaunchpadTypes.BLANK;
+        let type: Firmware | null = null;
 
         switch (msg[7]) {
           // X
           case 0x03: {
-            if (msg[8] === 17) type = LaunchpadTypes.BL_LPX;
-            else if (msg[8] === 1) type = LaunchpadTypes.LPX;
+            if (msg[8] === 17) type = "BL_LPX";
+            else if (msg[8] === 1) type = "LPX";
             break;
           }
           // Mini MK3
           case 0x13: {
-            if (msg[8] === 17) type = LaunchpadTypes.BL_LPMINIMK3;
-            else if (msg[8] === 1) type = LaunchpadTypes.LPMINIMK3;
+            if (msg[8] === 17) type = "BL_LPMINIMK3";
+            else if (msg[8] === 1) type = "LPMINIMK3";
             break;
           }
           // Pro MK3
           case 0x23: {
-            if (msg[8] === 17) type = LaunchpadTypes.BL_LPPROMK3;
-            else if (msg[8] === 1) type = LaunchpadTypes.LPPROMK3;
+            if (msg[8] === 17) type = "BL_LPPROMK3";
+            else if (msg[8] === 1) type = "LPPROMK3";
             break;
           }
           // MK2
@@ -75,8 +75,8 @@ export default class Launchpad {
                 .reduce((p: string, c: number) => p + c, "")
             );
 
-            if (verNum < 171) type = await this.mk2_identify();
-            else type = LaunchpadTypes.LPMK2;
+            if (verNum < 171) type = await this.identifyMK2();
+            else type = "LPMK2";
             break;
           }
           // Pro
@@ -91,20 +91,20 @@ export default class Launchpad {
 
             switch (versionStr) {
               case "\0\0\0": {
-                type = LaunchpadTypes.BL_LPPRO;
+                type = "BL_LPPRO";
                 break;
               }
               case "cfw":
               case "cfx": {
-                type = LaunchpadTypes.CFW;
+                type = "CFW";
                 break;
               }
               case "cfy": {
-                type = LaunchpadTypes.CFY;
+                type = "CFY";
                 break;
               }
               default: {
-                type = LaunchpadTypes.LPPRO;
+                type = "LPPRO";
                 break;
               }
             }
@@ -116,10 +116,10 @@ export default class Launchpad {
         return type;
       }
     }
-    return LaunchpadTypes.BLANK;
+    return null;
   }
 
-  mk2_identify(): Promise<LaunchpadTypes> {
+  identifyMK2(): Promise<Firmware | null> {
     return new Promise((res) => {
       this.input.addListener("sysex", "all", (e: InputEventSysex) => {
         if (
@@ -137,9 +137,9 @@ export default class Launchpad {
           console.log("removing");
           this.input.removeListener("sysex", "all");
 
-          if (versionNum < 171) res(LaunchpadTypes.LPMK2);
-          else res(LaunchpadTypes.BL_LPMK2);
-        } else res(LaunchpadTypes.BL_LPMK2);
+          if (versionNum < 171) res("LPMK2");
+          else res("BL_LPMK2");
+        } else res("BL_LPMK2");
       });
 
       this.output.sendSysex([], [0x00, 0x20, 0x29, 0x00, 0x70]);
@@ -173,7 +173,7 @@ export default class Launchpad {
   }
 
   uploadPalette(palette: number[], paletteIndex: number = 0) {
-    if (!isCustomFW(this.type))
+    if (!this.type || !isCustomFW(this.type))
       throw new Error(
         "Uploading palettes requires a Launchpad Pro running the Custom Firmware"
       );

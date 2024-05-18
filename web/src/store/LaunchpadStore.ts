@@ -4,7 +4,7 @@ import WebMidi from "webmidi";
 import BaseStore from "./BaseStore";
 import Launchpad from "../classes/Launchpad";
 import { RootStore } from ".";
-import { LaunchpadTypes, FlashableFirmwares } from "../constants";
+import { FlashableFirmware } from "../constants";
 import { portsMatch, portNeutralize, deviceIsBLForFW } from "../utils";
 
 export default class LaunchpadStore extends BaseStore {
@@ -21,12 +21,11 @@ export default class LaunchpadStore extends BaseStore {
     reaction(
       () => this.launchpad,
       (lp) => {
-        if (lp?.type === LaunchpadTypes.CFW)
+        if (lp?.type === "CFW")
           setTimeout(
             () =>
               this.rootStore.notice.show({
-                text:
-                  "The Launchpad Pro currently connected is running an old version of the Custom Firmware. It is highly recommended that you update it.",
+                text: "The Launchpad Pro currently connected is running an old version of the Custom Firmware. It is highly recommended that you update it.",
                 dismissable: true,
               }),
             500
@@ -79,7 +78,7 @@ export default class LaunchpadStore extends BaseStore {
           // When new launchpads are connected, give them some time to boot before sending version query
           await new Promise<void>((res) => setTimeout(() => res(), 50));
 
-          if ((await launchpad.getType()) !== LaunchpadTypes.BLANK) {
+          if ((await launchpad.getType()) !== null) {
             this.setLaunchpad(launchpad);
             return launchpad;
           }
@@ -90,7 +89,7 @@ export default class LaunchpadStore extends BaseStore {
   }
 
   @action
-  queueFirmwareFlash = (buffer: Uint8Array, targetLp: FlashableFirmwares) => {
+  queueFirmwareFlash = (buffer: Uint8Array, targetLp: FlashableFirmware) => {
     let cancelFlash: (_: any) => void;
     let dispose: Function;
 
