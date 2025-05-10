@@ -1,0 +1,9 @@
+services:
+  lp-firmware-utility:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lp-firmware-utility
+    ports:
+      - "8080:80"
+    restart: unless-stopped
