@@ -5,6 +5,7 @@ COPY web/package.json web/pnpm-lock.yaml* ./web/
 COPY . .
 RUN sed -i 's|$(EMSDK_ENV) --build=Release && emcc|emcc|g' Makefile
 RUN mkdir -p /app/firmware/stock
+ENV CI=true
 RUN make all
 
 FROM nginx:1.28.0-alpine
